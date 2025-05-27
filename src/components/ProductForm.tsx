@@ -55,6 +55,11 @@ export function ProductForm({
     }
   };
 
+  const handleNumberInputChange = (field: keyof ProductFormData, value: string) => {
+    const numericValue = parseInt(value) || 0;
+    handleInputChange(field, numericValue);
+  };
+
   const handleDateSelect = (field: 'dataFabricacao' | 'validade' | 'dataAbertura', date: Date | undefined) => {
     if (date) {
       const dateString = format(date, 'yyyy-MM-dd');
@@ -275,7 +280,7 @@ export function ProductForm({
                 type="number"
                 min="1"
                 value={formData.diasParaVencer}
-                onChange={(e) => handleInputChange('diasParaVencer', parseInt(e.target.value) || 0)}
+                onChange={(e) => handleNumberInputChange('diasParaVencer', e.target.value)}
                 className={errors.diasParaVencer ? 'border-red-500' : ''}
               />
               {errors.diasParaVencer && <p className="text-sm text-red-500">{errors.diasParaVencer}</p>}
