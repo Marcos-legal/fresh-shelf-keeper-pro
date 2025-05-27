@@ -6,12 +6,14 @@ import { useProducts } from "@/hooks/useProducts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Printer, Package } from "lucide-react";
+import { Printer, Package, Eye } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const ImpressaoEtiquetas = () => {
   const { products } = useProducts();
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   const handleSelectProduct = (productId: string) => {
     setSelectedProducts(prev => 
@@ -41,26 +43,6 @@ const ImpressaoEtiquetas = () => {
       return;
     }
 
-    // Criar conteúdo para impressão
-    const printContent = selectedProductsData.map(product => `
-      ================================
-      ETIQUETA TÉRMICA
-      ================================
-      Produto: ${product.nome}
-      Lote: ${product.lote}
-      Marca: ${product.marca}
-      Fabricação: ${product.dataFabricacao.toLocaleDateString('pt-BR')}
-      Validade: ${product.validade.toLocaleDateString('pt-BR')}
-      ${product.dataAbertura ? `Abertura: ${product.dataAbertura.toLocaleDateString('pt-BR')}` : ''}
-      ${product.utilizarAte ? `Utilizar até: ${product.utilizarAte.toLocaleDateString('pt-BR')}` : ''}
-      Local: ${product.localArmazenamento}
-      Responsável: ${product.responsavel}
-      ================================
-    `).join('\n\n');
-
-    // Simular impressão
-    console.log("Imprimindo etiquetas:", printContent);
-    
     // Criar janela de impressão
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -135,14 +117,24 @@ const ImpressaoEtiquetas = () => {
                   Selecionar todos ({products.length} produtos)
                 </span>
               </div>
-              <Button 
-                onClick={handlePrint} 
-                disabled={selectedProducts.length === 0}
-                className="gradient-blue text-white"
-              >
-                <Printer className="w-4 h-4 mr-2" />
-                Imprimir Selecionados ({selectedProducts.length})
-              </Button>
+              <div className="flex space-x-2">
+                <Button 
+                  onClick={() => navigate('/visualizar-etiquetas')}
+                  variant="outline"
+                  className="text-blue-600"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Visualizar Etiquetas
+                </Button>
+                <Button 
+                  onClick={handlePrint} 
+                  disabled={selectedProducts.length === 0}
+                  className="gradient-blue text-white"
+                >
+                  <Printer className="w-4 h-4 mr-2" />
+                  Imprimir Selecionados ({selectedProducts.length})
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -10,14 +10,5 @@ export const validateProductForm = (formData: ProductFormData): Partial<Record<k
   if (formData.diasParaVencer <= 0) errors.diasParaVencer = 'Dias para vencer deve ser maior que 0';
   if (!formData.localArmazenamento) errors.localArmazenamento = 'Local de armazenamento é obrigatório';
 
-  // Validar se a data de abertura é posterior à fabricação (se fabricação estiver preenchida)
-  if (formData.dataFabricacao && formData.dataAbertura) {
-    const fabricacao = new Date(formData.dataFabricacao);
-    const abertura = new Date(formData.dataAbertura);
-    if (abertura < fabricacao) {
-      errors.dataAbertura = 'Data de abertura não pode ser anterior à fabricação';
-    }
-  }
-
   return errors;
 };

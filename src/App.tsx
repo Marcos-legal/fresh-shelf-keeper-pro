@@ -14,6 +14,7 @@ import CamaraFria from "./pages/CamaraFria";
 import Cadastro from "./pages/Cadastro";
 import Relatorios from "./pages/Relatorios";
 import ImpressaoEtiquetas from "./pages/ImpressaoEtiquetas";
+import VisualizarEtiquetas from "./pages/VisualizarEtiquetas";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/impressao-etiquetas" element={<ImpressaoEtiquetas />} />
+            <Route path="/visualizar-etiquetas" element={<VisualizarEtiquetas />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
