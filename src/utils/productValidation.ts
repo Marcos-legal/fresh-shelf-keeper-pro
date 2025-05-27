@@ -4,24 +4,13 @@ import { ProductFormData } from "@/types/product";
 export const validateProductForm = (formData: ProductFormData): Partial<Record<keyof ProductFormData, string>> => {
   const errors: Partial<Record<keyof ProductFormData, string>> = {};
 
-  if (!formData.nome.trim()) errors.nome = 'Nome é obrigatório';
-  if (!formData.lote.trim()) errors.lote = 'Lote é obrigatório';
-  if (!formData.marca.trim()) errors.marca = 'Marca é obrigatória';
-  if (!formData.dataFabricacao) errors.dataFabricacao = 'Data de fabricação é obrigatória';
-  if (!formData.validade) errors.validade = 'Data de validade é obrigatória';
+  // Apenas campos obrigatórios: dataAbertura, diasParaVencer, localArmazenamento e responsavel
+  if (!formData.dataAbertura) errors.dataAbertura = 'Data de abertura é obrigatória';
   if (!formData.responsavel.trim()) errors.responsavel = 'Responsável é obrigatório';
   if (formData.diasParaVencer <= 0) errors.diasParaVencer = 'Dias para vencer deve ser maior que 0';
+  if (!formData.localArmazenamento) errors.localArmazenamento = 'Local de armazenamento é obrigatório';
 
-  // Validar se a data de validade é posterior à fabricação
-  if (formData.dataFabricacao && formData.validade) {
-    const fabricacao = new Date(formData.dataFabricacao);
-    const validade = new Date(formData.validade);
-    if (validade <= fabricacao) {
-      errors.validade = 'Data de validade deve ser posterior à fabricação';
-    }
-  }
-
-  // Validar se a data de abertura é posterior à fabricação
+  // Validar se a data de abertura é posterior à fabricação (se fabricação estiver preenchida)
   if (formData.dataFabricacao && formData.dataAbertura) {
     const fabricacao = new Date(formData.dataFabricacao);
     const abertura = new Date(formData.dataAbertura);

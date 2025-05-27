@@ -5,12 +5,87 @@ import { useProducts } from "@/hooks/useProducts";
 import { FileText, Download, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
 const Relatorios = () => {
   const { products, stats } = useProducts();
 
+  const downloadCSV = (data: any[], filename: string) => {
+    if (data.length === 0) {
+      toast({
+        title: "Nenhum dado para exportar",
+        description: "Não há produtos que atendem aos critérios selecionados.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headers = [
+      'Nome',
+      'Lote', 
+      'Marca',
+      'Data Fabricação',
+      'Validade',
+      'Data Abertura',
+      'Utilizar Até',
+      'Dias Para Vencer',
+      'Local Armazenamento',
+      'Responsável',
+      'Status'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...data.map(product => [
+        `"${product.nome}"`,
+        `"${product.lote}"`,
+        `"${product.marca}"`,
+        product.dataFabricacao ? product.dataFabricacao.toLocaleDateString('pt-BR') : '',
+        product.validade ? product.validade.toLocaleDateString('pt-BR') : '',
+        product.dataAbertura ? product.dataAbertura.toLocaleDateString('pt-BR') : '',
+        product.utilizarAte ? product.utilizarAte.toLocaleDateString('pt-BR') : '',
+        product.diasParaVencer,
+        `"${product.localArmazenamento}"`,
+        `"${product.responsavel}"`,
+        `"${product.status}"`
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Relatório baixado",
+      description: `Arquivo ${filename}.csv foi baixado com sucesso!`,
+    });
+  };
+
   const handleDownloadReport = (type: string) => {
-    console.log(`Baixando relatório: ${type}`);
+    const now = new Date();
+    const timestamp = now.toISOString().split('T')[0];
+
+    switch (type) {
+      case 'geral':
+        downloadCSV(products, `relatorio-geral-${timestamp}`);
+        break;
+      case 'vencidos':
+        const vencidos = products.filter(p => p.status === 'vencido');
+        downloadCSV(vencidos, `produtos-vencidos-${timestamp}`);
+        break;
+      case 'proximo-vencimento':
+        const proximoVencimento = products.filter(p => p.status === 'proximo-vencimento');
+        downloadCSV(proximoVencimento, `proximo-vencimento-${timestamp}`);
+        break;
+      default:
+        console.log(`Relatório não implementado: ${type}`);
+    }
   };
 
   return (
@@ -44,14 +119,14 @@ const Relatorios = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4">
-                    Relatório completo com todos os produtos cadastrados
+                    Relatório completo com todos os produtos cadastrados ({products.length} produtos)
                   </p>
                   <Button 
                     onClick={() => handleDownloadReport('geral')}
                     className="w-full"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Baixar Relatório
+                    Baixar CSV
                   </Button>
                 </CardContent>
               </Card>
@@ -65,7 +140,7 @@ const Relatorios = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4">
-                    Lista de produtos com data de validade expirada
+                    Lista de produtos com data de validade expirada ({stats.vencidos} produtos)
                   </p>
                   <Button 
                     onClick={() => handleDownloadReport('vencidos')}
@@ -73,7 +148,7 @@ const Relatorios = () => {
                     variant="destructive"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Baixar Relatório
+                    Baixar CSV
                   </Button>
                 </CardContent>
               </Card>
@@ -87,7 +162,7 @@ const Relatorios = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4">
-                    Produtos que vencem nos próximos dias
+                    Produtos que vencem nos próximos dias ({stats.proximoVencimento} produtos)
                   </p>
                   <Button 
                     onClick={() => handleDownloadReport('proximo-vencimento')}
@@ -95,7 +170,7 @@ const Relatorios = () => {
                     variant="outline"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Baixar Relatório
+                    Baixar CSV
                   </Button>
                 </CardContent>
               </Card>

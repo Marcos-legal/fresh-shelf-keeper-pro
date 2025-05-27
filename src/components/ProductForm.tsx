@@ -2,13 +2,15 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Save } from "lucide-react";
+import { Package, Save, Calendar } from "lucide-react";
 import { ProductFormData, StorageLocation } from "@/types/product";
 import { validateProductForm } from "@/utils/productValidation";
 import { TextInputField } from "@/components/form/TextInputField";
 import { DatePickerField } from "@/components/form/DatePickerField";
 import { NumberInputField } from "@/components/form/NumberInputField";
 import { SelectField } from "@/components/form/SelectField";
+import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
+import { ValidadeField } from "@/components/form/ValidadeField";
 
 interface ProductFormProps {
   onSubmit: (data: ProductFormData) => void;
@@ -58,6 +60,15 @@ export function ProductForm({
     }
   };
 
+  const handleUpdateDates = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setFormData(prev => ({
+      ...prev,
+      dataFabricacao: today,
+      dataAbertura: today
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validateProductForm(formData);
@@ -80,6 +91,18 @@ export function ProductForm({
       
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex justify-end mb-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleUpdateDates}
+              className="text-blue-600"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Atualizar Datas (Hoje)
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <TextInputField
               id="nome"
@@ -88,7 +111,6 @@ export function ProductForm({
               onChange={(value) => handleInputChange('nome', value)}
               placeholder="Digite o nome do produto"
               error={errors.nome}
-              required
             />
 
             <TextInputField
@@ -98,7 +120,6 @@ export function ProductForm({
               onChange={(value) => handleInputChange('lote', value)}
               placeholder="Digite o lote"
               error={errors.lote}
-              required
             />
 
             <TextInputField
@@ -108,15 +129,12 @@ export function ProductForm({
               onChange={(value) => handleInputChange('marca', value)}
               placeholder="Digite a marca"
               error={errors.marca}
-              required
             />
 
-            <TextInputField
-              id="responsavel"
+            <ResponsavelSelectField
               label="Responsável"
               value={formData.responsavel}
               onChange={(value) => handleInputChange('responsavel', value)}
-              placeholder="Digite o nome do responsável"
               error={errors.responsavel}
               required
             />
@@ -127,24 +145,22 @@ export function ProductForm({
               value={formData.dataFabricacao}
               onChange={(value) => handleInputChange('dataFabricacao', value)}
               error={errors.dataFabricacao}
-              required
             />
 
-            <DatePickerField
-              id="validade"
+            <ValidadeField
               label="Data de Validade"
               value={formData.validade}
               onChange={(value) => handleInputChange('validade', value)}
               error={errors.validade}
-              required
             />
 
             <DatePickerField
               id="dataAbertura"
-              label="Data de Abertura (Opcional)"
+              label="Data de Abertura"
               value={formData.dataAbertura || ''}
               onChange={(value) => handleInputChange('dataAbertura', value)}
               error={errors.dataAbertura}
+              required
             />
 
             <NumberInputField
