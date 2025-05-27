@@ -42,9 +42,16 @@ export function ProductForm({
     responsavel: initialData?.responsavel || '',
   });
 
-  const [errors, setErrors] = useState<Partial<ProductFormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof ProductFormData, string>>>({});
 
-  const handleInputChange = (field: keyof ProductFormData, value: string | number) => {
+  const handleInputChange = (field: keyof ProductFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleNumberInputChange = (field: keyof ProductFormData, value: number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -135,7 +142,7 @@ export function ProductForm({
             <DatePickerField
               id="dataAbertura"
               label="Data de Abertura (Opcional)"
-              value={formData.dataAbertura}
+              value={formData.dataAbertura || ''}
               onChange={(value) => handleInputChange('dataAbertura', value)}
               error={errors.dataAbertura}
             />
@@ -144,7 +151,7 @@ export function ProductForm({
               id="diasParaVencer"
               label="Dias para Vencer após Abertura"
               value={formData.diasParaVencer}
-              onChange={(value) => handleInputChange('diasParaVencer', value)}
+              onChange={(value) => handleNumberInputChange('diasParaVencer', value)}
               error={errors.diasParaVencer}
               min={1}
               required

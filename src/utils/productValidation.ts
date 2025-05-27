@@ -1,8 +1,8 @@
 
 import { ProductFormData } from "@/types/product";
 
-export const validateProductForm = (formData: ProductFormData): Partial<ProductFormData> => {
-  const errors: Partial<ProductFormData> = {};
+export const validateProductForm = (formData: ProductFormData): Partial<Record<keyof ProductFormData, string>> => {
+  const errors: Partial<Record<keyof ProductFormData, string>> = {};
 
   if (!formData.nome.trim()) errors.nome = 'Nome é obrigatório';
   if (!formData.lote.trim()) errors.lote = 'Lote é obrigatório';
