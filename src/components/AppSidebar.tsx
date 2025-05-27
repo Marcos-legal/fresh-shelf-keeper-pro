@@ -8,6 +8,7 @@ import {
   Package,
   FileText
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -91,10 +92,10 @@ export function AppSidebar() {
                     asChild 
                     className="hover:bg-sidebar-accent transition-colors duration-200"
                   >
-                    <a href={item.url} className="flex items-center space-x-3 py-3">
+                    <Link to={item.url} className="flex items-center space-x-3 py-3">
                       <item.icon className="w-5 h-5" />
                       <span className="font-medium">{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
