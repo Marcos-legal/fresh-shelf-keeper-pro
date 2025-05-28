@@ -27,7 +27,7 @@ const formatDateForStorage = (date: Date): string => {
     return date.toISOString().split('T')[0];
   } catch (error) {
     console.warn('Error formatting date:', date, error);
-    return '';
+    return new Date().toISOString().split('T')[0]; // Return today as fallback
   }
 };
 
@@ -48,23 +48,20 @@ export function useProducts() {
           const criadoEm = safeParseDate(p.criadoEm);
           const atualizadoEm = safeParseDate(p.atualizadoEm);
 
-          // Skip products with invalid required dates
-          if (!dataFabricacao || !validade || !criadoEm || !atualizadoEm) {
-            console.warn('Skipping product with invalid dates:', p);
-            return null;
-          }
-
+          // Create valid product with fallbacks for required dates
+          const now = new Date();
           return {
             ...p,
-            dataFabricacao,
-            validade,
+            dataFabricacao: dataFabricacao || now,
+            validade: validade || now,
             dataAbertura,
             utilizarAte,
-            criadoEm,
-            atualizadoEm,
+            criadoEm: criadoEm || now,
+            atualizadoEm: atualizadoEm || now,
           };
-        }).filter(Boolean); // Remove null products
+        });
         
+        console.log('Produtos carregados do localStorage:', parsedProducts);
         setProducts(parsedProducts);
       }
     } catch (error) {
@@ -89,6 +86,7 @@ export function useProducts() {
       
       localStorage.setItem(STORAGE_KEY, JSON.stringify(productsToSave));
       setProducts(updatedProducts);
+      console.log('Produtos salvos:', updatedProducts);
     } catch (error) {
       console.error('Erro ao salvar produtos:', error);
     }
@@ -100,7 +98,7 @@ export function useProducts() {
     const targetDate = product.utilizarAte || product.validade;
     
     if (!targetDate || isNaN(targetDate.getTime())) {
-      return 'vencido'; // Consider invalid dates as expired
+      return 'vencido';
     }
     
     if (targetDate < now) {
@@ -119,7 +117,7 @@ export function useProducts() {
   // Calcular data "Utilizar até"
   const calculateUtilizarAte = (dataAbertura: Date, diasParaVencer: number): Date => {
     if (!dataAbertura || isNaN(dataAbertura.getTime()) || !diasParaVencer) {
-      return new Date(); // Return current date as fallback
+      return new Date();
     }
     
     const utilizarAte = new Date(dataAbertura);

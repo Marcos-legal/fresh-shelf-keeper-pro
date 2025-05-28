@@ -16,8 +16,11 @@ import { toast } from "@/hooks/use-toast";
 
 const VisualizarEtiquetas = () => {
   const { products, updateProduct } = useProducts();
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [calendarOpen, setCalendarOpen] = useState(false);
+
+  console.log('Produtos carregados:', products);
+  console.log('Total de produtos:', products.length);
 
   const handleUpdateUtilizarAte = () => {
     if (!selectedDate) {
@@ -29,16 +32,29 @@ const VisualizarEtiquetas = () => {
       return;
     }
 
+    // A data selecionada não deve ser no passado
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selected = new Date(selectedDate);
+    selected.setHours(0, 0, 0, 0);
+
+    if (selected < today) {
+      toast({
+        title: "Data inválida",
+        description: "A data de abertura não pode ser no passado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     let updatedCount = 0;
     products.forEach(product => {
-      if (product.diasParaVencer) {
+      if (product.diasParaVencer && product.diasParaVencer > 0) {
         // Usar a data selecionada como nova data de abertura
-        const newDataAbertura = selectedDate;
-        const newUtilizarAte = new Date(selectedDate);
-        newUtilizarAte.setDate(newUtilizarAte.getDate() + product.diasParaVencer);
+        const dataAberturaFormatted = format(selectedDate, 'yyyy-MM-dd');
         
         updateProduct(product.id, {
-          dataAbertura: newDataAbertura.toISOString().split('T')[0],
+          dataAbertura: dataAberturaFormatted,
         });
         updatedCount++;
       }
@@ -65,7 +81,7 @@ const VisualizarEtiquetas = () => {
                     Visualizar Etiquetas
                   </h1>
                   <p className="text-gray-600 mt-1">
-                    Visualize todas as etiquetas geradas
+                    Visualize todas as etiquetas geradas ({products.length} produtos)
                   </p>
                 </div>
               </div>
@@ -95,8 +111,16 @@ const VisualizarEtiquetas = () => {
                         mode="single"
                         selected={selectedDate}
                         onSelect={(date) => {
-                          setSelectedDate(date);
-                          setCalendarOpen(false);
+                          if (date) {
+                            setSelectedDate(date);
+                            setCalendarOpen(false);
+                          }
+                        }}
+                        disabled={(date) => {
+                          // Desabilitar datas passadas
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          return date < today;
                         }}
                         initialFocus
                         className="pointer-events-auto"
@@ -106,34 +130,41 @@ const VisualizarEtiquetas = () => {
                   <Button 
                     onClick={handleUpdateUtilizarAte}
                     className="gradient-blue text-white"
+                    disabled={products.length === 0}
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Atualizar Datas
                   </Button>
                 </div>
                 <p className="text-sm text-gray-600 mt-2">
-                  Selecione uma data para definir como nova data de abertura e recalcular as datas "Utilizar até"
+                  Selecione uma data (hoje ou futura) para definir como nova data de abertura e recalcular as datas "Utilizar até"
                 </p>
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <div key={product.id} className="print:break-inside-avoid">
-                  <EtiquetaView product={product} />
-                </div>
-              ))}
-            </div>
-
-            {products.length === 0 && (
+            {products.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <div key={product.id} className="print:break-inside-avoid">
+                    <EtiquetaView product={product} />
+                  </div>
+                ))}
+              </div>
+            ) : (
               <div className="text-center py-12">
                 <Eye className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   Nenhuma etiqueta encontrada
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 mb-4">
                   Cadastre produtos para visualizar as etiquetas aqui.
                 </p>
+                <Button 
+                  onClick={() => window.location.href = '/cadastro'}
+                  className="gradient-blue text-white"
+                >
+                  Cadastrar Produto
+                </Button>
               </div>
             )}
           </div>
