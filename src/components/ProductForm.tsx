@@ -136,6 +136,7 @@ export function ProductForm({
               value={formData.responsavel}
               onChange={(value) => handleInputChange('responsavel', value)}
               error={errors.responsavel}
+              required={true}
             />
 
             <DatePickerField
@@ -159,6 +160,7 @@ export function ProductForm({
               value={formData.dataAbertura || ''}
               onChange={(value) => handleInputChange('dataAbertura', value)}
               error={errors.dataAbertura}
+              required={true}
             />
 
             <NumberInputField
@@ -168,6 +170,7 @@ export function ProductForm({
               onChange={(value) => handleNumberInputChange('diasParaVencer', value)}
               error={errors.diasParaVencer}
               min={1}
+              required={true}
             />
 
             <SelectField
@@ -176,6 +179,7 @@ export function ProductForm({
               onChange={(value: StorageLocation) => handleInputChange('localArmazenamento', value)}
               options={storageOptions}
               placeholder="Selecione o local"
+              required={true}
             />
           </div>
 

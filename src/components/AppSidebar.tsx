@@ -6,7 +6,9 @@ import {
   Home, 
   Refrigerator,
   Package,
-  FileText
+  FileText,
+  Printer,
+  Eye
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -52,6 +54,16 @@ const menuItems = [
     title: "Cadastro de Produtos",
     url: "/cadastro",
     icon: Package,
+  },
+  {
+    title: "Impressão de Etiquetas",
+    url: "/impressao-etiquetas",
+    icon: Printer,
+  },
+  {
+    title: "Visualizar Etiquetas",
+    url: "/visualizar-etiquetas",
+    icon: Eye,
   },
   {
     title: "Relatórios",

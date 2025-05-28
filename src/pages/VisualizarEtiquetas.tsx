@@ -31,13 +31,14 @@ const VisualizarEtiquetas = () => {
 
     let updatedCount = 0;
     products.forEach(product => {
-      if (product.dataAbertura && product.diasParaVencer) {
+      if (product.diasParaVencer) {
         // Usar a data selecionada como nova data de abertura
+        const newDataAbertura = selectedDate;
         const newUtilizarAte = new Date(selectedDate);
         newUtilizarAte.setDate(newUtilizarAte.getDate() + product.diasParaVencer);
         
         updateProduct(product.id, {
-          dataAbertura: selectedDate.toISOString().split('T')[0],
+          dataAbertura: newDataAbertura.toISOString().split('T')[0],
         });
         updatedCount++;
       }
@@ -45,7 +46,7 @@ const VisualizarEtiquetas = () => {
 
     toast({
       title: "Datas atualizadas",
-      description: `${updatedCount} produto(s) tiveram suas datas "Utilizar até" atualizadas.`,
+      description: `${updatedCount} produto(s) tiveram suas datas de abertura e "Utilizar até" atualizadas.`,
     });
   };
 
@@ -111,7 +112,7 @@ const VisualizarEtiquetas = () => {
                   </Button>
                 </div>
                 <p className="text-sm text-gray-600 mt-2">
-                  Selecione uma data para recalcular as datas "Utilizar até" de todos os produtos
+                  Selecione uma data para definir como nova data de abertura e recalcular as datas "Utilizar até"
                 </p>
               </CardContent>
             </Card>

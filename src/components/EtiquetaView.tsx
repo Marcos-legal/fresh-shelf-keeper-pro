@@ -66,33 +66,42 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
           </div>
         </div>
 
-        <div className="flex space-x-6">
-          <label className="flex items-center space-x-2">
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <label className="flex items-center space-x-1">
             <input 
               type="checkbox" 
               checked={product.localArmazenamento === 'refrigerado'}
               readOnly
-              className="w-4 h-4"
+              className="w-3 h-3"
             />
             <span className="font-bold">Refrigerado</span>
           </label>
-          <label className="flex items-center space-x-2">
+          <label className="flex items-center space-x-1">
             <input 
               type="checkbox" 
               checked={product.localArmazenamento === 'congelado'}
               readOnly
-              className="w-4 h-4"
+              className="w-3 h-3"
             />
             <span className="font-bold">Congelado</span>
           </label>
-          <label className="flex items-center space-x-2">
+          <label className="flex items-center space-x-1">
             <input 
               type="checkbox" 
               checked={product.localArmazenamento === 'ambiente'}
               readOnly
-              className="w-4 h-4"
+              className="w-3 h-3"
             />
             <span className="font-bold">Ambiente</span>
+          </label>
+          <label className="flex items-center space-x-1">
+            <input 
+              type="checkbox" 
+              checked={product.localArmazenamento === 'camara-fria'}
+              readOnly
+              className="w-3 h-3"
+            />
+            <span className="font-bold">Câmara Fria</span>
           </label>
         </div>
 
