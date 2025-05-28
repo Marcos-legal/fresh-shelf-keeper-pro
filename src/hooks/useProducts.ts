@@ -1,8 +1,35 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { Product, ProductFormData, ProductStats, StorageLocation } from '@/types/product';
 
 const STORAGE_KEY = 'sistema-validade-produtos';
+
+// Helper function to safely parse dates
+const safeParseDate = (dateValue: any): Date | undefined => {
+  if (!dateValue) return undefined;
+  
+  try {
+    const date = new Date(dateValue);
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date value:', dateValue);
+      return undefined;
+    }
+    return date;
+  } catch (error) {
+    console.warn('Error parsing date:', dateValue, error);
+    return undefined;
+  }
+};
+
+// Helper function to safely format date for storage
+const formatDateForStorage = (date: Date): string => {
+  try {
+    return date.toISOString().split('T')[0];
+  } catch (error) {
+    console.warn('Error formatting date:', date, error);
+    return '';
+  }
+};
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -13,15 +40,31 @@ export function useProducts() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsedProducts = JSON.parse(stored).map((p: any) => ({
-          ...p,
-          dataFabricacao: new Date(p.dataFabricacao),
-          validade: new Date(p.validade),
-          dataAbertura: p.dataAbertura ? new Date(p.dataAbertura) : undefined,
-          utilizarAte: p.utilizarAte ? new Date(p.utilizarAte) : undefined,
-          criadoEm: new Date(p.criadoEm),
-          atualizadoEm: new Date(p.atualizadoEm),
-        }));
+        const parsedProducts = JSON.parse(stored).map((p: any) => {
+          const dataFabricacao = safeParseDate(p.dataFabricacao);
+          const validade = safeParseDate(p.validade);
+          const dataAbertura = safeParseDate(p.dataAbertura);
+          const utilizarAte = safeParseDate(p.utilizarAte);
+          const criadoEm = safeParseDate(p.criadoEm);
+          const atualizadoEm = safeParseDate(p.atualizadoEm);
+
+          // Skip products with invalid required dates
+          if (!dataFabricacao || !validade || !criadoEm || !atualizadoEm) {
+            console.warn('Skipping product with invalid dates:', p);
+            return null;
+          }
+
+          return {
+            ...p,
+            dataFabricacao,
+            validade,
+            dataAbertura,
+            utilizarAte,
+            criadoEm,
+            atualizadoEm,
+          };
+        }).filter(Boolean); // Remove null products
+        
         setProducts(parsedProducts);
       }
     } catch (error) {
@@ -34,7 +77,17 @@ export function useProducts() {
   // Salvar produtos no localStorage
   const saveProducts = (updatedProducts: Product[]) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
+      const productsToSave = updatedProducts.map(product => ({
+        ...product,
+        dataFabricacao: formatDateForStorage(product.dataFabricacao),
+        validade: formatDateForStorage(product.validade),
+        dataAbertura: product.dataAbertura ? formatDateForStorage(product.dataAbertura) : null,
+        utilizarAte: product.utilizarAte ? formatDateForStorage(product.utilizarAte) : null,
+        criadoEm: formatDateForStorage(product.criadoEm),
+        atualizadoEm: formatDateForStorage(product.atualizadoEm),
+      }));
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(productsToSave));
       setProducts(updatedProducts);
     } catch (error) {
       console.error('Erro ao salvar produtos:', error);
@@ -45,6 +98,10 @@ export function useProducts() {
   const calculateStatus = (product: Product): 'valido' | 'proximo-vencimento' | 'vencido' => {
     const now = new Date();
     const targetDate = product.utilizarAte || product.validade;
+    
+    if (!targetDate || isNaN(targetDate.getTime())) {
+      return 'vencido'; // Consider invalid dates as expired
+    }
     
     if (targetDate < now) {
       return 'vencido';
@@ -61,6 +118,10 @@ export function useProducts() {
 
   // Calcular data "Utilizar até"
   const calculateUtilizarAte = (dataAbertura: Date, diasParaVencer: number): Date => {
+    if (!dataAbertura || isNaN(dataAbertura.getTime()) || !diasParaVencer) {
+      return new Date(); // Return current date as fallback
+    }
+    
     const utilizarAte = new Date(dataAbertura);
     utilizarAte.setDate(utilizarAte.getDate() + diasParaVencer);
     return utilizarAte;
@@ -71,7 +132,10 @@ export function useProducts() {
     const id = crypto.randomUUID();
     const now = new Date();
     
-    const dataAbertura = data.dataAbertura ? new Date(data.dataAbertura) : undefined;
+    const dataFabricacao = safeParseDate(data.dataFabricacao) || now;
+    const validade = safeParseDate(data.validade) || now;
+    const dataAbertura = data.dataAbertura ? safeParseDate(data.dataAbertura) : undefined;
+    
     const utilizarAte = dataAbertura 
       ? calculateUtilizarAte(dataAbertura, data.diasParaVencer)
       : undefined;
@@ -81,8 +145,8 @@ export function useProducts() {
       nome: data.nome,
       lote: data.lote,
       marca: data.marca,
-      dataFabricacao: new Date(data.dataFabricacao),
-      validade: new Date(data.validade),
+      dataFabricacao,
+      validade,
       dataAbertura,
       diasParaVencer: data.diasParaVencer,
       utilizarAte,
@@ -108,7 +172,7 @@ export function useProducts() {
   const updateProduct = (id: string, data: Partial<ProductFormData>) => {
     const updatedProducts = products.map(product => {
       if (product.id === id) {
-        const dataAbertura = data.dataAbertura ? new Date(data.dataAbertura) : product.dataAbertura;
+        const dataAbertura = data.dataAbertura ? safeParseDate(data.dataAbertura) : product.dataAbertura;
         const utilizarAte = dataAbertura && (data.diasParaVencer !== undefined || product.diasParaVencer)
           ? calculateUtilizarAte(dataAbertura, data.diasParaVencer ?? product.diasParaVencer)
           : product.utilizarAte;
@@ -116,8 +180,8 @@ export function useProducts() {
         const updatedProduct = {
           ...product,
           ...data,
-          dataFabricacao: data.dataFabricacao ? new Date(data.dataFabricacao) : product.dataFabricacao,
-          validade: data.validade ? new Date(data.validade) : product.validade,
+          dataFabricacao: data.dataFabricacao ? safeParseDate(data.dataFabricacao) || product.dataFabricacao : product.dataFabricacao,
+          validade: data.validade ? safeParseDate(data.validade) || product.validade : product.validade,
           dataAbertura,
           utilizarAte,
           atualizadoEm: new Date(),
@@ -140,6 +204,11 @@ export function useProducts() {
 
   // Atualizar data de abertura
   const updateDataAbertura = (id: string, novaData: Date) => {
+    if (!novaData || isNaN(novaData.getTime())) {
+      console.warn('Invalid date provided for updateDataAbertura:', novaData);
+      return;
+    }
+
     const updatedProducts = products.map(product => {
       if (product.id === id) {
         const utilizarAte = calculateUtilizarAte(novaData, product.diasParaVencer);

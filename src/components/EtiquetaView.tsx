@@ -7,8 +7,19 @@ interface EtiquetaViewProps {
 }
 
 export function EtiquetaView({ product }: EtiquetaViewProps) {
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('pt-BR');
+  const formatDate = (date: Date | undefined) => {
+    if (!date) return '__/__/__';
+    
+    try {
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return '__/__/__';
+      }
+      return date.toLocaleDateString('pt-BR');
+    } catch (error) {
+      console.warn('Error formatting date:', date, error);
+      return '__/__/__';
+    }
   };
 
   return (
@@ -40,13 +51,13 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
           <div>
             <span className="font-bold">Fab.:</span>
             <div className="border-b border-gray-300 mt-1 pb-1">
-              {product.dataFabricacao ? formatDate(product.dataFabricacao) : '__/__/__'}
+              {formatDate(product.dataFabricacao)}
             </div>
           </div>
           <div>
             <span className="font-bold">Val.:</span>
             <div className="border-b border-gray-300 mt-1 pb-1">
-              {product.validade ? formatDate(product.validade) : '__/__/__'}
+              {formatDate(product.validade)}
             </div>
           </div>
         </div>
@@ -55,13 +66,13 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
           <div>
             <span className="font-bold">DT Abert:</span>
             <div className="border-b border-gray-300 mt-1 pb-1">
-              {product.dataAbertura ? formatDate(product.dataAbertura) : '__/__/__'}
+              {formatDate(product.dataAbertura)}
             </div>
           </div>
           <div>
             <span className="font-bold">Utilizar até:</span>
             <div className="border-b border-gray-300 mt-1 pb-1">
-              {product.utilizarAte ? formatDate(product.utilizarAte) : '__/__/__'}
+              {formatDate(product.utilizarAte)}
             </div>
           </div>
         </div>
