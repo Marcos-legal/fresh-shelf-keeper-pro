@@ -17,7 +17,7 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
         <div className="border-b border-gray-400 pb-1">
           <span className="font-bold">Nome do Produto:</span>
           <div className="border-b border-gray-300 mt-1 pb-1">
-            {product.nome}
+            {product.nome || '_____________________'}
           </div>
         </div>
 
@@ -25,13 +25,13 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
           <div>
             <span className="font-bold">Lote nº:</span>
             <div className="border-b border-gray-300 mt-1 pb-1">
-              {product.lote}
+              {product.lote || '__________'}
             </div>
           </div>
           <div>
             <span className="font-bold">Marca:</span>
             <div className="border-b border-gray-300 mt-1 pb-1">
-              {product.marca}
+              {product.marca || '__________'}
             </div>
           </div>
         </div>
@@ -40,13 +40,13 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
           <div>
             <span className="font-bold">Fab.:</span>
             <div className="border-b border-gray-300 mt-1 pb-1">
-              {formatDate(product.dataFabricacao)}
+              {product.dataFabricacao ? formatDate(product.dataFabricacao) : '__/__/__'}
             </div>
           </div>
           <div>
             <span className="font-bold">Val.:</span>
             <div className="border-b border-gray-300 mt-1 pb-1">
-              {formatDate(product.validade)}
+              {product.validade ? formatDate(product.validade) : '__/__/__'}
             </div>
           </div>
         </div>
@@ -55,13 +55,13 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
           <div>
             <span className="font-bold">DT Abert:</span>
             <div className="border-b border-gray-300 mt-1 pb-1">
-              {product.dataAbertura ? formatDate(product.dataAbertura) : ''}
+              {product.dataAbertura ? formatDate(product.dataAbertura) : '__/__/__'}
             </div>
           </div>
           <div>
             <span className="font-bold">Utilizar até:</span>
             <div className="border-b border-gray-300 mt-1 pb-1">
-              {product.utilizarAte ? formatDate(product.utilizarAte) : ''}
+              {product.utilizarAte ? formatDate(product.utilizarAte) : '__/__/__'}
             </div>
           </div>
         </div>
@@ -99,7 +99,7 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
         <div className="border-b border-gray-400 pb-1">
           <span className="font-bold">Responsável:</span>
           <div className="border-b border-gray-300 mt-1 pb-1">
-            {product.responsavel}
+            {product.responsavel || '_____________________'}
           </div>
         </div>
       </CardContent>

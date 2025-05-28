@@ -31,8 +31,8 @@ const VisualizarEtiquetas = () => {
 
     let updatedCount = 0;
     products.forEach(product => {
-      if (product.dataAbertura) {
-        // Calcular nova data "Utilizar até" baseada na data selecionada
+      if (product.dataAbertura && product.diasParaVencer) {
+        // Usar a data selecionada como nova data de abertura
         const newUtilizarAte = new Date(selectedDate);
         newUtilizarAte.setDate(newUtilizarAte.getDate() + product.diasParaVencer);
         
