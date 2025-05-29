@@ -70,7 +70,12 @@ export function ProductTable({
         case 'nome':
           return a.nome.localeCompare(b.nome);
         case 'validade':
-          return new Date(a.validade).getTime() - new Date(b.validade).getTime();
+          const aDate = safeGetDate(a.validade);
+          const bDate = safeGetDate(b.validade);
+          if (!aDate && !bDate) return 0;
+          if (!aDate) return 1;
+          if (!bDate) return -1;
+          return aDate.getTime() - bDate.getTime();
         case 'status':
           return a.status.localeCompare(b.status);
         default:
@@ -78,8 +83,46 @@ export function ProductTable({
       }
     });
 
-  const formatDate = (date: Date) => {
-    return format(date, "dd/MM/yyyy", { locale: ptBR });
+  const safeGetDate = (dateValue: any): Date | null => {
+    if (!dateValue) return null;
+    
+    try {
+      // Handle complex date structure from localStorage
+      if (typeof dateValue === 'object' && dateValue._type === 'Date') {
+        if (dateValue.value && dateValue.value.iso) {
+          const date = new Date(dateValue.value.iso);
+          return isNaN(date.getTime()) ? null : date;
+        }
+      }
+      
+      // Handle direct Date objects
+      if (dateValue instanceof Date) {
+        return isNaN(dateValue.getTime()) ? null : dateValue;
+      }
+      
+      // Handle string dates
+      if (typeof dateValue === 'string') {
+        const date = new Date(dateValue);
+        return isNaN(date.getTime()) ? null : date;
+      }
+      
+      return null;
+    } catch (error) {
+      console.warn('Error parsing date:', dateValue, error);
+      return null;
+    }
+  };
+
+  const formatDate = (dateValue: any): string => {
+    const date = safeGetDate(dateValue);
+    if (!date) return '-';
+    
+    try {
+      return format(date, "dd/MM/yyyy", { locale: ptBR });
+    } catch (error) {
+      console.warn('Error formatting date:', dateValue, error);
+      return '-';
+    }
   };
 
   return (
@@ -155,12 +198,8 @@ export function ProductTable({
                   <TableCell>{product.marca}</TableCell>
                   <TableCell>{formatDate(product.dataFabricacao)}</TableCell>
                   <TableCell>{formatDate(product.validade)}</TableCell>
-                  <TableCell>
-                    {product.dataAbertura ? formatDate(product.dataAbertura) : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {product.utilizarAte ? formatDate(product.utilizarAte) : '-'}
-                  </TableCell>
+                  <TableCell>{formatDate(product.dataAbertura)}</TableCell>
+                  <TableCell>{formatDate(product.utilizarAte)}</TableCell>
                   {!category && (
                     <TableCell>
                       <Badge variant="outline">
