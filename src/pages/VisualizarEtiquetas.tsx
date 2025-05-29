@@ -59,26 +59,11 @@ const VisualizarEtiquetas = () => {
       return;
     }
 
-    // A data selecionada não deve ser no passado
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const selected = new Date(selectedDate);
-    selected.setHours(0, 0, 0, 0);
-
-    if (selected < today) {
-      toast({
-        title: "Data inválida",
-        description: "A data de abertura não pode ser no passado.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     let updatedCount = 0;
     selectedProducts.forEach(productId => {
       const product = products.find(p => p.id === productId);
       if (product && product.diasParaVencer && product.diasParaVencer > 0) {
-        // Usar a data selecionada como nova data de abertura
+        // Usar exatamente a data selecionada como nova data de abertura
         const dataAberturaFormatted = format(selectedDate, 'yyyy-MM-dd');
         
         updateProduct(product.id, {
@@ -158,12 +143,6 @@ const VisualizarEtiquetas = () => {
                               setCalendarOpen(false);
                             }
                           }}
-                          disabled={(date) => {
-                            // Desabilitar datas passadas
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0);
-                            return date < today;
-                          }}
                           initialFocus
                           className="pointer-events-auto"
                         />
@@ -179,7 +158,7 @@ const VisualizarEtiquetas = () => {
                     </Button>
                   </div>
                   <p className="text-sm text-gray-600">
-                    Selecione produtos e uma data (hoje ou futura) para definir como nova data de abertura
+                    Selecione produtos e uma data para definir como nova data de abertura
                   </p>
                 </div>
               </CardContent>
