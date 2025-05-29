@@ -8,13 +8,24 @@ const safeParseDate = (dateValue: any): Date | undefined => {
   if (!dateValue) return undefined;
   
   try {
-    const date = new Date(dateValue);
-    // Check if the date is valid
-    if (isNaN(date.getTime())) {
-      console.warn('Invalid date value:', dateValue);
-      return undefined;
+    // Handle string dates in YYYY-MM-DD format
+    if (typeof dateValue === 'string') {
+      const [year, month, day] = dateValue.split('-').map(Number);
+      if (year && month && day) {
+        // Criar data usando componentes para evitar problemas de timezone
+        const date = new Date(year, month - 1, day);
+        if (!isNaN(date.getTime())) {
+          return date;
+        }
+      }
     }
-    return date;
+    
+    // Handle Date objects
+    if (dateValue instanceof Date) {
+      return isNaN(dateValue.getTime()) ? undefined : dateValue;
+    }
+    
+    return undefined;
   } catch (error) {
     console.warn('Error parsing date:', dateValue, error);
     return undefined;
@@ -24,7 +35,10 @@ const safeParseDate = (dateValue: any): Date | undefined => {
 // Helper function to safely format date for storage
 const formatDateForStorage = (date: Date): string => {
   try {
-    return date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   } catch (error) {
     console.warn('Error formatting date:', date, error);
     return new Date().toISOString().split('T')[0]; // Return today as fallback
@@ -132,6 +146,8 @@ export function useProducts() {
     const validade = data.validade ? safeParseDate(data.validade) : undefined;
     const dataAbertura = data.dataAbertura ? safeParseDate(data.dataAbertura) : undefined;
     
+    console.log('Criando produto com data de abertura:', data.dataAbertura, 'parsed:', dataAbertura);
+    
     const utilizarAte = dataAbertura 
       ? calculateUtilizarAte(dataAbertura, data.diasParaVencer)
       : undefined;
@@ -168,6 +184,8 @@ export function useProducts() {
   const updateProduct = (id: string, data: Partial<ProductFormData>) => {
     const updatedProducts = products.map(product => {
       if (product.id === id) {
+        console.log('Atualizando produto com dataAbertura:', data.dataAbertura);
+        
         const dataAbertura = data.dataAbertura ? safeParseDate(data.dataAbertura) : product.dataAbertura;
         const utilizarAte = dataAbertura && (data.diasParaVencer !== undefined || product.diasParaVencer)
           ? calculateUtilizarAte(dataAbertura, data.diasParaVencer ?? product.diasParaVencer)
@@ -183,6 +201,7 @@ export function useProducts() {
           atualizadoEm: new Date(),
         };
 
+        console.log('Produto atualizado:', updatedProduct);
         updatedProduct.status = calculateStatus(updatedProduct);
         return updatedProduct;
       }

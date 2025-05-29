@@ -30,8 +30,15 @@ export function DatePickerField({
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      // Usar exatamente a data selecionada no calendário
-      const dateString = format(date, 'yyyy-MM-dd');
+      // Garantir que a data seja exatamente a selecionada, sem ajustes de timezone
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`;
+      
+      console.log('Data selecionada no calendário:', date);
+      console.log('Data formatada para armazenamento:', dateString);
+      
       onChange(dateString);
       setCalendarOpen(false);
     }
@@ -40,10 +47,22 @@ export function DatePickerField({
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return 'Selecionar data';
     try {
-      const date = new Date(dateString);
+      // Criar data usando os componentes para evitar problemas de timezone
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
       return format(date, "dd/MM/yyyy", { locale: ptBR });
     } catch {
       return 'Data inválida';
+    }
+  };
+
+  const getSelectedDate = () => {
+    if (!value) return undefined;
+    try {
+      const [year, month, day] = value.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    } catch {
+      return undefined;
     }
   };
 
@@ -67,7 +86,7 @@ export function DatePickerField({
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            selected={value ? new Date(value) : undefined}
+            selected={getSelectedDate()}
             onSelect={handleDateSelect}
             initialFocus
             className="pointer-events-auto"

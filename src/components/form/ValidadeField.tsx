@@ -19,9 +19,9 @@ export function ValidadeField({
   error,
   required = false,
 }: ValidadeFieldProps) {
-  const [formato, setFormato] = useState<'DD/MM/AAAA' | 'MM/AAAA'>('DD/MM/AAAA');
+  const [formato, setFormato] = useState<'DD/MM/AA' | 'MM/AA'>('DD/MM/AA');
 
-  const handleFormatoChange = (novoFormato: 'DD/MM/AAAA' | 'MM/AAAA') => {
+  const handleFormatoChange = (novoFormato: 'DD/MM/AA' | 'MM/AA') => {
     setFormato(novoFormato);
     onChange(''); // Limpa o valor quando muda o formato
   };
@@ -29,39 +29,22 @@ export function ValidadeField({
   const handleInputChange = (inputValue: string) => {
     let formattedValue = inputValue.replace(/\D/g, ''); // Remove não dígitos
     
-    if (formato === 'DD/MM/AAAA') {
-      // Formato DD/MM/AAAA
+    if (formato === 'DD/MM/AA') {
+      // Formato DD/MM/AA
       if (formattedValue.length >= 2) {
         formattedValue = formattedValue.substring(0, 2) + '/' + formattedValue.substring(2);
       }
       if (formattedValue.length >= 5) {
-        formattedValue = formattedValue.substring(0, 5) + '/' + formattedValue.substring(5, 9);
+        formattedValue = formattedValue.substring(0, 5) + '/' + formattedValue.substring(5, 7);
       }
     } else {
-      // Formato MM/AAAA
+      // Formato MM/AA
       if (formattedValue.length >= 2) {
-        formattedValue = formattedValue.substring(0, 2) + '/' + formattedValue.substring(2, 6);
+        formattedValue = formattedValue.substring(0, 2) + '/' + formattedValue.substring(2, 4);
       }
     }
     
     onChange(formattedValue);
-  };
-
-  const convertToISODate = (dateStr: string) => {
-    if (formato === 'DD/MM/AAAA') {
-      const [day, month, year] = dateStr.split('/');
-      if (day && month && year && year.length === 4) {
-        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      }
-    } else {
-      const [month, year] = dateStr.split('/');
-      if (month && year && year.length === 4) {
-        // Usa o último dia do mês
-        const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
-        return `${year}-${month.padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
-      }
-    }
-    return '';
   };
 
   return (
@@ -73,16 +56,16 @@ export function ValidadeField({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="DD/MM/AAAA">DD/MM/AAAA</SelectItem>
-            <SelectItem value="MM/AAAA">MM/AAAA</SelectItem>
+            <SelectItem value="DD/MM/AA">DD/MM/AA</SelectItem>
+            <SelectItem value="MM/AA">MM/AA</SelectItem>
           </SelectContent>
         </Select>
         <Input
           value={value}
           onChange={(e) => handleInputChange(e.target.value)}
-          placeholder={formato}
+          placeholder={formato === 'DD/MM/AA' ? "10/10/25" : "10/25"}
           className={error ? 'border-red-500 flex-1' : 'flex-1'}
-          maxLength={formato === 'DD/MM/AAAA' ? 10 : 7}
+          maxLength={formato === 'DD/MM/AA' ? 8 : 5}
         />
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
