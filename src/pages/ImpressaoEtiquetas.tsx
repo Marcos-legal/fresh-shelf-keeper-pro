@@ -150,9 +150,9 @@ const ImpressaoEtiquetas = () => {
                     </div>
                   </div>
                   <div class="checkbox-row">
-                    <div>☐ Refrigerado ${product.localArmazenamento === 'refrigerado' ? '✓' : ''}</div>
-                    <div>☐ Congelado ${product.localArmazenamento === 'congelado' ? '✓' : ''}</div>
-                    <div>☐ Ambiente ${product.localArmazenamento === 'ambiente' ? '✓' : ''}</div>
+                    <div>${product.localArmazenamento === 'refrigerado' ? '☑' : '☐'} Refrigerado</div>
+                    <div>${product.localArmazenamento === 'congelado' ? '☑' : '☐'} Congelado</div>
+                    <div>${product.localArmazenamento === 'ambiente' ? '☑' : '☐'} Ambiente</div>
                   </div>
                   <div class="campo">
                     <div class="label">Responsável:</div>

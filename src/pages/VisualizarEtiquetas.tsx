@@ -40,6 +40,13 @@ const VisualizarEtiquetas = () => {
     }
   };
 
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      setCalendarOpen(false);
+    }
+  };
+
   const handleUpdateUtilizarAte = () => {
     if (!selectedDate) {
       toast({
@@ -62,7 +69,7 @@ const VisualizarEtiquetas = () => {
     let updatedCount = 0;
     selectedProducts.forEach(productId => {
       const product = products.find(p => p.id === productId);
-      if (product && product.diasParaVencer && product.diasParaVencer > 0) {
+      if (product) {
         // Usar exatamente a data selecionada como nova data de abertura
         const dataAberturaFormatted = format(selectedDate, 'yyyy-MM-dd');
         
@@ -137,12 +144,7 @@ const VisualizarEtiquetas = () => {
                         <Calendar
                           mode="single"
                           selected={selectedDate}
-                          onSelect={(date) => {
-                            if (date) {
-                              setSelectedDate(date);
-                              setCalendarOpen(false);
-                            }
-                          }}
+                          onSelect={handleDateSelect}
                           initialFocus
                           className="pointer-events-auto"
                         />
