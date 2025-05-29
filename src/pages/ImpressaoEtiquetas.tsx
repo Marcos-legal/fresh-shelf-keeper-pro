@@ -6,7 +6,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Printer, Package, Eye } from "lucide-react";
+import { Printer, Package, Eye, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -31,6 +31,10 @@ const ImpressaoEtiquetas = () => {
     }
   };
 
+  // Calcular número de páginas (considerando 6 etiquetas por página)
+  const etiquetasPorPagina = 6;
+  const totalPaginas = Math.ceil(selectedProducts.length / etiquetasPorPagina);
+
   const handlePrint = () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
     
@@ -43,36 +47,120 @@ const ImpressaoEtiquetas = () => {
       return;
     }
 
-    // Criar janela de impressão
+    // Criar janela de impressão com layout otimizado
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Etiquetas</title>
+            <title>Etiquetas - ${selectedProducts.length} produtos</title>
             <style>
-              body { font-family: monospace; white-space: pre-line; }
-              .etiqueta { page-break-after: always; margin-bottom: 20px; }
+              @page {
+                size: A4;
+                margin: 1cm;
+              }
+              body { 
+                font-family: monospace; 
+                margin: 0; 
+                padding: 0;
+                line-height: 1.2;
+              }
+              .etiqueta { 
+                border: 2px solid #666;
+                width: 320px;
+                height: 200px;
+                margin: 10px;
+                padding: 12px;
+                float: left;
+                font-size: 11px;
+                page-break-inside: avoid;
+                background: white;
+              }
+              .campo {
+                margin-bottom: 8px;
+                border-bottom: 1px solid #ccc;
+                padding-bottom: 2px;
+                min-height: 16px;
+              }
+              .label {
+                font-weight: bold;
+                font-size: 10px;
+              }
+              .grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin-bottom: 8px;
+              }
+              .checkbox-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 8px;
+                font-size: 9px;
+                margin-bottom: 8px;
+              }
+              .clearfix::after {
+                content: "";
+                display: table;
+                clear: both;
+              }
+              @media print {
+                .etiqueta {
+                  page-break-inside: avoid;
+                }
+              }
             </style>
           </head>
           <body>
-            ${selectedProductsData.map(product => `
-              <div class="etiqueta">
-                ================================<br>
-                ETIQUETA TÉRMICA<br>
-                ================================<br>
-                Produto: ${product.nome}<br>
-                Lote: ${product.lote}<br>
-                Marca: ${product.marca}<br>
-                Fabricação: ${product.dataFabricacao.toLocaleDateString('pt-BR')}<br>
-                Validade: ${product.validade.toLocaleDateString('pt-BR')}<br>
-                ${product.dataAbertura ? `Abertura: ${product.dataAbertura.toLocaleDateString('pt-BR')}<br>` : ''}
-                ${product.utilizarAte ? `Utilizar até: ${product.utilizarAte.toLocaleDateString('pt-BR')}<br>` : ''}
-                Local: ${product.localArmazenamento}<br>
-                Responsável: ${product.responsavel}<br>
-                ================================
-              </div>
-            `).join('')}
+            <div class="clearfix">
+              ${selectedProductsData.map(product => `
+                <div class="etiqueta">
+                  <div class="campo">
+                    <div class="label">Nome do Produto:</div>
+                    <div>${product.nome || ''}</div>
+                  </div>
+                  <div class="grid">
+                    <div class="campo">
+                      <div class="label">Lote nº:</div>
+                      <div>${product.lote || ''}</div>
+                    </div>
+                    <div class="campo">
+                      <div class="label">Marca:</div>
+                      <div>${product.marca || ''}</div>
+                    </div>
+                  </div>
+                  <div class="grid">
+                    <div class="campo">
+                      <div class="label">Fab.:</div>
+                      <div>${product.dataFabricacao ? product.dataFabricacao.toLocaleDateString('pt-BR') : ''}</div>
+                    </div>
+                    <div class="campo">
+                      <div class="label">Val.:</div>
+                      <div>${product.validade ? product.validade.toLocaleDateString('pt-BR') : ''}</div>
+                    </div>
+                  </div>
+                  <div class="grid">
+                    <div class="campo">
+                      <div class="label">DT Abert:</div>
+                      <div>${product.dataAbertura ? product.dataAbertura.toLocaleDateString('pt-BR') : ''}</div>
+                    </div>
+                    <div class="campo">
+                      <div class="label">Utilizar até:</div>
+                      <div>${product.utilizarAte ? product.utilizarAte.toLocaleDateString('pt-BR') : ''}</div>
+                    </div>
+                  </div>
+                  <div class="checkbox-row">
+                    <div>☐ Refrigerado ${product.localArmazenamento === 'refrigerado' ? '✓' : ''}</div>
+                    <div>☐ Congelado ${product.localArmazenamento === 'congelado' ? '✓' : ''}</div>
+                    <div>☐ Ambiente ${product.localArmazenamento === 'ambiente' ? '✓' : ''}</div>
+                  </div>
+                  <div class="campo">
+                    <div class="label">Responsável:</div>
+                    <div>${product.responsavel || ''}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
           </body>
         </html>
       `);
@@ -82,7 +170,7 @@ const ImpressaoEtiquetas = () => {
 
     toast({
       title: "Etiquetas enviadas",
-      description: `${selectedProducts.length} etiqueta(s) enviada(s) para impressão!`,
+      description: `${selectedProducts.length} etiqueta(s) enviada(s) para impressão (${totalPaginas} página${totalPaginas !== 1 ? 's' : ''})!`,
     });
   };
 
@@ -132,10 +220,30 @@ const ImpressaoEtiquetas = () => {
                   className="gradient-blue text-white"
                 >
                   <Printer className="w-4 h-4 mr-2" />
-                  Imprimir Selecionados ({selectedProducts.length})
+                  Imprimir ({selectedProducts.length})
+                  {selectedProducts.length > 0 && (
+                    <span className="ml-1">
+                      - {totalPaginas} pág{totalPaginas !== 1 ? 's' : ''}
+                    </span>
+                  )}
                 </Button>
               </div>
             </div>
+
+            {selectedProducts.length > 0 && (
+              <Card className="mb-6 bg-blue-50 border-blue-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2 text-blue-700">
+                    <FileText className="w-5 h-5" />
+                    <span className="font-medium">
+                      {selectedProducts.length} etiqueta{selectedProducts.length !== 1 ? 's' : ''} selecionada{selectedProducts.length !== 1 ? 's' : ''} 
+                      • {totalPaginas} página{totalPaginas !== 1 ? 's' : ''} para impressão
+                      • {etiquetasPorPagina} etiquetas por página
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {products.map((product) => (
@@ -154,7 +262,9 @@ const ImpressaoEtiquetas = () => {
                     <div className="space-y-1">
                       <p><span className="font-medium">Lote:</span> {product.lote}</p>
                       <p><span className="font-medium">Marca:</span> {product.marca}</p>
-                      <p><span className="font-medium">Validade:</span> {product.validade.toLocaleDateString('pt-BR')}</p>
+                      {product.validade && (
+                        <p><span className="font-medium">Validade:</span> {product.validade.toLocaleDateString('pt-BR')}</p>
+                      )}
                       <p><span className="font-medium">Local:</span> {product.localArmazenamento}</p>
                       <p><span className="font-medium">Responsável:</span> {product.responsavel}</p>
                     </div>

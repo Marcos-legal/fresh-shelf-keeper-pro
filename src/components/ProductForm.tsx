@@ -38,7 +38,7 @@ export function ProductForm({
     marca: initialData?.marca || '',
     dataFabricacao: initialData?.dataFabricacao || '',
     validade: initialData?.validade || '',
-    dataAbertura: initialData?.dataAbertura || '',
+    dataAbertura: initialData?.dataAbertura || new Date().toISOString().split('T')[0],
     diasParaVencer: initialData?.diasParaVencer || 30,
     localArmazenamento: initialData?.localArmazenamento || 'ambiente',
     responsavel: initialData?.responsavel || '',
@@ -141,17 +141,19 @@ export function ProductForm({
 
             <DatePickerField
               id="dataFabricacao"
-              label="Data de Fabricação"
+              label="Data de Fabricação (Opcional)"
               value={formData.dataFabricacao}
               onChange={(value) => handleInputChange('dataFabricacao', value)}
               error={errors.dataFabricacao}
+              required={false}
             />
 
             <ValidadeField
-              label="Data de Validade"
+              label="Data de Validade (Opcional)"
               value={formData.validade}
               onChange={(value) => handleInputChange('validade', value)}
               error={errors.validade}
+              required={false}
             />
 
             <DatePickerField

@@ -30,6 +30,7 @@ export function DatePickerField({
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
+      // Usar exatamente a data selecionada no calendário
       const dateString = format(date, 'yyyy-MM-dd');
       onChange(dateString);
       setCalendarOpen(false);

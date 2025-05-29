@@ -45,19 +45,17 @@ export function useProducts() {
           const validade = safeParseDate(p.validade);
           const dataAbertura = safeParseDate(p.dataAbertura);
           const utilizarAte = safeParseDate(p.utilizarAte);
-          const criadoEm = safeParseDate(p.criadoEm);
-          const atualizadoEm = safeParseDate(p.atualizadoEm);
+          const criadoEm = safeParseDate(p.criadoEm) || new Date();
+          const atualizadoEm = safeParseDate(p.atualizadoEm) || new Date();
 
-          // Create valid product with fallbacks for required dates
-          const now = new Date();
           return {
             ...p,
-            dataFabricacao: dataFabricacao || now,
-            validade: validade || now,
+            dataFabricacao,
+            validade,
             dataAbertura,
             utilizarAte,
-            criadoEm: criadoEm || now,
-            atualizadoEm: atualizadoEm || now,
+            criadoEm,
+            atualizadoEm,
           };
         });
         
@@ -76,8 +74,8 @@ export function useProducts() {
     try {
       const productsToSave = updatedProducts.map(product => ({
         ...product,
-        dataFabricacao: formatDateForStorage(product.dataFabricacao),
-        validade: formatDateForStorage(product.validade),
+        dataFabricacao: product.dataFabricacao ? formatDateForStorage(product.dataFabricacao) : null,
+        validade: product.validade ? formatDateForStorage(product.validade) : null,
         dataAbertura: product.dataAbertura ? formatDateForStorage(product.dataAbertura) : null,
         utilizarAte: product.utilizarAte ? formatDateForStorage(product.utilizarAte) : null,
         criadoEm: formatDateForStorage(product.criadoEm),
@@ -130,8 +128,8 @@ export function useProducts() {
     const id = crypto.randomUUID();
     const now = new Date();
     
-    const dataFabricacao = safeParseDate(data.dataFabricacao) || now;
-    const validade = safeParseDate(data.validade) || now;
+    const dataFabricacao = data.dataFabricacao ? safeParseDate(data.dataFabricacao) : undefined;
+    const validade = data.validade ? safeParseDate(data.validade) : undefined;
     const dataAbertura = data.dataAbertura ? safeParseDate(data.dataAbertura) : undefined;
     
     const utilizarAte = dataAbertura 

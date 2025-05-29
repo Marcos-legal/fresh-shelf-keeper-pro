@@ -8,17 +8,17 @@ interface EtiquetaViewProps {
 
 export function EtiquetaView({ product }: EtiquetaViewProps) {
   const formatDate = (date: Date | undefined) => {
-    if (!date) return '__/__/__';
+    if (!date) return '';
     
     try {
       // Check if date is valid
       if (isNaN(date.getTime())) {
-        return '__/__/__';
+        return '';
       }
       return date.toLocaleDateString('pt-BR');
     } catch (error) {
       console.warn('Error formatting date:', date, error);
-      return '__/__/__';
+      return '';
     }
   };
 
@@ -27,22 +27,22 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
       <CardContent className="p-4 space-y-3 font-mono text-sm">
         <div className="border-b border-gray-400 pb-1">
           <span className="font-bold">Nome do Produto:</span>
-          <div className="border-b border-gray-300 mt-1 pb-1">
-            {product.nome || '_____________________'}
+          <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
+            {product.nome || ''}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <span className="font-bold">Lote nº:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1">
-              {product.lote || '__________'}
+            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
+              {product.lote || ''}
             </div>
           </div>
           <div>
             <span className="font-bold">Marca:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1">
-              {product.marca || '__________'}
+            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
+              {product.marca || ''}
             </div>
           </div>
         </div>
@@ -50,13 +50,13 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <span className="font-bold">Fab.:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1">
+            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
               {formatDate(product.dataFabricacao)}
             </div>
           </div>
           <div>
             <span className="font-bold">Val.:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1">
+            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
               {formatDate(product.validade)}
             </div>
           </div>
@@ -65,19 +65,19 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <span className="font-bold">DT Abert:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1">
+            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
               {formatDate(product.dataAbertura)}
             </div>
           </div>
           <div>
             <span className="font-bold">Utilizar até:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1">
+            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
               {formatDate(product.utilizarAte)}
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="grid grid-cols-3 gap-2 text-xs">
           <label className="flex items-center space-x-1">
             <input 
               type="checkbox" 
@@ -105,21 +105,12 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
             />
             <span className="font-bold">Ambiente</span>
           </label>
-          <label className="flex items-center space-x-1">
-            <input 
-              type="checkbox" 
-              checked={product.localArmazenamento === 'camara-fria'}
-              readOnly
-              className="w-3 h-3"
-            />
-            <span className="font-bold">Câmara Fria</span>
-          </label>
         </div>
 
         <div className="border-b border-gray-400 pb-1">
           <span className="font-bold">Responsável:</span>
-          <div className="border-b border-gray-300 mt-1 pb-1">
-            {product.responsavel || '_____________________'}
+          <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
+            {product.responsavel || ''}
           </div>
         </div>
       </CardContent>
