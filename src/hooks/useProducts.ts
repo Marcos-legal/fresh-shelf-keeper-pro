@@ -1,6 +1,6 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { Product, ProductFormData, ProductStats, StorageLocation } from '@/types/product';
+import { parseValidadeDate } from '@/utils/productValidation';
 
 const STORAGE_KEY = 'sistema-validade-produtos';
 
@@ -161,10 +161,11 @@ export function useProducts() {
     const now = new Date();
     
     const dataFabricacao = data.dataFabricacao ? safeParseDate(data.dataFabricacao) : undefined;
-    const validade = data.validade ? safeParseDate(data.validade) : undefined;
+    const validade = data.validade ? parseValidadeDate(data.validade) : undefined;
     const dataAbertura = data.dataAbertura ? safeParseDate(data.dataAbertura) : undefined;
     
     console.log('Criando produto com data de abertura:', data.dataAbertura, 'parsed:', dataAbertura);
+    console.log('Criando produto com validade:', data.validade, 'parsed:', validade);
     
     const utilizarAte = dataAbertura 
       ? calculateUtilizarAte(dataAbertura, data.diasParaVencer)
@@ -203,8 +204,10 @@ export function useProducts() {
     const updatedProducts = products.map(product => {
       if (product.id === id) {
         console.log('Atualizando produto com dataAbertura:', data.dataAbertura);
+        console.log('Atualizando produto com validade:', data.validade);
         
         const dataAbertura = data.dataAbertura ? safeParseDate(data.dataAbertura) : product.dataAbertura;
+        const validade = data.validade ? parseValidadeDate(data.validade) : product.validade;
         const utilizarAte = dataAbertura && (data.diasParaVencer !== undefined || product.diasParaVencer)
           ? calculateUtilizarAte(dataAbertura, data.diasParaVencer ?? product.diasParaVencer)
           : product.utilizarAte;
@@ -213,7 +216,7 @@ export function useProducts() {
           ...product,
           ...data,
           dataFabricacao: data.dataFabricacao ? safeParseDate(data.dataFabricacao) || product.dataFabricacao : product.dataFabricacao,
-          validade: data.validade ? safeParseDate(data.validade) || product.validade : product.validade,
+          validade,
           dataAbertura,
           utilizarAte,
           atualizadoEm: new Date(),
