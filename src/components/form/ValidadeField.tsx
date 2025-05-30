@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -146,6 +145,19 @@ export function ValidadeField({
     return undefined;
   };
 
+  // Helper function to display formatted value
+  const getDisplayValue = () => {
+    if (!value) return '';
+    
+    // If it's already in MES/ANO format, return as is
+    if (formato === 'MES/ANO' && /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+\/\d{4}$/.test(value)) {
+      return value;
+    }
+    
+    // For other formats, return the value as is
+    return value;
+  };
+
   return (
     <div className="space-y-2">
       <Label>{label} {required && '*'}</Label>
@@ -163,7 +175,7 @@ export function ValidadeField({
         </Select>
         
         <Input
-          value={value}
+          value={getDisplayValue()}
           onChange={(e) => handleInputChange(e.target.value)}
           placeholder={getPlaceholder()}
           className={error ? 'border-red-500 flex-1' : 'flex-1'}

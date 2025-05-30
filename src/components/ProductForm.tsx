@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Save, Calendar } from "lucide-react";
+import { Package, Save, Calendar, EyeOff, Eye } from "lucide-react";
 import { ProductFormData, StorageLocation } from "@/types/product";
 import { validateProductForm } from "@/utils/productValidation";
 import { TextInputField } from "@/components/form/TextInputField";
@@ -45,6 +44,7 @@ export function ProductForm({
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof ProductFormData, string>>>({});
+  const [showOptionalDates, setShowOptionalDates] = useState(false);
 
   const handleInputChange = (field: keyof ProductFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -91,7 +91,7 @@ export function ProductForm({
       
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-between items-center mb-4">
             <Button 
               type="button" 
               variant="outline" 
@@ -100,6 +100,25 @@ export function ProductForm({
             >
               <Calendar className="w-4 h-4 mr-2" />
               Atualizar Datas (Hoje)
+            </Button>
+            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowOptionalDates(!showOptionalDates)}
+              className="text-gray-600"
+            >
+              {showOptionalDates ? (
+                <>
+                  <EyeOff className="w-4 h-4 mr-2" />
+                  Ocultar Datas Opcionais
+                </>
+              ) : (
+                <>
+                  <Eye className="w-4 h-4 mr-2" />
+                  Mostrar Datas Opcionais
+                </>
+              )}
             </Button>
           </div>
 
@@ -139,22 +158,26 @@ export function ProductForm({
               required={true}
             />
 
-            <DatePickerField
-              id="dataFabricacao"
-              label="Data de Fabricação (Opcional)"
-              value={formData.dataFabricacao}
-              onChange={(value) => handleInputChange('dataFabricacao', value)}
-              error={errors.dataFabricacao}
-              required={false}
-            />
+            {showOptionalDates && (
+              <>
+                <DatePickerField
+                  id="dataFabricacao"
+                  label="Data de Fabricação (Opcional)"
+                  value={formData.dataFabricacao}
+                  onChange={(value) => handleInputChange('dataFabricacao', value)}
+                  error={errors.dataFabricacao}
+                  required={false}
+                />
 
-            <ValidadeField
-              label="Data de Validade (Opcional)"
-              value={formData.validade}
-              onChange={(value) => handleInputChange('validade', value)}
-              error={errors.validade}
-              required={false}
-            />
+                <ValidadeField
+                  label="Data de Validade (Opcional)"
+                  value={formData.validade}
+                  onChange={(value) => handleInputChange('validade', value)}
+                  error={errors.validade}
+                  required={false}
+                />
+              </>
+            )}
 
             <DatePickerField
               id="dataAbertura"
