@@ -31,6 +31,33 @@ const ImpressaoEtiquetas = () => {
     }
   };
 
+  // Helper function to safely format dates
+  const formatDateSafe = (dateValue: any): string => {
+    if (!dateValue) return '';
+    
+    try {
+      let date: Date | null = null;
+      
+      if (dateValue instanceof Date) {
+        date = dateValue;
+      } else if (typeof dateValue === 'string') {
+        // Handle string dates in YYYY-MM-DD format
+        const [year, month, day] = dateValue.split('-').map(Number);
+        if (year && month && day) {
+          date = new Date(year, month - 1, day);
+        }
+      }
+      
+      if (date && !isNaN(date.getTime())) {
+        return date.toLocaleDateString('pt-BR');
+      }
+    } catch (error) {
+      console.warn('Error formatting date:', dateValue, error);
+    }
+    
+    return '';
+  };
+
   // Calcular número de páginas (considerando 6 etiquetas por página)
   const etiquetasPorPagina = 6;
   const totalPaginas = Math.ceil(selectedProducts.length / etiquetasPorPagina);
@@ -132,21 +159,21 @@ const ImpressaoEtiquetas = () => {
                   <div class="grid">
                     <div class="campo">
                       <div class="label">Fab.:</div>
-                      <div>${product.dataFabricacao ? product.dataFabricacao.toLocaleDateString('pt-BR') : ''}</div>
+                      <div>${formatDateSafe(product.dataFabricacao)}</div>
                     </div>
                     <div class="campo">
                       <div class="label">Val.:</div>
-                      <div>${product.validade ? product.validade.toLocaleDateString('pt-BR') : ''}</div>
+                      <div>${formatDateSafe(product.validade)}</div>
                     </div>
                   </div>
                   <div class="grid">
                     <div class="campo">
                       <div class="label">DT Abert:</div>
-                      <div>${product.dataAbertura ? product.dataAbertura.toLocaleDateString('pt-BR') : ''}</div>
+                      <div>${formatDateSafe(product.dataAbertura)}</div>
                     </div>
                     <div class="campo">
                       <div class="label">Utilizar até:</div>
-                      <div>${product.utilizarAte ? product.utilizarAte.toLocaleDateString('pt-BR') : ''}</div>
+                      <div>${formatDateSafe(product.utilizarAte)}</div>
                     </div>
                   </div>
                   <div class="checkbox-row">
@@ -263,7 +290,7 @@ const ImpressaoEtiquetas = () => {
                       <p><span className="font-medium">Lote:</span> {product.lote}</p>
                       <p><span className="font-medium">Marca:</span> {product.marca}</p>
                       {product.validade && (
-                        <p><span className="font-medium">Validade:</span> {product.validade.toLocaleDateString('pt-BR')}</p>
+                        <p><span className="font-medium">Validade:</span> {formatDateSafe(product.validade)}</p>
                       )}
                       <p><span className="font-medium">Local:</span> {product.localArmazenamento}</p>
                       <p><span className="font-medium">Responsável:</span> {product.responsavel}</p>
