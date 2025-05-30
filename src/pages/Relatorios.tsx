@@ -10,7 +10,35 @@ import { toast } from "@/hooks/use-toast";
 const Relatorios = () => {
   const { products, stats } = useProducts();
 
-  const downloadCSV = (data: any[], filename: string) => {
+  const formatDateForExport = (date: Date | undefined) => {
+    if (!date) return '';
+    try {
+      return date.toLocaleDateString('pt-BR');
+    } catch {
+      return '';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'valido': return 'VÁLIDO';
+      case 'proximo-vencimento': return 'PRÓXIMO AO VENCIMENTO';
+      case 'vencido': return 'VENCIDO';
+      default: return status.toUpperCase();
+    }
+  };
+
+  const getLocalArmazenamentoText = (local: string) => {
+    switch (local) {
+      case 'refrigerado': return 'REFRIGERADO';
+      case 'congelado': return 'CONGELADO';
+      case 'ambiente': return 'AMBIENTE';
+      case 'camara-fria': return 'CÂMARA FRIA';
+      default: return local.toUpperCase();
+    }
+  };
+
+  const downloadCSV = (data: any[], filename: string, reportType: string) => {
     if (data.length === 0) {
       toast({
         title: "Nenhum dado para exportar",
@@ -20,35 +48,70 @@ const Relatorios = () => {
       return;
     }
 
-    const headers = [
-      'Nome',
-      'Lote', 
-      'Marca',
-      'Data Fabricação',
-      'Validade',
-      'Data Abertura',
-      'Utilizar Até',
-      'Dias Para Vencer',
-      'Local Armazenamento',
-      'Responsável',
-      'Status'
+    // Cabeçalho do relatório
+    const reportHeader = [
+      `RELATÓRIO: ${reportType.toUpperCase()}`,
+      `DATA DE GERAÇÃO: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+      `TOTAL DE PRODUTOS: ${data.length}`,
+      '', // Linha em branco
+      '='.repeat(100), // Separador
+      ''
     ];
 
+    // Cabeçalhos das colunas
+    const headers = [
+      'NOME DO PRODUTO',
+      'LOTE', 
+      'MARCA',
+      'DATA FABRICAÇÃO',
+      'DATA VALIDADE',
+      'DATA ABERTURA',
+      'UTILIZAR ATÉ',
+      'DIAS PARA VENCER',
+      'LOCAL ARMAZENAMENTO',
+      'RESPONSÁVEL',
+      'STATUS'
+    ];
+
+    // Dados dos produtos
+    const csvData = data.map(product => [
+      `"${(product.nome || '').toUpperCase()}"`,
+      `"${(product.lote || '').toUpperCase()}"`,
+      `"${(product.marca || '').toUpperCase()}"`,
+      `"${formatDateForExport(product.dataFabricacao)}"`,
+      `"${formatDateForExport(product.validade)}"`,
+      `"${formatDateForExport(product.dataAbertura)}"`,
+      `"${formatDateForExport(product.utilizarAte)}"`,
+      `"${product.diasParaVencer || 0}"`,
+      `"${getLocalArmazenamentoText(product.localArmazenamento)}"`,
+      `"${(product.responsavel || '').toUpperCase()}"`,
+      `"${getStatusText(product.status)}"`
+    ]);
+
+    // Rodapé com estatísticas
+    const footer = [
+      '',
+      '='.repeat(100),
+      'RESUMO ESTATÍSTICO:',
+      `PRODUTOS VÁLIDOS: ${stats.validos}`,
+      `PRÓXIMOS AO VENCIMENTO: ${stats.proximoVencimento}`,
+      `PRODUTOS VENCIDOS: ${stats.vencidos}`,
+      '',
+      'PRODUTOS POR LOCAL DE ARMAZENAMENTO:',
+      `REFRIGERADO: ${stats.porCategoria.refrigerado}`,
+      `CONGELADO: ${stats.porCategoria.congelado}`,
+      `AMBIENTE: ${stats.porCategoria.ambiente}`,
+      `CÂMARA FRIA: ${stats.porCategoria['camara-fria']}`,
+      '',
+      `Relatório gerado pelo Sistema de Controle de Validade - ${new Date().getFullYear()}`
+    ];
+
+    // Combinar tudo
     const csvContent = [
+      ...reportHeader,
       headers.join(','),
-      ...data.map(product => [
-        `"${product.nome}"`,
-        `"${product.lote}"`,
-        `"${product.marca}"`,
-        product.dataFabricacao ? product.dataFabricacao.toLocaleDateString('pt-BR') : '',
-        product.validade ? product.validade.toLocaleDateString('pt-BR') : '',
-        product.dataAbertura ? product.dataAbertura.toLocaleDateString('pt-BR') : '',
-        product.utilizarAte ? product.utilizarAte.toLocaleDateString('pt-BR') : '',
-        product.diasParaVencer,
-        `"${product.localArmazenamento}"`,
-        `"${product.responsavel}"`,
-        `"${product.status}"`
-      ].join(','))
+      ...csvData.map(row => row.join(',')),
+      ...footer
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -62,26 +125,26 @@ const Relatorios = () => {
     document.body.removeChild(link);
 
     toast({
-      title: "Relatório baixado",
-      description: `Arquivo ${filename}.csv foi baixado com sucesso!`,
+      title: "✅ Relatório baixado com sucesso!",
+      description: `📄 Arquivo ${filename}.csv foi gerado com ${data.length} produtos`,
     });
   };
 
   const handleDownloadReport = (type: string) => {
     const now = new Date();
-    const timestamp = now.toISOString().split('T')[0];
+    const timestamp = now.toISOString().split('T')[0].replace(/-/g, '');
 
     switch (type) {
       case 'geral':
-        downloadCSV(products, `relatorio-geral-${timestamp}`);
+        downloadCSV(products, `RELATORIO_GERAL_${timestamp}`, 'Relatório Geral de Produtos');
         break;
       case 'vencidos':
         const vencidos = products.filter(p => p.status === 'vencido');
-        downloadCSV(vencidos, `produtos-vencidos-${timestamp}`);
+        downloadCSV(vencidos, `PRODUTOS_VENCIDOS_${timestamp}`, 'Produtos Vencidos');
         break;
       case 'proximo-vencimento':
         const proximoVencimento = products.filter(p => p.status === 'proximo-vencimento');
-        downloadCSV(proximoVencimento, `proximo-vencimento-${timestamp}`);
+        downloadCSV(proximoVencimento, `PROXIMO_VENCIMENTO_${timestamp}`, 'Produtos Próximos ao Vencimento');
         break;
       default:
         console.log(`Relatório não implementado: ${type}`);
@@ -100,104 +163,111 @@ const Relatorios = () => {
                 <FileText className="w-8 h-8 text-green-600" />
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">
-                    Relatórios
+                    📊 Relatórios
                   </h1>
                   <p className="text-gray-600 mt-1">
-                    Visualize e exporte relatórios do sistema
+                    Visualize e exporte relatórios organizados do sistema
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-blue-50">
                   <CardTitle className="flex items-center space-x-2">
-                    <BarChart3 className="w-5 h-5" />
-                    <span>Relatório Geral</span>
+                    <BarChart3 className="w-5 h-5 text-blue-600" />
+                    <span className="font-bold">📋 Relatório Geral</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <p className="text-gray-600 mb-4">
-                    Relatório completo com todos os produtos cadastrados ({products.length} produtos)
+                    <strong>Relatório completo</strong> com todos os produtos cadastrados
                   </p>
+                  <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                    <p className="text-blue-800 font-bold text-lg">{products.length} produtos</p>
+                  </div>
                   <Button 
                     onClick={() => handleDownloadReport('geral')}
-                    className="w-full"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Baixar CSV
+                    <strong>Baixar Relatório CSV</strong>
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-red-50">
                   <CardTitle className="flex items-center space-x-2">
-                    <BarChart3 className="w-5 h-5" />
-                    <span>Produtos Vencidos</span>
+                    <BarChart3 className="w-5 h-5 text-red-600" />
+                    <span className="font-bold">⚠️ Produtos Vencidos</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <p className="text-gray-600 mb-4">
-                    Lista de produtos com data de validade expirada ({stats.vencidos} produtos)
+                    <strong>Lista de produtos</strong> com data de validade expirada
                   </p>
+                  <div className="bg-red-50 p-3 rounded-lg mb-4">
+                    <p className="text-red-800 font-bold text-lg">{stats.vencidos} produtos</p>
+                  </div>
                   <Button 
                     onClick={() => handleDownloadReport('vencidos')}
-                    className="w-full"
-                    variant="destructive"
+                    className="w-full bg-red-600 hover:bg-red-700"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Baixar CSV
+                    <strong>Baixar Relatório CSV</strong>
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-yellow-50">
                   <CardTitle className="flex items-center space-x-2">
-                    <BarChart3 className="w-5 h-5" />
-                    <span>Próximos ao Vencimento</span>
+                    <BarChart3 className="w-5 h-5 text-yellow-600" />
+                    <span className="font-bold">⏰ Próximos ao Vencimento</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <p className="text-gray-600 mb-4">
-                    Produtos que vencem nos próximos dias ({stats.proximoVencimento} produtos)
+                    <strong>Produtos que vencem</strong> nos próximos 7 dias
                   </p>
+                  <div className="bg-yellow-50 p-3 rounded-lg mb-4">
+                    <p className="text-yellow-800 font-bold text-lg">{stats.proximoVencimento} produtos</p>
+                  </div>
                   <Button 
                     onClick={() => handleDownloadReport('proximo-vencimento')}
-                    className="w-full"
-                    variant="outline"
+                    className="w-full bg-yellow-600 hover:bg-yellow-700"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Baixar CSV
+                    <strong>Baixar Relatório CSV</strong>
                   </Button>
                 </CardContent>
               </Card>
             </div>
 
             <div className="mt-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Resumo Estatístico</CardTitle>
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50">
+                  <CardTitle className="font-bold text-xl">📈 Resumo Estatístico</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
-                      <p className="text-sm text-gray-600">Total de Produtos</p>
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="text-center bg-blue-50 p-4 rounded-lg">
+                      <p className="text-3xl font-bold text-blue-600">{stats.total}</p>
+                      <p className="text-sm font-semibold text-gray-700">TOTAL DE PRODUTOS</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-green-600">{stats.validos}</p>
-                      <p className="text-sm text-gray-600">Produtos Válidos</p>
+                    <div className="text-center bg-green-50 p-4 rounded-lg">
+                      <p className="text-3xl font-bold text-green-600">{stats.validos}</p>
+                      <p className="text-sm font-semibold text-gray-700">PRODUTOS VÁLIDOS</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-yellow-600">{stats.proximoVencimento}</p>
-                      <p className="text-sm text-gray-600">Próximo Vencimento</p>
+                    <div className="text-center bg-yellow-50 p-4 rounded-lg">
+                      <p className="text-3xl font-bold text-yellow-600">{stats.proximoVencimento}</p>
+                      <p className="text-sm font-semibold text-gray-700">PRÓXIMO VENCIMENTO</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-red-600">{stats.vencidos}</p>
-                      <p className="text-sm text-gray-600">Produtos Vencidos</p>
+                    <div className="text-center bg-red-50 p-4 rounded-lg">
+                      <p className="text-3xl font-bold text-red-600">{stats.vencidos}</p>
+                      <p className="text-sm font-semibold text-gray-700">PRODUTOS VENCIDOS</p>
                     </div>
                   </div>
                 </CardContent>
