@@ -46,6 +46,20 @@ export function ProductForm({
   const [errors, setErrors] = useState<Partial<Record<keyof ProductFormData, string>>>({});
   const [showOptionalDates, setShowOptionalDates] = useState(false);
 
+  // Store the visibility preference in localStorage
+  const handleToggleOptionalDates = (show: boolean) => {
+    setShowOptionalDates(show);
+    localStorage.setItem('showOptionalDates', JSON.stringify(show));
+  };
+
+  // Load the visibility preference on component mount
+  useState(() => {
+    const stored = localStorage.getItem('showOptionalDates');
+    if (stored) {
+      setShowOptionalDates(JSON.parse(stored));
+    }
+  });
+
   const handleInputChange = (field: keyof ProductFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -105,7 +119,7 @@ export function ProductForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() => setShowOptionalDates(!showOptionalDates)}
+              onClick={() => handleToggleOptionalDates(!showOptionalDates)}
               className="text-gray-600"
             >
               {showOptionalDates ? (

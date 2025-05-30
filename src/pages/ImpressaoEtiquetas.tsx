@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -14,6 +13,12 @@ const ImpressaoEtiquetas = () => {
   const { products } = useProducts();
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const navigate = useNavigate();
+
+  // Check if optional dates should be shown
+  const getShowOptionalDates = () => {
+    const stored = localStorage.getItem('showOptionalDates');
+    return stored ? JSON.parse(stored) : false;
+  };
 
   const handleSelectProduct = (productId: string) => {
     setSelectedProducts(prev => 
@@ -31,7 +36,7 @@ const ImpressaoEtiquetas = () => {
     }
   };
 
-  // Helper function to safely format dates
+  // Helper function to safely format dates with improved display
   const formatDateSafe = (dateValue: any): string => {
     if (!dateValue) return '';
     
@@ -41,21 +46,38 @@ const ImpressaoEtiquetas = () => {
       if (dateValue instanceof Date) {
         date = dateValue;
       } else if (typeof dateValue === 'string') {
-        // Handle string dates in YYYY-MM-DD format
-        const [year, month, day] = dateValue.split('-').map(Number);
-        if (year && month && day) {
-          date = new Date(year, month - 1, day);
+        // Handle different date formats
+        if (dateValue.includes('/')) {
+          // Handle formats like "DEZEMBRO/2025" or "31/12/2025"
+          if (dateValue.match(/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+\/\d{4}$/)) {
+            // Format: DEZEMBRO/2025
+            return dateValue;
+          } else if (dateValue.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+            // Format: 31/12/2025
+            return dateValue;
+          } else if (dateValue.match(/^\d{1,2}\/\d{4}$/)) {
+            // Format: 12/2025
+            return dateValue;
+          }
+        } else {
+          // Handle YYYY-MM-DD format
+          const [year, month, day] = dateValue.split('-').map(Number);
+          if (year && month && day) {
+            date = new Date(year, month - 1, day);
+          }
         }
       }
       
       if (date && !isNaN(date.getTime())) {
         return date.toLocaleDateString('pt-BR');
       }
+      
+      // Return the original value if it's already formatted
+      return dateValue;
     } catch (error) {
       console.warn('Error formatting date:', dateValue, error);
+      return '';
     }
-    
-    return '';
   };
 
   // Calcular número de páginas (considerando 6 etiquetas por página)
@@ -64,6 +86,7 @@ const ImpressaoEtiquetas = () => {
 
   const handlePrint = () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
+    const showOptionalDates = getShowOptionalDates();
     
     if (selectedProductsData.length === 0) {
       toast({
@@ -156,6 +179,7 @@ const ImpressaoEtiquetas = () => {
                       <div>${product.marca || ''}</div>
                     </div>
                   </div>
+                  ${showOptionalDates ? `
                   <div class="grid">
                     <div class="campo">
                       <div class="label">Fab.:</div>
@@ -166,6 +190,7 @@ const ImpressaoEtiquetas = () => {
                       <div>${formatDateSafe(product.validade)}</div>
                     </div>
                   </div>
+                  ` : ''}
                   <div class="grid">
                     <div class="campo">
                       <div class="label">DT Abert:</div>

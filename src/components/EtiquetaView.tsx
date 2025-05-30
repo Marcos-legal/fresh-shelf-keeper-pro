@@ -7,15 +7,54 @@ interface EtiquetaViewProps {
 }
 
 export function EtiquetaView({ product }: EtiquetaViewProps) {
-  const formatDate = (date: Date | undefined) => {
+  // Check if optional dates should be shown
+  const getShowOptionalDates = () => {
+    const stored = localStorage.getItem('showOptionalDates');
+    return stored ? JSON.parse(stored) : false;
+  };
+
+  const showOptionalDates = getShowOptionalDates();
+
+  const formatDate = (date: Date | undefined | string) => {
     if (!date) return '';
     
     try {
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return '';
+      // Handle string formats like "DEZEMBRO/2025" or "31/12/2025"
+      if (typeof date === 'string') {
+        if (date.includes('/')) {
+          // Handle formats like "DEZEMBRO/2025" or "31/12/2025" or "12/2025"
+          if (date.match(/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+\/\d{4}$/)) {
+            // Format: DEZEMBRO/2025
+            return date;
+          } else if (date.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+            // Format: 31/12/2025
+            return date;
+          } else if (date.match(/^\d{1,2}\/\d{4}$/)) {
+            // Format: 12/2025
+            return date;
+          }
+        } else {
+          // Handle YYYY-MM-DD format
+          const [year, month, day] = date.split('-').map(Number);
+          if (year && month && day) {
+            const dateObj = new Date(year, month - 1, day);
+            if (!isNaN(dateObj.getTime())) {
+              return dateObj.toLocaleDateString('pt-BR');
+            }
+          }
+        }
       }
-      return date.toLocaleDateString('pt-BR');
+      
+      // Handle Date objects
+      if (date instanceof Date) {
+        if (isNaN(date.getTime())) {
+          return '';
+        }
+        return date.toLocaleDateString('pt-BR');
+      }
+      
+      // Return the original value if it's already formatted
+      return String(date);
     } catch (error) {
       console.warn('Error formatting date:', date, error);
       return '';
@@ -47,20 +86,22 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <span className="font-bold">Fab.:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
-              {formatDate(product.dataFabricacao)}
+        {showOptionalDates && (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <span className="font-bold">Fab.:</span>
+              <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
+                {formatDate(product.dataFabricacao)}
+              </div>
+            </div>
+            <div>
+              <span className="font-bold">Val.:</span>
+              <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
+                {formatDate(product.validade)}
+              </div>
             </div>
           </div>
-          <div>
-            <span className="font-bold">Val.:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
-              {formatDate(product.validade)}
-            </div>
-          </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <div>
