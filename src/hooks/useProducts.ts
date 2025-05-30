@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { Product, ProductFormData, ProductStats, StorageLocation } from '@/types/product';
 
@@ -8,6 +9,19 @@ const safeParseDate = (dateValue: any): Date | undefined => {
   if (!dateValue) return undefined;
   
   try {
+    // Handle complex date structure from localStorage
+    if (typeof dateValue === 'object' && dateValue._type === 'Date' && dateValue.value) {
+      if (dateValue.value.iso) {
+        const date = new Date(dateValue.value.iso);
+        return isNaN(date.getTime()) ? undefined : date;
+      }
+    }
+    
+    // Handle undefined values stored as objects
+    if (typeof dateValue === 'object' && (dateValue._type === 'undefined' || dateValue.value === 'undefined')) {
+      return undefined;
+    }
+    
     // Handle string dates in YYYY-MM-DD format
     if (typeof dateValue === 'string') {
       const [year, month, day] = dateValue.split('-').map(Number);
@@ -33,7 +47,11 @@ const safeParseDate = (dateValue: any): Date | undefined => {
 };
 
 // Helper function to safely format date for storage
-const formatDateForStorage = (date: Date): string => {
+const formatDateForStorage = (date: Date | undefined): string | null => {
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    return null;
+  }
+  
   try {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -41,7 +59,7 @@ const formatDateForStorage = (date: Date): string => {
     return `${year}-${month}-${day}`;
   } catch (error) {
     console.warn('Error formatting date:', date, error);
-    return new Date().toISOString().split('T')[0]; // Return today as fallback
+    return null;
   }
 };
 
@@ -88,12 +106,12 @@ export function useProducts() {
     try {
       const productsToSave = updatedProducts.map(product => ({
         ...product,
-        dataFabricacao: product.dataFabricacao ? formatDateForStorage(product.dataFabricacao) : null,
-        validade: product.validade ? formatDateForStorage(product.validade) : null,
-        dataAbertura: product.dataAbertura ? formatDateForStorage(product.dataAbertura) : null,
-        utilizarAte: product.utilizarAte ? formatDateForStorage(product.utilizarAte) : null,
-        criadoEm: formatDateForStorage(product.criadoEm),
-        atualizadoEm: formatDateForStorage(product.atualizadoEm),
+        dataFabricacao: formatDateForStorage(product.dataFabricacao),
+        validade: formatDateForStorage(product.validade),
+        dataAbertura: formatDateForStorage(product.dataAbertura),
+        utilizarAte: formatDateForStorage(product.utilizarAte),
+        criadoEm: formatDateForStorage(product.criadoEm) || new Date().toISOString().split('T')[0],
+        atualizadoEm: formatDateForStorage(product.atualizadoEm) || new Date().toISOString().split('T')[0],
       }));
       
       localStorage.setItem(STORAGE_KEY, JSON.stringify(productsToSave));
