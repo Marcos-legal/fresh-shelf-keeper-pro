@@ -109,12 +109,12 @@ export function useProducts() {
       const productsToSave = updatedProducts.map(product => ({
         ...product,
         dataFabricacao: formatDateForStorage(product.dataFabricacao),
-        validade: formatDateForStorage(product.validade),
+        validade: formatDateForStorage(product.validade instanceof Date ? product.validade : undefined),
         dataAbertura: formatDateForStorage(product.dataAbertura),
         utilizarAte: formatDateForStorage(product.utilizarAte),
         criadoEm: formatDateForStorage(product.criadoEm) || new Date().toISOString().split('T')[0],
         atualizadoEm: formatDateForStorage(product.atualizadoEm) || new Date().toISOString().split('T')[0],
-        showOptionalDates: product.showOptionalDates ?? false, // Salvar preferência individual
+        showOptionalDates: product.showOptionalDates ?? false,
       }));
       
       localStorage.setItem(STORAGE_KEY, JSON.stringify(productsToSave));
@@ -128,7 +128,15 @@ export function useProducts() {
   // Calcular status do produto
   const calculateStatus = (product: Product): 'valido' | 'proximo-vencimento' | 'vencido' => {
     const now = new Date();
-    const targetDate = product.utilizarAte || (typeof product.validade === 'string' ? undefined : product.validade);
+    
+    // Use utilizarAte if available, otherwise try to use validade if it's a Date
+    let targetDate: Date | undefined;
+    
+    if (product.utilizarAte instanceof Date) {
+      targetDate = product.utilizarAte;
+    } else if (product.validade instanceof Date) {
+      targetDate = product.validade;
+    }
     
     if (!targetDate || !(targetDate instanceof Date) || isNaN(targetDate.getTime())) {
       return 'vencido';
@@ -224,7 +232,7 @@ export function useProducts() {
           dataAbertura,
           utilizarAte,
           atualizadoEm: new Date(),
-          showOptionalDates: data.showOptionalDates !== undefined ? data.showOptionalDates : product.showOptionalDates, // Atualizar preferência individual
+          showOptionalDates: data.showOptionalDates !== undefined ? data.showOptionalDates : product.showOptionalDates,
         };
 
         console.log('Produto atualizado:', updatedProduct);
