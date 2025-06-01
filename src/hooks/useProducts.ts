@@ -88,6 +88,7 @@ export function useProducts() {
             utilizarAte,
             criadoEm,
             atualizadoEm,
+            showOptionalDates: p.showOptionalDates ?? false, // Carregar preferência individual
           };
         });
         
@@ -112,6 +113,7 @@ export function useProducts() {
         utilizarAte: formatDateForStorage(product.utilizarAte),
         criadoEm: formatDateForStorage(product.criadoEm) || new Date().toISOString().split('T')[0],
         atualizadoEm: formatDateForStorage(product.atualizadoEm) || new Date().toISOString().split('T')[0],
+        showOptionalDates: product.showOptionalDates ?? false, // Salvar preferência individual
       }));
       
       localStorage.setItem(STORAGE_KEY, JSON.stringify(productsToSave));
@@ -186,6 +188,7 @@ export function useProducts() {
       status: 'valido',
       criadoEm: now,
       atualizadoEm: now,
+      showOptionalDates: data.showOptionalDates ?? false, // Incluir preferência individual
     };
 
     product.status = calculateStatus(product);
@@ -220,6 +223,7 @@ export function useProducts() {
           dataAbertura,
           utilizarAte,
           atualizadoEm: new Date(),
+          showOptionalDates: data.showOptionalDates !== undefined ? data.showOptionalDates : product.showOptionalDates, // Atualizar preferência individual
         };
 
         console.log('Produto atualizado:', updatedProduct);

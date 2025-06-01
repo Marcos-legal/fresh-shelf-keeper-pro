@@ -7,13 +7,8 @@ interface EtiquetaViewProps {
 }
 
 export function EtiquetaView({ product }: EtiquetaViewProps) {
-  // Check if optional dates should be shown
-  const getShowOptionalDates = () => {
-    const stored = localStorage.getItem('showOptionalDates');
-    return stored ? JSON.parse(stored) : false;
-  };
-
-  const showOptionalDates = getShowOptionalDates();
+  // Usar a configuração individual do produto
+  const showOptionalDates = product.showOptionalDates ?? false;
 
   const formatDate = (date: Date | undefined | string) => {
     if (!date) return '';

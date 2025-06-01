@@ -86,7 +86,6 @@ const ImpressaoEtiquetas = () => {
 
   const handlePrint = () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
-    const showOptionalDates = getShowOptionalDates();
     
     if (selectedProductsData.length === 0) {
       toast({
@@ -179,7 +178,7 @@ const ImpressaoEtiquetas = () => {
                       <div>${product.marca || ''}</div>
                     </div>
                   </div>
-                  ${showOptionalDates ? `
+                  ${product.showOptionalDates ? `
                   <div class="grid">
                     <div class="campo">
                       <div class="label">Fab.:</div>

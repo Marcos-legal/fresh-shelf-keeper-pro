@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,24 +42,10 @@ export function ProductForm({
     diasParaVencer: initialData?.diasParaVencer || 30,
     localArmazenamento: initialData?.localArmazenamento || 'ambiente',
     responsavel: initialData?.responsavel || '',
+    showOptionalDates: initialData?.showOptionalDates ?? false,
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof ProductFormData, string>>>({});
-  const [showOptionalDates, setShowOptionalDates] = useState(false);
-
-  // Store the visibility preference in localStorage
-  const handleToggleOptionalDates = (show: boolean) => {
-    setShowOptionalDates(show);
-    localStorage.setItem('showOptionalDates', JSON.stringify(show));
-  };
-
-  // Load the visibility preference on component mount
-  useState(() => {
-    const stored = localStorage.getItem('showOptionalDates');
-    if (stored) {
-      setShowOptionalDates(JSON.parse(stored));
-    }
-  });
 
   const handleInputChange = (field: keyof ProductFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -72,6 +59,10 @@ export function ProductForm({
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+  };
+
+  const handleToggleOptionalDates = (show: boolean) => {
+    setFormData(prev => ({ ...prev, showOptionalDates: show }));
   };
 
   const handleUpdateDates = () => {
@@ -119,10 +110,10 @@ export function ProductForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() => handleToggleOptionalDates(!showOptionalDates)}
+              onClick={() => handleToggleOptionalDates(!formData.showOptionalDates)}
               className="text-gray-600"
             >
-              {showOptionalDates ? (
+              {formData.showOptionalDates ? (
                 <>
                   <EyeOff className="w-4 h-4 mr-2" />
                   Ocultar Datas Opcionais
@@ -172,7 +163,7 @@ export function ProductForm({
               required={true}
             />
 
-            {showOptionalDates && (
+            {formData.showOptionalDates && (
               <>
                 <DatePickerField
                   id="dataFabricacao"
