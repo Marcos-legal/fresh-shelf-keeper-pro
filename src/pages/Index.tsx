@@ -1,143 +1,125 @@
-
+import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { StatsCard } from "@/components/StatsCard";
+import { useProducts } from "@/hooks/useProducts";
+import { Product, ProductFormData } from "@/types/product";
 import { ProductTable } from "@/components/ProductTable";
 import { ProductForm } from "@/components/ProductForm";
-import { useProducts } from "@/hooks/useProducts";
-import { useState } from "react";
-import { 
-  Package, 
-  CheckCircle, 
-  AlertTriangle, 
-  XCircle,
-  Plus,
-  BarChart3
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Package, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Product, ProductFormData } from "@/types/product";
+
+interface StatsCardProps {
+  title: string;
+  value: number;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  color: 'blue' | 'green' | 'yellow' | 'red';
+}
+
+const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon: Icon, color }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center justify-between">
+        <span>{title}</span>
+        <Icon className={`w-5 h-5 text-${color}-500`} />
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold">{value}</div>
+    </CardContent>
+  </Card>
+);
 
 const Index = () => {
-  const { 
-    products, 
-    loading, 
-    stats, 
-    addProduct, 
-    updateProduct, 
-    deleteProduct, 
-    updateDataAbertura 
-  } = useProducts();
-  
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const { products, addProduct, updateProduct, deleteProduct, stats } = useProducts();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  console.log('Produtos carregados no Index:', products);
 
   const handleAddProduct = (data: ProductFormData) => {
-    try {
-      addProduct(data);
-      setIsFormOpen(false);
-      toast({
-        title: "Produto cadastrado",
-        description: "O produto foi cadastrado com sucesso!",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao cadastrar",
-        description: "Ocorreu um erro ao cadastrar o produto.",
-        variant: "destructive",
-      });
-    }
+    console.log('Adicionando produto no Index:', data);
+    addProduct(data);
+    setShowForm(false);
+    toast({
+      title: "Produto cadastrado",
+      description: "Produto foi cadastrado com sucesso!",
+    });
   };
 
-  const handleEditProduct = (product: Product) => {
-    setEditingProduct(product);
-    setIsFormOpen(true);
-  };
-
-  const handleUpdateProduct = (data: ProductFormData) => {
+  const handleEditProduct = (data: ProductFormData) => {
     if (editingProduct) {
-      try {
-        updateProduct(editingProduct.id, data);
-        setEditingProduct(null);
-        setIsFormOpen(false);
-        toast({
-          title: "Produto atualizado",
-          description: "O produto foi atualizado com sucesso!",
-        });
-      } catch (error) {
-        toast({
-          title: "Erro ao atualizar",
-          description: "Ocorreu um erro ao atualizar o produto.",
-          variant: "destructive",
-        });
-      }
+      updateProduct(editingProduct.id, data);
+      setEditingProduct(null);
+      setShowForm(false);
+      toast({
+        title: "Produto atualizado",
+        description: "Produto foi atualizado com sucesso!",
+      });
     }
   };
 
   const handleDeleteProduct = (id: string) => {
-    if (confirm("Tem certeza que deseja excluir este produto?")) {
-      try {
-        deleteProduct(id);
-        toast({
-          title: "Produto excluído",
-          description: "O produto foi excluído com sucesso!",
-        });
-      } catch (error) {
-        toast({
-          title: "Erro ao excluir",
-          description: "Ocorreu um erro ao excluir o produto.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const handlePrintLabel = (product: Product) => {
-    // Simular impressão de etiqueta
-    const labelContent = `
-      ETIQUETA TÉRMICA
-      ================
-      Produto: ${product.nome}
-      Lote: ${product.lote}
-      Marca: ${product.marca}
-      Fabricação: ${product.dataFabricacao.toLocaleDateString('pt-BR')}
-      Validade: ${product.validade.toLocaleDateString('pt-BR')}
-      ${product.dataAbertura ? `Abertura: ${product.dataAbertura.toLocaleDateString('pt-BR')}` : ''}
-      ${product.utilizarAte ? `Utilizar até: ${product.utilizarAte.toLocaleDateString('pt-BR')}` : ''}
-      Local: ${product.localArmazenamento}
-      ================
-    `;
-    
-    console.log("Imprimindo etiqueta:", labelContent);
+    deleteProduct(id);
     toast({
-      title: "Etiqueta enviada",
-      description: "A etiqueta foi enviada para impressão!",
+      title: "Produto excluído",
+      description: "Produto foi excluído com sucesso!",
+      variant: "destructive",
     });
   };
 
-  const formInitialData = editingProduct ? {
-    nome: editingProduct.nome,
-    lote: editingProduct.lote,
-    marca: editingProduct.marca,
-    dataFabricacao: editingProduct.dataFabricacao?.toISOString().split('T')[0] || '',
-    validade: editingProduct.validade?.toISOString().split('T')[0] || '',
-    dataAbertura: editingProduct.dataAbertura?.toISOString().split('T')[0],
-    diasParaVencer: editingProduct.diasParaVencer,
-    localArmazenamento: editingProduct.localArmazenamento,
-    responsavel: editingProduct.responsavel,
-  } : undefined;
+  const handleEditClick = (product: Product) => {
+    // Converter datas para formato string apropriado para o formulário
+    const formattedProduct = {
+      ...product,
+      dataFabricacao: product.dataFabricacao instanceof Date 
+        ? product.dataFabricacao.toISOString().split('T')[0] 
+        : product.dataFabricacao || '',
+      validade: typeof product.validade === 'string' 
+        ? product.validade 
+        : product.validade instanceof Date 
+          ? product.validade.toISOString().split('T')[0] 
+          : '',
+      dataAbertura: product.dataAbertura instanceof Date 
+        ? product.dataAbertura.toISOString().split('T')[0] 
+        : product.dataAbertura || '',
+    };
+    
+    setEditingProduct(product);
+    setShowForm(true);
+  };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando sistema...</p>
-        </div>
-      </div>
-    );
-  }
+  const formatDate = (date: Date | string | undefined): string => {
+    if (!date) return '-';
+    
+    try {
+      if (typeof date === 'string') {
+        // Handle string formats like "DEZEMBRO/2025" or "31/12/2025"
+        if (date.includes('/')) {
+          return date; // Return as-is for formatted strings
+        }
+        // Handle YYYY-MM-DD format
+        const [year, month, day] = date.split('-').map(Number);
+        if (year && month && day) {
+          const dateObj = new Date(year, month - 1, day);
+          if (!isNaN(dateObj.getTime())) {
+            return dateObj.toLocaleDateString('pt-BR');
+          }
+        }
+      }
+      
+      if (date instanceof Date && !isNaN(date.getTime())) {
+        return date.toLocaleDateString('pt-BR');
+      }
+      
+      return String(date);
+    } catch (error) {
+      console.warn('Error formatting date:', date, error);
+      return '-';
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -145,136 +127,97 @@ const Index = () => {
         <AppSidebar />
         <main className="flex-1">
           <div className="p-6">
-            {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-4">
                 <SidebarTrigger className="lg:hidden" />
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    Dashboard - Sistema de Validade
-                  </h1>
-                  <p className="text-gray-600 mt-1">
-                    Controle e gerenciamento de produtos
-                  </p>
+                <div className="flex items-center space-x-3">
+                  <Package className="w-8 h-8 text-blue-600" />
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900">
+                      Sistema de Controle de Validade
+                    </h1>
+                    <p className="text-gray-600 mt-1">
+                      Gerencie produtos e monitore validades
+                    </p>
+                  </div>
                 </div>
               </div>
-              
-              <Dialog open={isFormOpen} onOpenChange={(open) => {
-                setIsFormOpen(open);
-                if (!open) setEditingProduct(null);
-              }}>
-                <DialogTrigger asChild>
-                  <Button className="gradient-blue text-white">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Novo Produto
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingProduct ? 'Editar Produto' : 'Cadastrar Produto'}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <ProductForm
-                    onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct}
-                    initialData={formInitialData}
-                    title=""
-                    submitLabel={editingProduct ? 'Atualizar Produto' : 'Cadastrar Produto'}
-                  />
-                </DialogContent>
-              </Dialog>
+              <Button 
+                onClick={() => {
+                  setEditingProduct(null);
+                  setShowForm(!showForm);
+                }} 
+                className="gradient-blue text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {showForm ? 'Cancelar' : 'Novo Produto'}
+              </Button>
             </div>
 
-            {/* Estatísticas */}
+            {/* Dashboard Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <StatsCard
                 title="Total de Produtos"
                 value={stats.total}
                 icon={Package}
-                variant="default"
-                description="Produtos cadastrados"
+                color="blue"
               />
               <StatsCard
                 title="Produtos Válidos"
                 value={stats.validos}
                 icon={CheckCircle}
-                variant="success"
-                description="Em conformidade"
+                color="green"
               />
               <StatsCard
                 title="Próximo Vencimento"
                 value={stats.proximoVencimento}
                 icon={AlertTriangle}
-                variant="warning"
-                description="Atenção necessária"
+                color="yellow"
               />
               <StatsCard
-                title="Produtos Vencidos"
+                title="Vencidos"
                 value={stats.vencidos}
                 icon={XCircle}
-                variant="danger"
-                description="Ação imediata"
+                color="red"
               />
             </div>
 
-            {/* Gráfico de categorias */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
-              <div className="bg-white p-4 rounded-lg shadow border">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Refrigerado</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {stats.porCategoria.refrigerado}
-                    </p>
-                  </div>
-                  <BarChart3 className="w-8 h-8 text-blue-500" />
-                </div>
+            {/* Formulário */}
+            {showForm && (
+              <div className="mb-8">
+                <ProductForm
+                  onSubmit={editingProduct ? handleEditProduct : handleAddProduct}
+                  initialData={editingProduct ? {
+                    nome: editingProduct.nome,
+                    lote: editingProduct.lote,
+                    marca: editingProduct.marca,
+                    dataFabricacao: editingProduct.dataFabricacao instanceof Date 
+                      ? editingProduct.dataFabricacao.toISOString().split('T')[0] 
+                      : editingProduct.dataFabricacao || '',
+                    validade: typeof editingProduct.validade === 'string' 
+                      ? editingProduct.validade 
+                      : editingProduct.validade instanceof Date 
+                        ? editingProduct.validade.toISOString().split('T')[0] 
+                        : '',
+                    dataAbertura: editingProduct.dataAbertura instanceof Date 
+                      ? editingProduct.dataAbertura.toISOString().split('T')[0] 
+                      : editingProduct.dataAbertura || '',
+                    diasParaVencer: editingProduct.diasParaVencer,
+                    localArmazenamento: editingProduct.localArmazenamento,
+                    responsavel: editingProduct.responsavel,
+                    showOptionalDates: editingProduct.showOptionalDates ?? false, // Preservar configuração individual
+                  } : undefined}
+                  title={editingProduct ? 'Editar Produto' : 'Cadastro de Produto'}
+                  submitLabel={editingProduct ? 'Atualizar Produto' : 'Salvar Produto'}
+                />
               </div>
-              
-              <div className="bg-white p-4 rounded-lg shadow border">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Congelado</p>
-                    <p className="text-2xl font-bold text-cyan-600">
-                      {stats.porCategoria.congelado}
-                    </p>
-                  </div>
-                  <BarChart3 className="w-8 h-8 text-cyan-500" />
-                </div>
-              </div>
-              
-              <div className="bg-white p-4 rounded-lg shadow border">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Ambiente</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {stats.porCategoria.ambiente}
-                    </p>
-                  </div>
-                  <BarChart3 className="w-8 h-8 text-green-500" />
-                </div>
-              </div>
-              
-              <div className="bg-white p-4 rounded-lg shadow border">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Câmara Fria</p>
-                    <p className="text-2xl font-bold text-purple-600">
-                      {stats.porCategoria['camara-fria']}
-                    </p>
-                  </div>
-                  <BarChart3 className="w-8 h-8 text-purple-500" />
-                </div>
-              </div>
-            </div>
+            )}
 
             {/* Tabela de produtos */}
             <ProductTable
               products={products}
-              onEdit={handleEditProduct}
+              onEdit={handleEditClick}
               onDelete={handleDeleteProduct}
-              onUpdateAbertura={updateDataAbertura}
-              onPrintLabel={handlePrintLabel}
               title="Todos os Produtos"
             />
           </div>

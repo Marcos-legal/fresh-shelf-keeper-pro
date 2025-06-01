@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { Product, ProductFormData, ProductStats, StorageLocation } from '@/types/product';
 import { parseValidadeDate } from '@/utils/productValidation';
@@ -127,9 +128,9 @@ export function useProducts() {
   // Calcular status do produto
   const calculateStatus = (product: Product): 'valido' | 'proximo-vencimento' | 'vencido' => {
     const now = new Date();
-    const targetDate = product.utilizarAte || product.validade;
+    const targetDate = product.utilizarAte || (typeof product.validade === 'string' ? undefined : product.validade);
     
-    if (!targetDate || isNaN(targetDate.getTime())) {
+    if (!targetDate || !(targetDate instanceof Date) || isNaN(targetDate.getTime())) {
       return 'vencido';
     }
     
