@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -11,30 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Plus, Package, CheckCircle, AlertTriangle, XCircle, Thermometer, Snowflake, Home, Refrigerator, TrendingUp, Clock, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-
-interface StatsCardProps {
-  title: string;
-  value: number;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  color: 'blue' | 'green' | 'yellow' | 'red';
-  variant?: 'default' | 'success' | 'warning' | 'danger';
-  description?: string;
-}
-
-const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon: Icon, color, variant, description }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="flex items-center justify-between">
-        <span>{title}</span>
-        <Icon className={`w-5 h-5 text-${color}-500`} />
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-      {description && <p className="text-sm text-gray-600 mt-1">{description}</p>}
-    </CardContent>
-  </Card>
-);
 
 const Index = () => {
   const navigate = useNavigate();
