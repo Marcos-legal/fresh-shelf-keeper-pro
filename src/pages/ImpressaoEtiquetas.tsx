@@ -96,57 +96,83 @@ const ImpressaoEtiquetas = () => {
       return;
     }
 
-    // Criar janela de impressão com layout otimizado
+    // Criar janela de impressão otimizada para impressoras térmicas
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Etiquetas - ${selectedProducts.length} produtos</title>
+            <title>Etiquetas Térmicas - ${selectedProducts.length} produtos</title>
             <style>
               @page {
                 size: A4;
-                margin: 1cm;
+                margin: 0.5cm;
               }
               body { 
-                font-family: monospace; 
+                font-family: 'Courier New', 'Liberation Mono', monospace; 
                 margin: 0; 
                 padding: 0;
-                line-height: 1.2;
+                line-height: 1.1;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
               }
               .etiqueta { 
-                border: 2px solid #666;
+                border: 3px solid #000;
                 width: 320px;
                 height: 200px;
-                margin: 10px;
-                padding: 12px;
+                margin: 8px;
+                padding: 8px;
                 float: left;
-                font-size: 11px;
+                font-size: 12px;
                 page-break-inside: avoid;
                 background: white;
+                font-weight: 600;
+                color: #000;
               }
               .campo {
-                margin-bottom: 8px;
-                border-bottom: 1px solid #ccc;
+                margin-bottom: 6px;
+                border-bottom: 2px solid #333;
                 padding-bottom: 2px;
-                min-height: 16px;
+                min-height: 18px;
+                font-weight: bold;
               }
               .label {
-                font-weight: bold;
-                font-size: 10px;
+                font-weight: 900;
+                font-size: 11px;
+                color: #000;
+                text-transform: uppercase;
+              }
+              .content {
+                font-weight: 800;
+                font-size: 12px;
+                color: #000;
+                text-transform: uppercase;
+                margin-top: 2px;
               }
               .grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 12px;
-                margin-bottom: 8px;
+                gap: 8px;
+                margin-bottom: 6px;
               }
               .checkbox-row {
                 display: grid;
                 grid-template-columns: 1fr 1fr 1fr;
-                gap: 8px;
-                font-size: 9px;
-                margin-bottom: 8px;
+                gap: 6px;
+                font-size: 10px;
+                margin-bottom: 6px;
+                font-weight: 900;
+              }
+              .checkbox-item {
+                display: flex;
+                align-items: center;
+                font-weight: 900;
+                color: #000;
+              }
+              .checkbox-mark {
+                font-size: 14px;
+                font-weight: 900;
+                margin-right: 2px;
               }
               .clearfix::after {
                 content: "";
@@ -156,6 +182,12 @@ const ImpressaoEtiquetas = () => {
               @media print {
                 .etiqueta {
                   page-break-inside: avoid;
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
+                }
+                body {
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
                 }
               }
             </style>
@@ -165,49 +197,58 @@ const ImpressaoEtiquetas = () => {
               ${selectedProductsData.map(product => `
                 <div class="etiqueta">
                   <div class="campo">
-                    <div class="label">Nome do Produto:</div>
-                    <div>${product.nome || ''}</div>
+                    <div class="label">PRODUTO:</div>
+                    <div class="content">${(product.nome || '').toUpperCase()}</div>
                   </div>
                   <div class="grid">
                     <div class="campo">
-                      <div class="label">Lote nº:</div>
-                      <div>${product.lote || ''}</div>
+                      <div class="label">LOTE:</div>
+                      <div class="content">${(product.lote || '').toUpperCase()}</div>
                     </div>
                     <div class="campo">
-                      <div class="label">Marca:</div>
-                      <div>${product.marca || ''}</div>
+                      <div class="label">MARCA:</div>
+                      <div class="content">${(product.marca || '').toUpperCase()}</div>
                     </div>
                   </div>
                   ${product.showOptionalDates ? `
                   <div class="grid">
                     <div class="campo">
-                      <div class="label">Fab.:</div>
-                      <div>${formatDateSafe(product.dataFabricacao)}</div>
+                      <div class="label">FABRIC.:</div>
+                      <div class="content">${formatDateSafe(product.dataFabricacao)}</div>
                     </div>
                     <div class="campo">
-                      <div class="label">Val.:</div>
-                      <div>${formatDateSafe(product.validade)}</div>
+                      <div class="label">VALID.:</div>
+                      <div class="content">${formatDateSafe(product.validade)}</div>
                     </div>
                   </div>
                   ` : ''}
                   <div class="grid">
                     <div class="campo">
-                      <div class="label">DT Abert:</div>
-                      <div>${formatDateSafe(product.dataAbertura)}</div>
+                      <div class="label">ABERTURA:</div>
+                      <div class="content">${formatDateSafe(product.dataAbertura)}</div>
                     </div>
                     <div class="campo">
-                      <div class="label">Utilizar até:</div>
-                      <div>${formatDateSafe(product.utilizarAte)}</div>
+                      <div class="label">USAR ATÉ:</div>
+                      <div class="content">${formatDateSafe(product.utilizarAte)}</div>
                     </div>
                   </div>
                   <div class="checkbox-row">
-                    <div>${product.localArmazenamento === 'refrigerado' ? '☑' : '☐'} Refrigerado</div>
-                    <div>${product.localArmazenamento === 'congelado' ? '☑' : '☐'} Congelado</div>
-                    <div>${product.localArmazenamento === 'ambiente' ? '☑' : '☐'} Ambiente</div>
+                    <div class="checkbox-item">
+                      <span class="checkbox-mark">${product.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
+                      <span>REFRIG.</span>
+                    </div>
+                    <div class="checkbox-item">
+                      <span class="checkbox-mark">${product.localArmazenamento === 'congelado' ? '■' : '□'}</span>
+                      <span>CONGEL.</span>
+                    </div>
+                    <div class="checkbox-item">
+                      <span class="checkbox-mark">${product.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
+                      <span>AMBIENT.</span>
+                    </div>
                   </div>
                   <div class="campo">
-                    <div class="label">Responsável:</div>
-                    <div>${product.responsavel || ''}</div>
+                    <div class="label">RESPONSÁVEL:</div>
+                    <div class="content">${(product.responsavel || '').toUpperCase()}</div>
                   </div>
                 </div>
               `).join('')}
@@ -216,80 +257,98 @@ const ImpressaoEtiquetas = () => {
         </html>
       `);
       printWindow.document.close();
-      printWindow.print();
+      
+      // Aguardar carregamento e imprimir
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
     }
 
     toast({
-      title: "Etiquetas enviadas",
-      description: `${selectedProducts.length} etiqueta(s) enviada(s) para impressão (${totalPaginas} página${totalPaginas !== 1 ? 's' : ''})!`,
+      title: "Etiquetas enviadas para impressão",
+      description: `${selectedProducts.length} etiqueta(s) otimizada(s) para impressora térmica!`,
     });
   };
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
         <AppSidebar />
         <main className="flex-1">
           <div className="p-6">
             <div className="flex items-center space-x-4 mb-8">
               <SidebarTrigger className="lg:hidden" />
-              <div className="flex items-center space-x-3">
-                <Printer className="w-8 h-8 text-blue-600" />
+              <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
+                  <Printer className="w-8 h-8 text-white" />
+                </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    Impressão de Etiquetas
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
+                    🖨️ Impressão Térmica
                   </h1>
-                  <p className="text-gray-600 mt-1">
-                    Selecione os produtos para imprimir etiquetas
+                  <p className="text-gray-600 mt-1 text-lg">
+                    Impressão otimizada para impressoras térmicas
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center space-x-4">
-                <Checkbox
-                  checked={selectedProducts.length === products.length}
-                  onCheckedChange={handleSelectAll}
-                />
-                <span className="text-sm text-gray-600">
-                  Selecionar todos ({products.length} produtos)
-                </span>
-              </div>
-              <div className="flex space-x-2">
-                <Button 
-                  onClick={() => navigate('/visualizar-etiquetas')}
-                  variant="outline"
-                  className="text-blue-600"
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  Visualizar Etiquetas
-                </Button>
-                <Button 
-                  onClick={handlePrint} 
-                  disabled={selectedProducts.length === 0}
-                  className="gradient-blue text-white"
-                >
-                  <Printer className="w-4 h-4 mr-2" />
-                  Imprimir ({selectedProducts.length})
-                  {selectedProducts.length > 0 && (
-                    <span className="ml-1">
-                      - {totalPaginas} pág{totalPaginas !== 1 ? 's' : ''}
+            {/* Controles de Impressão */}
+            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
+              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg">
+                <CardTitle className="flex items-center space-x-2">
+                  <Printer className="w-5 h-5" />
+                  <span>Controles de Impressão</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-4">
+                    <Checkbox
+                      checked={selectedProducts.length === products.length}
+                      onCheckedChange={handleSelectAll}
+                    />
+                    <span className="text-sm text-gray-600 font-medium">
+                      Selecionar todos ({products.length} produtos)
                     </span>
-                  )}
-                </Button>
-              </div>
-            </div>
+                  </div>
+                  <div className="flex space-x-3">
+                    <Button 
+                      onClick={() => navigate('/visualizar-etiquetas')}
+                      variant="outline"
+                      className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Visualizar Etiquetas
+                    </Button>
+                    <Button 
+                      onClick={handlePrint} 
+                      disabled={selectedProducts.length === 0}
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg"
+                    >
+                      <Printer className="w-4 h-4 mr-2" />
+                      Imprimir Térmico ({selectedProducts.length})
+                      {selectedProducts.length > 0 && (
+                        <span className="ml-1">
+                          - {totalPaginas} pág{totalPaginas !== 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
+            {/* Informações de Impressão */}
             {selectedProducts.length > 0 && (
-              <Card className="mb-6 bg-blue-50 border-blue-200">
+              <Card className="mb-6 bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 shadow-lg">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-2 text-blue-700">
                     <FileText className="w-5 h-5" />
                     <span className="font-medium">
-                      {selectedProducts.length} etiqueta{selectedProducts.length !== 1 ? 's' : ''} selecionada{selectedProducts.length !== 1 ? 's' : ''} 
-                      • {totalPaginas} página{totalPaginas !== 1 ? 's' : ''} para impressão
-                      • {etiquetasPorPagina} etiquetas por página
+                      {selectedProducts.length} etiqueta{selectedProducts.length !== 1 ? 's' : ''} 
+                      • Otimizada{selectedProducts.length !== 1 ? 's' : ''} para impressão térmica
+                      • Fonte monospace para melhor nitidez
                     </span>
                   </div>
                 </CardContent>

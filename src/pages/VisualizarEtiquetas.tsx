@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -9,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { EtiquetaView } from "@/components/EtiquetaView";
-import { Eye, CalendarIcon, RefreshCw } from "lucide-react";
+import { Eye, CalendarIcon, RefreshCw, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -23,6 +22,24 @@ const VisualizarEtiquetas = () => {
 
   console.log('Produtos carregados:', products);
   console.log('Total de produtos:', products.length);
+
+  // Função para verificar se produto está vencido
+  const isProductExpired = (product: any) => {
+    const now = new Date();
+    let targetDate: Date | undefined;
+    
+    if (product.utilizarAte instanceof Date) {
+      targetDate = product.utilizarAte;
+    } else if (product.validade instanceof Date) {
+      targetDate = product.validade;
+    }
+    
+    return targetDate && targetDate < now;
+  };
+
+  // Separar produtos por status
+  const expiredProducts = products.filter(product => isProductExpired(product));
+  const validProducts = products.filter(product => !isProductExpired(product));
 
   const handleSelectProduct = (productId: string) => {
     setSelectedProducts(prev => 
@@ -91,30 +108,36 @@ const VisualizarEtiquetas = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
         <AppSidebar />
         <main className="flex-1">
           <div className="p-6">
             <div className="flex items-center space-x-4 mb-8">
               <SidebarTrigger className="lg:hidden" />
-              <div className="flex items-center space-x-3">
-                <Eye className="w-8 h-8 text-blue-600" />
+              <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
+                  <Eye className="w-8 h-8 text-white" />
+                </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    Visualizar Etiquetas
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
+                    👁️ Visualizar Etiquetas
                   </h1>
-                  <p className="text-gray-600 mt-1">
+                  <p className="text-gray-600 mt-1 text-lg">
                     Visualize todas as etiquetas geradas ({products.length} produtos)
                   </p>
                 </div>
               </div>
             </div>
 
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Atualizar Datas "Utilizar até"</CardTitle>
+            {/* Card de Controle */}
+            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
+              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg">
+                <CardTitle className="flex items-center space-x-2">
+                  <RefreshCw className="w-5 h-5" />
+                  <span>Atualizar Datas "Utilizar até"</span>
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <div className="space-y-4">
                   <div className="flex items-center space-x-4">
                     <Checkbox
@@ -166,20 +189,76 @@ const VisualizarEtiquetas = () => {
               </CardContent>
             </Card>
 
+            {/* Alertas para produtos vencidos */}
+            {expiredProducts.length > 0 && (
+              <Card className="mb-6 bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center space-x-2">
+                    <AlertTriangle className="w-5 h-5" />
+                    <span>⚠️ Produtos Vencidos - Atenção Especial</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <p className="text-red-800 font-medium">
+                    <strong>{expiredProducts.length} produto(s)</strong> estão fora da validade e destacados em vermelho abaixo.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             {products.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
-                  <div key={product.id} className="print:break-inside-avoid">
-                    <div className="mb-2 flex items-center space-x-2">
-                      <Checkbox
-                        checked={selectedProducts.includes(product.id)}
-                        onCheckedChange={() => handleSelectProduct(product.id)}
-                      />
-                      <span className="text-sm text-gray-600">Selecionar para atualizar</span>
+              <div className="space-y-8">
+                {/* Produtos Vencidos - Destaque Especial */}
+                {expiredProducts.length > 0 && (
+                  <div>
+                    <div className="flex items-center space-x-3 mb-4">
+                      <AlertTriangle className="w-6 h-6 text-red-600" />
+                      <h2 className="text-2xl font-bold text-red-700">🚨 Produtos Vencidos</h2>
                     </div>
-                    <EtiquetaView product={product} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {expiredProducts.map((product) => (
+                        <div key={product.id} className="print:break-inside-avoid">
+                          <div className="mb-2 flex items-center space-x-2">
+                            <Checkbox
+                              checked={selectedProducts.includes(product.id)}
+                              onCheckedChange={() => handleSelectProduct(product.id)}
+                            />
+                            <span className="text-sm text-red-600 font-bold">⚠️ PRODUTO VENCIDO</span>
+                          </div>
+                          <div className="border-4 border-red-500 rounded-lg p-2 bg-red-50 shadow-xl transform hover:scale-105 transition-all duration-200">
+                            <EtiquetaView product={product} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                )}
+
+                {/* Produtos Válidos */}
+                {validProducts.length > 0 && (
+                  <div>
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Eye className="w-6 h-6 text-green-600" />
+                      <h2 className="text-2xl font-bold text-green-700">✅ Produtos Válidos</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {validProducts.map((product) => (
+                        <div key={product.id} className="print:break-inside-avoid">
+                          <div className="mb-2 flex items-center space-x-2">
+                            <Checkbox
+                              checked={selectedProducts.includes(product.id)}
+                              onCheckedChange={() => handleSelectProduct(product.id)}
+                            />
+                            <span className="text-sm text-green-600">Produto válido</span>
+                          </div>
+                          <div className="hover:shadow-lg transition-shadow duration-200">
+                            <EtiquetaView product={product} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-12">

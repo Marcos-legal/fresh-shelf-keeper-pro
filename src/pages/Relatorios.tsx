@@ -2,7 +2,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useProducts } from "@/hooks/useProducts";
-import { FileText, Download, BarChart3 } from "lucide-react";
+import { FileText, Download, BarChart3, TrendingUp, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
@@ -153,126 +153,172 @@ const Relatorios = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
         <AppSidebar />
         <main className="flex-1">
           <div className="p-6">
+            {/* Header moderno */}
             <div className="flex items-center space-x-4 mb-8">
               <SidebarTrigger className="lg:hidden" />
-              <div className="flex items-center space-x-3">
-                <FileText className="w-8 h-8 text-green-600" />
+              <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
+                  <FileText className="w-8 h-8 text-white" />
+                </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    📊 Relatórios
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
+                    📊 Central de Relatórios
                   </h1>
-                  <p className="text-gray-600 mt-1">
-                    Visualize e exporte relatórios organizados do sistema
+                  <p className="text-gray-600 mt-1 text-lg">
+                    Gerencie e exporte dados organizados do sistema
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader className="bg-blue-50">
-                  <CardTitle className="flex items-center space-x-2">
-                    <BarChart3 className="w-5 h-5 text-blue-600" />
-                    <span className="font-bold">📋 Relatório Geral</span>
+            {/* Cards de Relatórios Modernos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+              {/* Relatório Geral */}
+              <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center space-x-3">
+                    <BarChart3 className="w-6 h-6" />
+                    <span className="font-bold text-lg">📋 Relatório Completo</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <p className="text-gray-600 mb-4">
-                    <strong>Relatório completo</strong> com todos os produtos cadastrados
-                  </p>
-                  <div className="bg-blue-50 p-3 rounded-lg mb-4">
-                    <p className="text-blue-800 font-bold text-lg">{products.length} produtos</p>
+                <CardContent className="pt-6 pb-6">
+                  <div className="space-y-4">
+                    <p className="text-gray-700 leading-relaxed">
+                      <strong>Relatório detalhado</strong> com todos os produtos cadastrados no sistema
+                    </p>
+                    <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border-2 border-blue-200">
+                      <div className="flex items-center justify-between">
+                        <TrendingUp className="w-8 h-8 text-blue-600" />
+                        <div className="text-right">
+                          <p className="text-3xl font-bold text-blue-700">{products.length}</p>
+                          <p className="text-sm text-blue-600 font-medium">produtos total</p>
+                        </div>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={() => handleDownloadReport('geral')}
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg text-white font-bold py-3 transition-all duration-200"
+                    >
+                      <Download className="w-5 h-5 mr-2" />
+                      Baixar Relatório Completo
+                    </Button>
                   </div>
-                  <Button 
-                    onClick={() => handleDownloadReport('geral')}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    <strong>Baixar Relatório CSV</strong>
-                  </Button>
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader className="bg-red-50">
-                  <CardTitle className="flex items-center space-x-2">
-                    <BarChart3 className="w-5 h-5 text-red-600" />
-                    <span className="font-bold">⚠️ Produtos Vencidos</span>
+              {/* Produtos Vencidos */}
+              <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg bg-gradient-to-br from-red-50 to-red-100">
+                <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center space-x-3">
+                    <XCircle className="w-6 h-6" />
+                    <span className="font-bold text-lg">⚠️ Produtos Vencidos</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <p className="text-gray-600 mb-4">
-                    <strong>Lista de produtos</strong> com data de validade expirada
-                  </p>
-                  <div className="bg-red-50 p-3 rounded-lg mb-4">
-                    <p className="text-red-800 font-bold text-lg">{stats.vencidos} produtos</p>
+                <CardContent className="pt-6 pb-6">
+                  <div className="space-y-4">
+                    <p className="text-gray-700 leading-relaxed">
+                      <strong>Relatório crítico</strong> com produtos que já passaram da validade
+                    </p>
+                    <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border-2 border-red-200">
+                      <div className="flex items-center justify-between">
+                        <AlertTriangle className="w-8 h-8 text-red-600" />
+                        <div className="text-right">
+                          <p className="text-3xl font-bold text-red-700">{stats.vencidos}</p>
+                          <p className="text-sm text-red-600 font-medium">vencidos</p>
+                        </div>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={() => handleDownloadReport('vencidos')}
+                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg text-white font-bold py-3 transition-all duration-200"
+                    >
+                      <Download className="w-5 h-5 mr-2" />
+                      Baixar Lista de Vencidos
+                    </Button>
                   </div>
-                  <Button 
-                    onClick={() => handleDownloadReport('vencidos')}
-                    className="w-full bg-red-600 hover:bg-red-700"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    <strong>Baixar Relatório CSV</strong>
-                  </Button>
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader className="bg-yellow-50">
-                  <CardTitle className="flex items-center space-x-2">
-                    <BarChart3 className="w-5 h-5 text-yellow-600" />
-                    <span className="font-bold">⏰ Próximos ao Vencimento</span>
+              {/* Próximos ao Vencimento */}
+              <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-yellow-100">
+                <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center space-x-3">
+                    <AlertTriangle className="w-6 h-6" />
+                    <span className="font-bold text-lg">⏰ Atenção Especial</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <p className="text-gray-600 mb-4">
-                    <strong>Produtos que vencem</strong> nos próximos 7 dias
-                  </p>
-                  <div className="bg-yellow-50 p-3 rounded-lg mb-4">
-                    <p className="text-yellow-800 font-bold text-lg">{stats.proximoVencimento} produtos</p>
+                <CardContent className="pt-6 pb-6">
+                  <div className="space-y-4">
+                    <p className="text-gray-700 leading-relaxed">
+                      <strong>Produtos urgentes</strong> que vencem nos próximos 7 dias
+                    </p>
+                    <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border-2 border-yellow-200">
+                      <div className="flex items-center justify-between">
+                        <AlertTriangle className="w-8 h-8 text-yellow-600" />
+                        <div className="text-right">
+                          <p className="text-3xl font-bold text-yellow-700">{stats.proximoVencimento}</p>
+                          <p className="text-sm text-yellow-600 font-medium">próx. vencimento</p>
+                        </div>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={() => handleDownloadReport('proximo-vencimento')}
+                      className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 shadow-lg text-white font-bold py-3 transition-all duration-200"
+                    >
+                      <Download className="w-5 h-5 mr-2" />
+                      Baixar Lista Urgente
+                    </Button>
                   </div>
-                  <Button 
-                    onClick={() => handleDownloadReport('proximo-vencimento')}
-                    className="w-full bg-yellow-600 hover:bg-yellow-700"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    <strong>Baixar Relatório CSV</strong>
-                  </Button>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="mt-8">
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50">
-                  <CardTitle className="font-bold text-xl">📈 Resumo Estatístico</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div className="text-center bg-blue-50 p-4 rounded-lg">
-                      <p className="text-3xl font-bold text-blue-600">{stats.total}</p>
-                      <p className="text-sm font-semibold text-gray-700">TOTAL DE PRODUTOS</p>
-                    </div>
-                    <div className="text-center bg-green-50 p-4 rounded-lg">
-                      <p className="text-3xl font-bold text-green-600">{stats.validos}</p>
-                      <p className="text-sm font-semibold text-gray-700">PRODUTOS VÁLIDOS</p>
-                    </div>
-                    <div className="text-center bg-yellow-50 p-4 rounded-lg">
-                      <p className="text-3xl font-bold text-yellow-600">{stats.proximoVencimento}</p>
-                      <p className="text-sm font-semibold text-gray-700">PRÓXIMO VENCIMENTO</p>
-                    </div>
-                    <div className="text-center bg-red-50 p-4 rounded-lg">
-                      <p className="text-3xl font-bold text-red-600">{stats.vencidos}</p>
-                      <p className="text-sm font-semibold text-gray-700">PRODUTOS VENCIDOS</p>
+            {/* Painel de Estatísticas Melhorado */}
+            <Card className="shadow-2xl border-0 bg-gradient-to-r from-white to-gray-50">
+              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg pb-6">
+                <CardTitle className="font-bold text-2xl flex items-center space-x-3">
+                  <TrendingUp className="w-8 h-8" />
+                  <span>📈 Painel de Controle Estatístico</span>
+                </CardTitle>
+                <p className="text-gray-200 mt-2">Visão geral completa do status dos produtos</p>
+              </CardHeader>
+              <CardContent className="pt-8 pb-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                  <div className="text-center group">
+                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+                      <BarChart3 className="w-8 h-8 text-white mx-auto mb-2" />
+                      <p className="text-4xl font-bold text-white">{stats.total}</p>
+                      <p className="text-sm font-semibold text-blue-100 mt-1">TOTAL GERAL</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <div className="text-center group">
+                    <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+                      <CheckCircle className="w-8 h-8 text-white mx-auto mb-2" />
+                      <p className="text-4xl font-bold text-white">{stats.validos}</p>
+                      <p className="text-sm font-semibold text-green-100 mt-1">PRODUTOS VÁLIDOS</p>
+                    </div>
+                  </div>
+                  <div className="text-center group">
+                    <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 p-6 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+                      <AlertTriangle className="w-8 h-8 text-white mx-auto mb-2" />
+                      <p className="text-4xl font-bold text-white">{stats.proximoVencimento}</p>
+                      <p className="text-sm font-semibold text-yellow-100 mt-1">PRÓX. VENCIMENTO</p>
+                    </div>
+                  </div>
+                  <div className="text-center group">
+                    <div className="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+                      <XCircle className="w-8 h-8 text-white mx-auto mb-2" />
+                      <p className="text-4xl font-bold text-white">{stats.vencidos}</p>
+                      <p className="text-sm font-semibold text-red-100 mt-1">PRODUTOS VENCIDOS</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </main>
       </div>
