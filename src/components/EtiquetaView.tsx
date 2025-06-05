@@ -57,95 +57,95 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
   };
 
   return (
-    <Card className="w-80 border-2 border-gray-400 bg-white">
-      <CardContent className="p-4 space-y-3 font-mono text-sm">
+    <Card className="w-80 border-2 border-gray-400 bg-white overflow-hidden">
+      <CardContent className="p-3 space-y-2 font-mono text-xs">
         <div className="border-b border-gray-400 pb-1">
-          <span className="font-bold">Nome do Produto:</span>
-          <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
+          <span className="font-bold text-xs">Nome do Produto:</span>
+          <div className="border-b border-gray-300 mt-1 pb-1 min-h-[18px] text-xs">
             {product.nome || ''}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2">
           <div>
-            <span className="font-bold">Lote nº:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
+            <span className="font-bold text-xs">Lote nº:</span>
+            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
               {product.lote || ''}
             </div>
           </div>
           <div>
-            <span className="font-bold">Marca:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
+            <span className="font-bold text-xs">Marca:</span>
+            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
               {product.marca || ''}
             </div>
           </div>
         </div>
 
         {showOptionalDates && (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <span className="font-bold">Fab.:</span>
-              <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
-                {formatDate(product.dataFabricacao)}
+              <span className="font-bold text-xs">Fab.:</span>
+              <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
+                {formatDate(product.dataFabricacao) || ''}
               </div>
             </div>
             <div>
-              <span className="font-bold">Val.:</span>
-              <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
-                {formatDate(product.validade)}
+              <span className="font-bold text-xs">Val.:</span>
+              <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
+                {formatDate(product.validade) || ''}
               </div>
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2">
           <div>
-            <span className="font-bold">DT Abert:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
-              {formatDate(product.dataAbertura)}
+            <span className="font-bold text-xs">DT Abert:</span>
+            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
+              {formatDate(product.dataAbertura) || ''}
             </div>
           </div>
           <div>
-            <span className="font-bold">Utilizar até:</span>
-            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
-              {formatDate(product.utilizarAte)}
+            <span className="font-bold text-xs">Utilizar até:</span>
+            <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
+              {formatDate(product.utilizarAte) || ''}
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 text-xs">
+        <div className="grid grid-cols-3 gap-1 text-xs pt-1">
           <label className="flex items-center space-x-1">
             <input 
               type="checkbox" 
               checked={product.localArmazenamento === 'refrigerado'}
               readOnly
-              className="w-3 h-3"
+              className="w-2 h-2"
             />
-            <span className="font-bold">Refrigerado</span>
+            <span className="font-bold text-xs">Refrig.</span>
           </label>
           <label className="flex items-center space-x-1">
             <input 
               type="checkbox" 
               checked={product.localArmazenamento === 'congelado'}
               readOnly
-              className="w-3 h-3"
+              className="w-2 h-2"
             />
-            <span className="font-bold">Congelado</span>
+            <span className="font-bold text-xs">Congel.</span>
           </label>
           <label className="flex items-center space-x-1">
             <input 
               type="checkbox" 
               checked={product.localArmazenamento === 'ambiente'}
               readOnly
-              className="w-3 h-3"
+              className="w-2 h-2"
             />
-            <span className="font-bold">Ambiente</span>
+            <span className="font-bold text-xs">Ambient.</span>
           </label>
         </div>
 
-        <div className="border-b border-gray-400 pb-1">
-          <span className="font-bold">Responsável:</span>
-          <div className="border-b border-gray-300 mt-1 pb-1 min-h-[20px]">
+        <div className="border-b border-gray-400 pb-1 pt-1">
+          <span className="font-bold text-xs">Responsável:</span>
+          <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
             {product.responsavel || ''}
           </div>
         </div>

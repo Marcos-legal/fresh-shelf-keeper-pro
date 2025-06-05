@@ -1,154 +1,204 @@
-
+import { useState, useEffect, useMemo } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useProducts } from "@/hooks/useProducts";
-import { FileText, Download, BarChart3, TrendingUp, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { PackageSearch, FileDown, XCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import * as XLSX from 'xlsx';
+import { DatePicker } from "@/components/ui/date-picker";
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const Relatorios = () => {
-  const { products, stats } = useProducts();
+  const { products } = useProducts();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
-  const formatDateForExport = (date: Date | undefined) => {
-    if (!date) return '';
-    try {
-      return date.toLocaleDateString('pt-BR');
-    } catch {
-      return '';
+  useEffect(() => {
+    let results = products.filter(product =>
+      product.nome.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (selectedCategory) {
+      results = results.filter(product => product.localArmazenamento === selectedCategory);
     }
-  };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'valido': return 'VÁLIDO';
-      case 'proximo-vencimento': return 'PRÓXIMO AO VENCIMENTO';
-      case 'vencido': return 'VENCIDO';
-      default: return status.toUpperCase();
+    if (startDate && endDate) {
+      results = results.filter(product => {
+        if (product.criadoEm) {
+          const productDate = new Date(product.criadoEm);
+          return productDate >= startDate && productDate <= endDate;
+        }
+        return false;
+      });
     }
-  };
 
-  const getLocalArmazenamentoText = (local: string) => {
-    switch (local) {
-      case 'refrigerado': return 'REFRIGERADO';
-      case 'congelado': return 'CONGELADO';
-      case 'ambiente': return 'AMBIENTE';
-      case 'camara-fria': return 'CÂMARA FRIA';
-      default: return local.toUpperCase();
-    }
-  };
+    setFilteredProducts(results);
+  }, [searchTerm, selectedCategory, products, startDate, endDate]);
 
-  const downloadCSV = (data: any[], filename: string, reportType: string) => {
-    if (data.length === 0) {
+  const exportToExcel = () => {
+    if (filteredProducts.length === 0) {
       toast({
-        title: "Nenhum dado para exportar",
-        description: "Não há produtos que atendem aos critérios selecionados.",
+        title: "Nenhum produto para exportar",
+        description: "Não há produtos para serem exportados.",
         variant: "destructive",
       });
       return;
     }
 
-    // Cabeçalho do relatório
-    const reportHeader = [
-      `RELATÓRIO: ${reportType.toUpperCase()}`,
-      `DATA DE GERAÇÃO: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
-      `TOTAL DE PRODUTOS: ${data.length}`,
-      '', // Linha em branco
-      '='.repeat(100), // Separador
-      ''
+    // Preparar dados para a planilha com formatação melhorada
+    const excelData = filteredProducts.map((product, index) => {
+      const formatDate = (date: any) => {
+        if (!date) return '';
+        try {
+          if (typeof date === 'string') {
+            if (date.includes('/')) return date;
+            const [year, month, day] = date.split('-').map(Number);
+            if (year && month && day) {
+              const dateObj = new Date(year, month - 1, day);
+              return dateObj.toLocaleDateString('pt-BR');
+            }
+          }
+          if (date instanceof Date && !isNaN(date.getTime())) {
+            return date.toLocaleDateString('pt-BR');
+          }
+          return String(date);
+        } catch {
+          return '';
+        }
+      };
+
+      const getStatusDescription = (status: string) => {
+        switch (status) {
+          case 'valido': return '✅ VÁLIDO';
+          case 'proximo-vencimento': return '⚠️ PRÓXIMO VENCIMENTO';
+          case 'vencido': return '❌ VENCIDO';
+          default: return status.toUpperCase();
+        }
+      };
+
+      const getLocalDescription = (local: string) => {
+        switch (local) {
+          case 'refrigerado': return '🧊 REFRIGERADO';
+          case 'congelado': return '❄️ CONGELADO';
+          case 'ambiente': return '🌡️ AMBIENTE';
+          case 'camara-fria': return '🧊 CÂMARA FRIA';
+          default: return local.toUpperCase();
+        }
+      };
+
+      return {
+        'ITEM': index + 1,
+        'PRODUTO': product.nome || '',
+        'LOTE': product.lote || '',
+        'MARCA': product.marca || '',
+        'DATA FABRICAÇÃO': formatDate(product.dataFabricacao),
+        'DATA VALIDADE': formatDate(product.validade),
+        'DATA ABERTURA': formatDate(product.dataAbertura),
+        'UTILIZAR ATÉ': formatDate(product.utilizarAte),
+        'DIAS RESTANTES': product.utilizarAte ? Math.ceil((new Date(product.utilizarAte).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : '',
+        'LOCAL ARMAZENAMENTO': getLocalDescription(product.localArmazenamento),
+        'RESPONSÁVEL': product.responsavel || '',
+        'STATUS': getStatusDescription(product.status),
+        'CRIADO EM': formatDate(product.criadoEm),
+        'ATUALIZADO EM': formatDate(product.atualizadoEm)
+      };
+    });
+
+    // Criar workbook e worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Configurar largura das colunas
+    const colWidths = [
+      { wch: 6 },   // ITEM
+      { wch: 25 },  // PRODUTO
+      { wch: 15 },  // LOTE
+      { wch: 15 },  // MARCA
+      { wch: 15 },  // DATA FABRICAÇÃO
+      { wch: 15 },  // DATA VALIDADE
+      { wch: 15 },  // DATA ABERTURA
+      { wch: 15 },  // UTILIZAR ATÉ
+      { wch: 15 },  // DIAS RESTANTES
+      { wch: 20 },  // LOCAL ARMAZENAMENTO
+      { wch: 20 },  // RESPONSÁVEL
+      { wch: 20 },  // STATUS
+      { wch: 15 },  // CRIADO EM
+      { wch: 15 }   // ATUALIZADO EM
     ];
+    ws['!cols'] = colWidths;
 
-    // Cabeçalhos das colunas
-    const headers = [
-      'NOME DO PRODUTO',
-      'LOTE', 
-      'MARCA',
-      'DATA FABRICAÇÃO',
-      'DATA VALIDADE',
-      'DATA ABERTURA',
-      'UTILIZAR ATÉ',
-      'DIAS PARA VENCER',
-      'LOCAL ARMAZENAMENTO',
-      'RESPONSÁVEL',
-      'STATUS'
-    ];
+    // Adicionar formatação condicional para o cabeçalho
+    const headerRange = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (!ws[cellAddress]) continue;
+      
+      ws[cellAddress].s = {
+        font: { bold: true, sz: 12, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "366092" } },
+        alignment: { horizontal: "center", vertical: "center" },
+        border: {
+          top: { style: "thin", color: { rgb: "000000" } },
+          bottom: { style: "thin", color: { rgb: "000000" } },
+          left: { style: "thin", color: { rgb: "000000" } },
+          right: { style: "thin", color: { rgb: "000000" } }
+        }
+      };
+    }
 
-    // Dados dos produtos
-    const csvData = data.map(product => [
-      `"${(product.nome || '').toUpperCase()}"`,
-      `"${(product.lote || '').toUpperCase()}"`,
-      `"${(product.marca || '').toUpperCase()}"`,
-      `"${formatDateForExport(product.dataFabricacao)}"`,
-      `"${formatDateForExport(product.validade)}"`,
-      `"${formatDateForExport(product.dataAbertura)}"`,
-      `"${formatDateForExport(product.utilizarAte)}"`,
-      `"${product.diasParaVencer || 0}"`,
-      `"${getLocalArmazenamentoText(product.localArmazenamento)}"`,
-      `"${(product.responsavel || '').toUpperCase()}"`,
-      `"${getStatusText(product.status)}"`
-    ]);
+    // Adicionar bordas para todas as células
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    for (let row = range.s.r; row <= range.e.r; row++) {
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+        if (!ws[cellAddress]) continue;
+        
+        if (!ws[cellAddress].s) ws[cellAddress].s = {};
+        ws[cellAddress].s.border = {
+          top: { style: "thin", color: { rgb: "000000" } },
+          bottom: { style: "thin", color: { rgb: "000000" } },
+          left: { style: "thin", color: { rgb: "000000" } },
+          right: { style: "thin", color: { rgb: "000000" } }
+        };
+        
+        // Alternar cores das linhas
+        if (row > 0) {
+          ws[cellAddress].s.fill = {
+            fgColor: { rgb: row % 2 === 0 ? "F8F9FA" : "FFFFFF" }
+          };
+        }
+      }
+    }
 
-    // Rodapé com estatísticas
-    const footer = [
-      '',
-      '='.repeat(100),
-      'RESUMO ESTATÍSTICO:',
-      `PRODUTOS VÁLIDOS: ${stats.validos}`,
-      `PRÓXIMOS AO VENCIMENTO: ${stats.proximoVencimento}`,
-      `PRODUTOS VENCIDOS: ${stats.vencidos}`,
-      '',
-      'PRODUTOS POR LOCAL DE ARMAZENAMENTO:',
-      `REFRIGERADO: ${stats.porCategoria.refrigerado}`,
-      `CONGELADO: ${stats.porCategoria.congelado}`,
-      `AMBIENTE: ${stats.porCategoria.ambiente}`,
-      `CÂMARA FRIA: ${stats.porCategoria['camara-fria']}`,
-      '',
-      `Relatório gerado pelo Sistema de Controle de Validade - ${new Date().getFullYear()}`
-    ];
+    XLSX.utils.book_append_sheet(wb, ws, "Relatório de Produtos");
 
-    // Combinar tudo
-    const csvContent = [
-      ...reportHeader,
-      headers.join(','),
-      ...csvData.map(row => row.join(',')),
-      ...footer
-    ].join('\n');
+    // Gerar nome do arquivo com data/hora
+    const now = new Date();
+    const timestamp = now.toLocaleString('pt-BR').replace(/[/:]/g, '-').replace(', ', '_');
+    const filename = `relatorio_produtos_${timestamp}.xlsx`;
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${filename}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    XLSX.writeFile(wb, filename);
 
     toast({
-      title: "✅ Relatório baixado com sucesso!",
-      description: `📄 Arquivo ${filename}.csv foi gerado com ${data.length} produtos`,
+      title: "Relatório exportado com sucesso!",
+      description: `Arquivo "${filename}" foi baixado com ${filteredProducts.length} produto(s).`,
     });
   };
 
-  const handleDownloadReport = (type: string) => {
-    const now = new Date();
-    const timestamp = now.toISOString().split('T')[0].replace(/-/g, '');
-
-    switch (type) {
-      case 'geral':
-        downloadCSV(products, `RELATORIO_GERAL_${timestamp}`, 'Relatório Geral de Produtos');
-        break;
-      case 'vencidos':
-        const vencidos = products.filter(p => p.status === 'vencido');
-        downloadCSV(vencidos, `PRODUTOS_VENCIDOS_${timestamp}`, 'Produtos Vencidos');
-        break;
-      case 'proximo-vencimento':
-        const proximoVencimento = products.filter(p => p.status === 'proximo-vencimento');
-        downloadCSV(proximoVencimento, `PROXIMO_VENCIMENTO_${timestamp}`, 'Produtos Próximos ao Vencimento');
-        break;
-      default:
-        console.log(`Relatório não implementado: ${type}`);
-    }
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("");
+    setStartDate(undefined);
+    setEndDate(undefined);
   };
 
   return (
@@ -157,168 +207,150 @@ const Relatorios = () => {
         <AppSidebar />
         <main className="flex-1">
           <div className="p-6">
-            {/* Header moderno */}
             <div className="flex items-center space-x-4 mb-8">
               <SidebarTrigger className="lg:hidden" />
               <div className="flex items-center space-x-4">
                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
-                  <FileText className="w-8 h-8 text-white" />
+                  <PackageSearch className="w-8 h-8 text-white" />
                 </div>
                 <div>
                   <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
-                    📊 Central de Relatórios
+                    📊 Relatórios
                   </h1>
                   <p className="text-gray-600 mt-1 text-lg">
-                    Gerencie e exporte dados organizados do sistema
+                    Visualize e exporte os dados dos seus produtos
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Cards de Relatórios Modernos */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-              {/* Relatório Geral */}
-              <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100">
-                <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center space-x-3">
-                    <BarChart3 className="w-6 h-6" />
-                    <span className="font-bold text-lg">📋 Relatório Completo</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6 pb-6">
-                  <div className="space-y-4">
-                    <p className="text-gray-700 leading-relaxed">
-                      <strong>Relatório detalhado</strong> com todos os produtos cadastrados no sistema
-                    </p>
-                    <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border-2 border-blue-200">
-                      <div className="flex items-center justify-between">
-                        <TrendingUp className="w-8 h-8 text-blue-600" />
-                        <div className="text-right">
-                          <p className="text-3xl font-bold text-blue-700">{products.length}</p>
-                          <p className="text-sm text-blue-600 font-medium">produtos total</p>
-                        </div>
-                      </div>
-                    </div>
-                    <Button 
-                      onClick={() => handleDownloadReport('geral')}
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg text-white font-bold py-3 transition-all duration-200"
-                    >
-                      <Download className="w-5 h-5 mr-2" />
-                      Baixar Relatório Completo
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Produtos Vencidos */}
-              <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg bg-gradient-to-br from-red-50 to-red-100">
-                <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center space-x-3">
-                    <XCircle className="w-6 h-6" />
-                    <span className="font-bold text-lg">⚠️ Produtos Vencidos</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6 pb-6">
-                  <div className="space-y-4">
-                    <p className="text-gray-700 leading-relaxed">
-                      <strong>Relatório crítico</strong> com produtos que já passaram da validade
-                    </p>
-                    <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border-2 border-red-200">
-                      <div className="flex items-center justify-between">
-                        <AlertTriangle className="w-8 h-8 text-red-600" />
-                        <div className="text-right">
-                          <p className="text-3xl font-bold text-red-700">{stats.vencidos}</p>
-                          <p className="text-sm text-red-600 font-medium">vencidos</p>
-                        </div>
-                      </div>
-                    </div>
-                    <Button 
-                      onClick={() => handleDownloadReport('vencidos')}
-                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg text-white font-bold py-3 transition-all duration-200"
-                    >
-                      <Download className="w-5 h-5 mr-2" />
-                      Baixar Lista de Vencidos
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Próximos ao Vencimento */}
-              <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-yellow-100">
-                <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center space-x-3">
-                    <AlertTriangle className="w-6 h-6" />
-                    <span className="font-bold text-lg">⏰ Atenção Especial</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6 pb-6">
-                  <div className="space-y-4">
-                    <p className="text-gray-700 leading-relaxed">
-                      <strong>Produtos urgentes</strong> que vencem nos próximos 7 dias
-                    </p>
-                    <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border-2 border-yellow-200">
-                      <div className="flex items-center justify-between">
-                        <AlertTriangle className="w-8 h-8 text-yellow-600" />
-                        <div className="text-right">
-                          <p className="text-3xl font-bold text-yellow-700">{stats.proximoVencimento}</p>
-                          <p className="text-sm text-yellow-600 font-medium">próx. vencimento</p>
-                        </div>
-                      </div>
-                    </div>
-                    <Button 
-                      onClick={() => handleDownloadReport('proximo-vencimento')}
-                      className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 shadow-lg text-white font-bold py-3 transition-all duration-200"
-                    >
-                      <Download className="w-5 h-5 mr-2" />
-                      Baixar Lista Urgente
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Painel de Estatísticas Melhorado */}
-            <Card className="shadow-2xl border-0 bg-gradient-to-r from-white to-gray-50">
-              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg pb-6">
-                <CardTitle className="font-bold text-2xl flex items-center space-x-3">
-                  <TrendingUp className="w-8 h-8" />
-                  <span>📈 Painel de Controle Estatístico</span>
+            {/* Filtros e Exportação */}
+            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
+              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg">
+                <CardTitle className="flex items-center space-x-2">
+                  <PackageSearch className="w-5 h-5" />
+                  <span>Filtros e Exportação</span>
                 </CardTitle>
-                <p className="text-gray-200 mt-2">Visão geral completa do status dos produtos</p>
               </CardHeader>
-              <CardContent className="pt-8 pb-8">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                  <div className="text-center group">
-                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-                      <BarChart3 className="w-8 h-8 text-white mx-auto mb-2" />
-                      <p className="text-4xl font-bold text-white">{stats.total}</p>
-                      <p className="text-sm font-semibold text-blue-100 mt-1">TOTAL GERAL</p>
-                    </div>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="search" className="text-sm text-gray-600">
+                      Pesquisar Produto
+                    </Label>
+                    <Input
+                      type="search"
+                      id="search"
+                      placeholder="Nome do produto..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                   </div>
-                  <div className="text-center group">
-                    <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-                      <CheckCircle className="w-8 h-8 text-white mx-auto mb-2" />
-                      <p className="text-4xl font-bold text-white">{stats.validos}</p>
-                      <p className="text-sm font-semibold text-green-100 mt-1">PRODUTOS VÁLIDOS</p>
-                    </div>
+                  <div>
+                    <Label htmlFor="category" className="text-sm text-gray-600">
+                      Filtrar por Categoria
+                    </Label>
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Todas as categorias" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todas as categorias</SelectItem>
+                        <SelectItem value="refrigerado">Refrigerado</SelectItem>
+                        <SelectItem value="congelado">Congelado</SelectItem>
+                        <SelectItem value="ambiente">Ambiente</SelectItem>
+                        <SelectItem value="camara-fria">Câmara Fria</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="text-center group">
-                    <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 p-6 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-                      <AlertTriangle className="w-8 h-8 text-white mx-auto mb-2" />
-                      <p className="text-4xl font-bold text-white">{stats.proximoVencimento}</p>
-                      <p className="text-sm font-semibold text-yellow-100 mt-1">PRÓX. VENCIMENTO</p>
-                    </div>
-                  </div>
-                  <div className="text-center group">
-                    <div className="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-                      <XCircle className="w-8 h-8 text-white mx-auto mb-2" />
-                      <p className="text-4xl font-bold text-white">{stats.vencidos}</p>
-                      <p className="text-sm font-semibold text-red-100 mt-1">PRODUTOS VENCIDOS</p>
+                  <div>
+                    <Label className="text-sm text-gray-600">
+                      Filtrar por Data de Criação
+                    </Label>
+                    <div className="flex items-center space-x-2">
+                      <DatePicker
+                        id="start-date"
+                        placeholderText="Data inicial"
+                        selected={startDate}
+                        onChange={(date: Date | undefined) => setStartDate(date)}
+                        dateFormat="dd/MM/yyyy"
+                        locale={ptBR}
+                      />
+                      <DatePicker
+                        id="end-date"
+                        placeholderText="Data final"
+                        selected={endDate}
+                        onChange={(date: Date | undefined) => setEndDate(date)}
+                        dateFormat="dd/MM/yyyy"
+                        locale={ptBR}
+                      />
                     </div>
                   </div>
                 </div>
+                <div className="flex justify-between items-center mt-4">
+                  <Button
+                    onClick={clearFilters}
+                    variant="ghost"
+                    className="text-gray-600 hover:bg-gray-100"
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Limpar Filtros
+                  </Button>
+                  <Button
+                    onClick={exportToExcel}
+                    className="gradient-blue text-white font-bold shadow-lg"
+                  >
+                    <FileDown className="w-4 h-4 mr-2" />
+                    Exportar para Excel ({filteredProducts.length})
+                  </Button>
+                </div>
               </CardContent>
             </Card>
+
+            {/* Lista de Produtos Filtrados */}
+            {filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredProducts.map((product) => (
+                  <Card key={product.id} className="shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">{product.nome}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <p>
+                          <span className="font-bold">Lote:</span> {product.lote}
+                        </p>
+                        <p>
+                          <span className="font-bold">Marca:</span> {product.marca}
+                        </p>
+                        <p>
+                          <span className="font-bold">Validade:</span>{" "}
+                          {product.validade ? format(new Date(product.validade), 'dd/MM/yyyy', { locale: ptBR }) : 'N/A'}
+                        </p>
+                        <p>
+                          <span className="font-bold">Local:</span> {product.localArmazenamento}
+                        </p>
+                        <p>
+                          <span className="font-bold">Responsável:</span> {product.responsavel}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="shadow-sm">
+                <CardContent className="text-center py-8">
+                  <PackageSearch className="w-10 h-10 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Nenhum produto encontrado
+                  </h3>
+                  <p className="text-gray-600">
+                    Altere os filtros ou adicione novos produtos.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </main>
       </div>
