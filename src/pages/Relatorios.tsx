@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -17,7 +18,7 @@ import { ptBR } from 'date-fns/locale';
 const Relatorios = () => {
   const { products } = useProducts();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -27,7 +28,7 @@ const Relatorios = () => {
       product.nome.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== "all") {
       results = results.filter(product => product.localArmazenamento === selectedCategory);
     }
 
@@ -196,7 +197,7 @@ const Relatorios = () => {
 
   const clearFilters = () => {
     setSearchTerm("");
-    setSelectedCategory("");
+    setSelectedCategory("all");
     setStartDate(undefined);
     setEndDate(undefined);
   };
@@ -255,7 +256,7 @@ const Relatorios = () => {
                         <SelectValue placeholder="Todas as categorias" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todas as categorias</SelectItem>
+                        <SelectItem value="all">Todas as categorias</SelectItem>
                         <SelectItem value="refrigerado">Refrigerado</SelectItem>
                         <SelectItem value="congelado">Congelado</SelectItem>
                         <SelectItem value="ambiente">Ambiente</SelectItem>
