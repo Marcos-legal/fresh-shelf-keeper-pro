@@ -8,7 +8,8 @@ import {
   Package,
   FileText,
   Printer,
-  Eye
+  Eye,
+  Calculator
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -54,6 +55,11 @@ const menuItems = [
     title: "Cadastro de Produtos",
     url: "/cadastro",
     icon: Package,
+  },
+  {
+    title: "Contagem de Estoque",
+    url: "/contagem-estoque",
+    icon: Calculator,
   },
   {
     title: "Impressão de Etiquetas",

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -16,6 +15,7 @@ import Cadastro from "./pages/Cadastro";
 import Relatorios from "./pages/Relatorios";
 import ImpressaoEtiquetas from "./pages/ImpressaoEtiquetas";
 import VisualizarEtiquetas from "./pages/VisualizarEtiquetas";
+import ContagemEstoque from "./pages/ContagemEstoque";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +43,7 @@ const App: React.FC = () => (
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/impressao-etiquetas" element={<ImpressaoEtiquetas />} />
             <Route path="/visualizar-etiquetas" element={<VisualizarEtiquetas />} />
+            <Route path="/contagem-estoque" element={<ContagemEstoque />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
