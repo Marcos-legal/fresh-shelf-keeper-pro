@@ -89,7 +89,7 @@ export function useProducts() {
             utilizarAte,
             criadoEm,
             atualizadoEm,
-            showOptionalDates: p.showOptionalDates ?? false, // Carregar preferência individual
+            showOptionalDates: p.showOptionalDates ?? false,
           };
         });
         
@@ -139,7 +139,7 @@ export function useProducts() {
     }
     
     if (!targetDate || !(targetDate instanceof Date) || isNaN(targetDate.getTime())) {
-      return 'vencido';
+      return 'valido'; // Produto sem data de vencimento é considerado válido
     }
     
     if (targetDate < now) {
@@ -178,26 +178,26 @@ export function useProducts() {
     console.log('Criando produto com data de abertura:', data.dataAbertura, 'parsed:', dataAbertura);
     console.log('Criando produto com validade:', data.validade, 'parsed:', validade);
     
-    const utilizarAte = dataAbertura 
+    const utilizarAte = (dataAbertura && data.diasParaVencer)
       ? calculateUtilizarAte(dataAbertura, data.diasParaVencer)
       : undefined;
 
     const product: Product = {
       id,
-      nome: data.nome,
-      lote: data.lote,
-      marca: data.marca,
+      nome: data.nome || '',
+      lote: data.lote || '',
+      marca: data.marca || '',
       dataFabricacao,
       validade,
       dataAbertura,
-      diasParaVencer: data.diasParaVencer,
+      diasParaVencer: data.diasParaVencer || 0,
       utilizarAte,
-      localArmazenamento: data.localArmazenamento,
-      responsavel: data.responsavel,
+      localArmazenamento: data.localArmazenamento || 'ambiente',
+      responsavel: data.responsavel || '',
       status: 'valido',
       criadoEm: now,
       atualizadoEm: now,
-      showOptionalDates: data.showOptionalDates ?? false, // Incluir preferência individual
+      showOptionalDates: data.showOptionalDates ?? false,
     };
 
     product.status = calculateStatus(product);
@@ -220,8 +220,8 @@ export function useProducts() {
         
         const dataAbertura = data.dataAbertura ? safeParseDate(data.dataAbertura) : product.dataAbertura;
         const validade = data.validade ? parseValidadeDate(data.validade) : product.validade;
-        const utilizarAte = dataAbertura && (data.diasParaVencer !== undefined || product.diasParaVencer)
-          ? calculateUtilizarAte(dataAbertura, data.diasParaVencer ?? product.diasParaVencer)
+        const utilizarAte = (dataAbertura && (data.diasParaVencer !== undefined || product.diasParaVencer))
+          ? calculateUtilizarAte(dataAbertura, data.diasParaVencer ?? product.diasParaVencer ?? 0)
           : product.utilizarAte;
 
         const updatedProduct = {
@@ -260,7 +260,9 @@ export function useProducts() {
 
     const updatedProducts = products.map(product => {
       if (product.id === id) {
-        const utilizarAte = calculateUtilizarAte(novaData, product.diasParaVencer);
+        const utilizarAte = (product.diasParaVencer && product.diasParaVencer > 0)
+          ? calculateUtilizarAte(novaData, product.diasParaVencer)
+          : undefined;
         const updatedProduct = {
           ...product,
           dataAbertura: novaData,
@@ -305,7 +307,8 @@ export function useProducts() {
           break;
       }
 
-      porCategoria[product.localArmazenamento]++;
+      const categoria = product.localArmazenamento || 'ambiente';
+      porCategoria[categoria]++;
     });
 
     return {
@@ -319,7 +322,7 @@ export function useProducts() {
 
   // Filtrar produtos por categoria
   const getProductsByCategory = (category: StorageLocation) => {
-    return products.filter(product => product.localArmazenamento === category);
+    return products.filter(product => (product.localArmazenamento || 'ambiente') === category);
   };
 
   // Produtos com status atualizado

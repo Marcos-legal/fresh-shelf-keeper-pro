@@ -48,29 +48,17 @@ const parseValidadeDate = (validade: string): Date | undefined => {
 export const validateProductForm = (formData: ProductFormData): Partial<Record<keyof ProductFormData, string>> => {
   const errors: Partial<Record<keyof ProductFormData, string>> = {};
 
-  // Campos obrigatórios
-  if (!formData.dataAbertura) {
-    errors.dataAbertura = 'Data de abertura é obrigatória';
-  }
-
-  if (!formData.responsavel) {
-    errors.responsavel = 'Responsável é obrigatório';
-  }
-
-  if (!formData.localArmazenamento) {
-    errors.localArmazenamento = 'Local de armazenamento é obrigatório';
-  }
-
-  if (!formData.diasParaVencer || formData.diasParaVencer <= 0) {
-    errors.diasParaVencer = 'Dias para vencer deve ser maior que 0';
-  }
-
   // Validar formato da data de validade se fornecida
   if (formData.validade && formData.validade.trim() !== '') {
     const validadeDate = parseValidadeDate(formData.validade);
     if (!validadeDate) {
       errors.validade = 'Formato de data inválido. Use DD/MM/AA, MM/AA ou MÊS/ANO';
     }
+  }
+
+  // Validar dias para vencer apenas se fornecido
+  if (formData.diasParaVencer !== undefined && formData.diasParaVencer < 0) {
+    errors.diasParaVencer = 'Dias para vencer deve ser maior ou igual a 0';
   }
 
   return errors;

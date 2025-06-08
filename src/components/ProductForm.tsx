@@ -38,9 +38,9 @@ export function ProductForm({
     marca: initialData?.marca || '',
     dataFabricacao: initialData?.dataFabricacao || '',
     validade: initialData?.validade || '',
-    dataAbertura: initialData?.dataAbertura || new Date().toISOString().split('T')[0],
-    diasParaVencer: initialData?.diasParaVencer || 30,
-    localArmazenamento: initialData?.localArmazenamento || 'ambiente',
+    dataAbertura: initialData?.dataAbertura || '',
+    diasParaVencer: initialData?.diasParaVencer || undefined,
+    localArmazenamento: initialData?.localArmazenamento || undefined,
     responsavel: initialData?.responsavel || '',
     showOptionalDates: initialData?.showOptionalDates ?? false,
   });
@@ -130,8 +130,8 @@ export function ProductForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <TextInputField
               id="nome"
-              label="Nome do Produto"
-              value={formData.nome}
+              label="Nome do Produto (Opcional)"
+              value={formData.nome || ''}
               onChange={(value) => handleInputChange('nome', value)}
               placeholder="Digite o nome do produto"
               error={errors.nome}
@@ -139,8 +139,8 @@ export function ProductForm({
 
             <TextInputField
               id="lote"
-              label="Lote"
-              value={formData.lote}
+              label="Lote (Opcional)"
+              value={formData.lote || ''}
               onChange={(value) => handleInputChange('lote', value)}
               placeholder="Digite o lote"
               error={errors.lote}
@@ -148,19 +148,19 @@ export function ProductForm({
 
             <TextInputField
               id="marca"
-              label="Marca"
-              value={formData.marca}
+              label="Marca (Opcional)"
+              value={formData.marca || ''}
               onChange={(value) => handleInputChange('marca', value)}
               placeholder="Digite a marca"
               error={errors.marca}
             />
 
             <ResponsavelSelectField
-              label="Responsável"
-              value={formData.responsavel}
+              label="Responsável (Opcional)"
+              value={formData.responsavel || ''}
               onChange={(value) => handleInputChange('responsavel', value)}
               error={errors.responsavel}
-              required={true}
+              required={false}
             />
 
             {formData.showOptionalDates && (
@@ -168,7 +168,7 @@ export function ProductForm({
                 <DatePickerField
                   id="dataFabricacao"
                   label="Data de Fabricação (Opcional)"
-                  value={formData.dataFabricacao}
+                  value={formData.dataFabricacao || ''}
                   onChange={(value) => handleInputChange('dataFabricacao', value)}
                   error={errors.dataFabricacao}
                   required={false}
@@ -176,7 +176,7 @@ export function ProductForm({
 
                 <ValidadeField
                   label="Data de Validade (Opcional)"
-                  value={formData.validade}
+                  value={formData.validade || ''}
                   onChange={(value) => handleInputChange('validade', value)}
                   error={errors.validade}
                   required={false}
@@ -186,30 +186,30 @@ export function ProductForm({
 
             <DatePickerField
               id="dataAbertura"
-              label="Data de Abertura"
+              label="Data de Abertura (Opcional)"
               value={formData.dataAbertura || ''}
               onChange={(value) => handleInputChange('dataAbertura', value)}
               error={errors.dataAbertura}
-              required={true}
+              required={false}
             />
 
             <NumberInputField
               id="diasParaVencer"
-              label="Dias para Vencer após Abertura"
-              value={formData.diasParaVencer}
+              label="Dias para Vencer após Abertura (Opcional)"
+              value={formData.diasParaVencer || 0}
               onChange={(value) => handleNumberInputChange('diasParaVencer', value)}
               error={errors.diasParaVencer}
-              min={1}
-              required={true}
+              min={0}
+              required={false}
             />
 
             <SelectField
-              label="Local de Armazenamento"
-              value={formData.localArmazenamento}
+              label="Local de Armazenamento (Opcional)"
+              value={formData.localArmazenamento || ''}
               onChange={(value: StorageLocation) => handleInputChange('localArmazenamento', value)}
               options={storageOptions}
               placeholder="Selecione o local"
-              required={true}
+              required={false}
             />
           </div>
 
