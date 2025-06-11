@@ -56,17 +56,21 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
     }
   };
 
+  // Verificar se os dados estão completos para centralizar
+  const hasCompleteData = product.nome && product.lote && product.marca && 
+    product.dataAbertura && product.utilizarAte && product.responsavel;
+
   return (
     <Card className="w-80 border-2 border-gray-400 bg-white overflow-hidden">
-      <CardContent className="p-3 space-y-2 font-mono text-xs">
-        <div className="border-b border-gray-400 pb-1">
+      <CardContent className={`p-3 space-y-2 font-mono text-xs ${hasCompleteData ? 'flex flex-col justify-center items-center text-center' : ''}`}>
+        <div className="border-b border-gray-400 pb-1 w-full">
           <span className="font-bold text-xs">Nome do Produto:</span>
           <div className="border-b border-gray-300 mt-1 pb-1 min-h-[18px] text-xs">
             {product.nome || ''}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 w-full">
           <div>
             <span className="font-bold text-xs">Lote nº:</span>
             <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
@@ -82,7 +86,7 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
         </div>
 
         {showOptionalDates && (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 w-full">
             <div>
               <span className="font-bold text-xs">Fab.:</span>
               <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
@@ -98,7 +102,7 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 w-full">
           <div>
             <span className="font-bold text-xs">DT Abert:</span>
             <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
@@ -113,8 +117,8 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-1 text-xs pt-1">
-          <label className="flex items-center space-x-1">
+        <div className="grid grid-cols-3 gap-1 text-xs pt-1 w-full">
+          <label className="flex items-center space-x-1 justify-center">
             <input 
               type="checkbox" 
               checked={product.localArmazenamento === 'refrigerado'}
@@ -123,7 +127,7 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
             />
             <span className="font-bold text-xs">Refrig.</span>
           </label>
-          <label className="flex items-center space-x-1">
+          <label className="flex items-center space-x-1 justify-center">
             <input 
               type="checkbox" 
               checked={product.localArmazenamento === 'congelado'}
@@ -132,7 +136,7 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
             />
             <span className="font-bold text-xs">Congel.</span>
           </label>
-          <label className="flex items-center space-x-1">
+          <label className="flex items-center space-x-1 justify-center">
             <input 
               type="checkbox" 
               checked={product.localArmazenamento === 'ambiente'}
@@ -143,7 +147,7 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
           </label>
         </div>
 
-        <div className="border-b border-gray-400 pb-1 pt-1">
+        <div className="border-b border-gray-400 pb-1 pt-1 w-full">
           <span className="font-bold text-xs">Responsável:</span>
           <div className="border-b border-gray-300 mt-1 pb-1 min-h-[16px] text-xs">
             {product.responsavel || ''}

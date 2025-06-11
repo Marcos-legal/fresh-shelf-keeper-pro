@@ -23,11 +23,12 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
     observacoes: '',
   });
 
+  const [quantidadeExtra, setQuantidadeExtra] = useState(0);
   const [errors, setErrors] = useState<Partial<Record<keyof ContagemFormData, string>>>({});
 
   const produtoSelecionado = produtos.find(p => p.id === formData.produtoId);
   const quantidadeTotal = produtoSelecionado 
-    ? formData.quantidade * produtoSelecionado.quantidadePorUnidade 
+    ? (formData.quantidade + quantidadeExtra) * produtoSelecionado.quantidadePorUnidade 
     : 0;
 
   const produtoOptions = produtos.map(produto => ({
@@ -62,13 +63,19 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
     }
     
     if (Object.keys(validationErrors).length === 0) {
-      onSubmit(formData);
+      // Incluir a quantidade extra na quantidade total
+      const dataWithExtra = {
+        ...formData,
+        quantidade: formData.quantidade + quantidadeExtra
+      };
+      onSubmit(dataWithExtra);
       setFormData({
         produtoId: '',
         quantidade: 0,
         responsavel: '',
         observacoes: '',
       });
+      setQuantidadeExtra(0);
       if (onClose) onClose();
     } else {
       setErrors(validationErrors);
@@ -99,7 +106,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
 
             <NumberInputField
               id="quantidade"
-              label={`Quantidade Contada${produtoSelecionado ? ` (${produtoSelecionado.unidadeMedida})` : ''}`}
+              label={`Quantidade Principal${produtoSelecionado ? ` (${produtoSelecionado.unidadeMedida})` : ''}`}
               value={formData.quantidade}
               onChange={(value) => handleNumberInputChange('quantidade', value)}
               error={errors.quantidade}
@@ -107,15 +114,32 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
               required
             />
 
+            <NumberInputField
+              id="quantidadeExtra"
+              label={`Quantidade Extra${produtoSelecionado ? ` (${produtoSelecionado.unidadeMedida})` : ''}`}
+              value={quantidadeExtra}
+              onChange={setQuantidadeExtra}
+              min={0}
+              required={false}
+            />
+
             {produtoSelecionado && (
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <h3 className="font-medium text-blue-900 mb-2">Cálculo do Estoque</h3>
-                <p className="text-sm text-blue-700">
-                  {formData.quantidade} {produtoSelecionado.unidadeMedida} × {produtoSelecionado.quantidadePorUnidade} {produtoSelecionado.unidadeConteudo} = 
-                  <span className="font-bold text-blue-900 ml-1">
-                    {quantidadeTotal} {produtoSelecionado.unidadeConteudo}
-                  </span>
-                </p>
+                <div className="text-sm text-blue-700 space-y-1">
+                  <p>
+                    Quantidade Principal: {formData.quantidade} {produtoSelecionado.unidadeMedida}
+                  </p>
+                  <p>
+                    Quantidade Extra: {quantidadeExtra} {produtoSelecionado.unidadeMedida}
+                  </p>
+                  <p className="border-t pt-2">
+                    Total: {formData.quantidade + quantidadeExtra} {produtoSelecionado.unidadeMedida} × {produtoSelecionado.quantidadePorUnidade} {produtoSelecionado.unidadeConteudo} = 
+                    <span className="font-bold text-blue-900 ml-1">
+                      {quantidadeTotal} {produtoSelecionado.unidadeConteudo}
+                    </span>
+                  </p>
+                </div>
               </div>
             )}
 

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -6,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProdutoEstoqueForm } from "@/components/ProdutoEstoqueForm";
 import { ContagemEstoqueForm } from "@/components/ContagemEstoqueForm";
+import { ExportarEstoque } from "@/components/ExportarEstoque";
 import { useEstoque } from "@/hooks/useEstoque";
-import { Package, Calculator, Plus, Trash2, Edit } from "lucide-react";
+import { Package, Calculator, Plus, Trash2, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +51,12 @@ export default function ContagemEstoque() {
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold gradient-text">Contagem de Estoque</h1>
             <div className="flex space-x-2">
+              <ExportarEstoque 
+                produtos={produtos}
+                contagens={contagens}
+                getEstoqueAtual={getEstoqueAtual}
+              />
+              
               <Dialog open={showProdutoForm} onOpenChange={setShowProdutoForm}>
                 <DialogTrigger asChild>
                   <Button className="gradient-blue text-white">
