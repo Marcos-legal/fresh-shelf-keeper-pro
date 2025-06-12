@@ -29,6 +29,9 @@ export function useEstoque() {
         const parsedContagens = JSON.parse(contagensStored).map((c: any) => ({
           ...c,
           dataContagem: new Date(c.dataContagem),
+          // Garantir compatibilidade com versões antigas
+          quantidadeExtra: c.quantidadeExtra || 0,
+          unidadeQuantidadeExtra: c.unidadeQuantidadeExtra || 'porcoes',
         }));
         setContagens(parsedContagens);
       }
@@ -97,11 +100,30 @@ export function useEstoque() {
     const produto = produtos.find(p => p.id === data.produtoId);
     if (!produto) return;
 
+    // Calcular quantidade total considerando a unidade da quantidade extra
+    const quantidadeBase = data.quantidade * produto.quantidadePorUnidade;
+    let quantidadeTotal = quantidadeBase;
+
+    if (data.quantidadeExtra > 0) {
+      if (data.unidadeQuantidadeExtra === 'porcoes') {
+        quantidadeTotal += data.quantidadeExtra;
+      } else {
+        // Se for unidades individuais, converter para porções
+        const porcoesExtras = data.quantidadeExtra / produto.quantidadePorUnidade;
+        quantidadeTotal += porcoesExtras;
+      }
+    }
+
     const novaContagem: ContagemEstoque = {
       id: crypto.randomUUID(),
-      ...data,
-      quantidadeTotal: data.quantidade * produto.quantidadePorUnidade,
+      produtoId: data.produtoId,
+      quantidade: data.quantidade,
+      quantidadeExtra: data.quantidadeExtra,
+      unidadeQuantidadeExtra: data.unidadeQuantidadeExtra,
+      quantidadeTotal,
       dataContagem: new Date(),
+      responsavel: data.responsavel,
+      observacoes: data.observacoes,
     };
     
     const updatedContagens = [...contagens, novaContagem];

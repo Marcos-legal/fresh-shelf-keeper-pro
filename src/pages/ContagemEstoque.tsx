@@ -183,7 +183,8 @@ export default function ContagemEstoque() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Produto</TableHead>
-                      <TableHead>Quantidade</TableHead>
+                      <TableHead>Qtd Principal</TableHead>
+                      <TableHead>Qtd Extra</TableHead>
                       <TableHead>Total Calculado</TableHead>
                       <TableHead>Responsável</TableHead>
                       <TableHead>Data</TableHead>
@@ -195,6 +196,10 @@ export default function ContagemEstoque() {
                       .sort((a, b) => new Date(b.dataContagem).getTime() - new Date(a.dataContagem).getTime())
                       .map((contagem) => {
                         const produto = produtos.find(p => p.id === contagem.produtoId);
+                        const quantidadeExtraTexto = contagem.quantidadeExtra > 0 ? 
+                          `${contagem.quantidadeExtra} ${contagem.unidadeQuantidadeExtra === 'porcoes' ? 
+                            produto?.unidadeConteudo : 'un. ind.'}` : '-';
+                        
                         return (
                           <TableRow key={contagem.id}>
                             <TableCell className="font-medium">
@@ -204,8 +209,13 @@ export default function ContagemEstoque() {
                               {contagem.quantidade} {produto?.unidadeMedida}
                             </TableCell>
                             <TableCell>
+                              <Badge variant="secondary" className="text-xs">
+                                {quantidadeExtraTexto}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
                               <Badge variant="outline">
-                                {contagem.quantidadeTotal} {produto?.unidadeConteudo}
+                                {contagem.quantidadeTotal.toFixed(2)} {produto?.unidadeConteudo}
                               </Badge>
                             </TableCell>
                             <TableCell>{contagem.responsavel || '-'}</TableCell>

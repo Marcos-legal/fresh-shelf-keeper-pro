@@ -19,22 +19,42 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
   const [formData, setFormData] = useState<ContagemFormData>({
     produtoId: '',
     quantidade: 0,
+    quantidadeExtra: 0,
+    unidadeQuantidadeExtra: 'porcoes',
     responsavel: '',
     observacoes: '',
   });
 
-  const [quantidadeExtra, setQuantidadeExtra] = useState(0);
   const [errors, setErrors] = useState<Partial<Record<keyof ContagemFormData, string>>>({});
 
   const produtoSelecionado = produtos.find(p => p.id === formData.produtoId);
-  const quantidadeTotal = produtoSelecionado 
-    ? (formData.quantidade + quantidadeExtra) * produtoSelecionado.quantidadePorUnidade 
-    : 0;
+  
+  const calcularQuantidadeTotal = () => {
+    if (!produtoSelecionado) return 0;
+    
+    const quantidadeBase = formData.quantidade * produtoSelecionado.quantidadePorUnidade;
+    
+    if (formData.unidadeQuantidadeExtra === 'porcoes') {
+      return quantidadeBase + formData.quantidadeExtra;
+    } else {
+      // Se for unidades individuais, calcular quantas porções representam
+      const porcoesPorUnidade = produtoSelecionado.quantidadePorUnidade;
+      const porcoesExtras = formData.quantidadeExtra / porcoesPorUnidade;
+      return quantidadeBase + porcoesExtras;
+    }
+  };
+
+  const quantidadeTotal = calcularQuantidadeTotal();
 
   const produtoOptions = produtos.map(produto => ({
     value: produto.id,
     label: `${produto.nome} (${produto.quantidadePorUnidade} ${produto.unidadeConteudo}/${produto.unidadeMedida})`
   }));
+
+  const unidadeExtraOptions = [
+    { value: 'porcoes', label: 'Porções/Conteúdo' },
+    { value: 'unidades', label: 'Unidades Individuais' }
+  ];
 
   const handleInputChange = (field: keyof ContagemFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -63,19 +83,15 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
     }
     
     if (Object.keys(validationErrors).length === 0) {
-      // Incluir a quantidade extra na quantidade total
-      const dataWithExtra = {
-        ...formData,
-        quantidade: formData.quantidade + quantidadeExtra
-      };
-      onSubmit(dataWithExtra);
+      onSubmit(formData);
       setFormData({
         produtoId: '',
         quantidade: 0,
+        quantidadeExtra: 0,
+        unidadeQuantidadeExtra: 'porcoes',
         responsavel: '',
         observacoes: '',
       });
-      setQuantidadeExtra(0);
       if (onClose) onClose();
     } else {
       setErrors(validationErrors);
@@ -114,31 +130,54 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
               required
             />
 
-            <NumberInputField
-              id="quantidadeExtra"
-              label={`Quantidade Extra${produtoSelecionado ? ` (${produtoSelecionado.unidadeMedida})` : ''}`}
-              value={quantidadeExtra}
-              onChange={setQuantidadeExtra}
-              min={0}
-              required={false}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <NumberInputField
+                id="quantidadeExtra"
+                label="Quantidade Extra"
+                value={formData.quantidadeExtra}
+                onChange={(value) => handleNumberInputChange('quantidadeExtra', value)}
+                min={0}
+                required={false}
+              />
+
+              <SelectField
+                label="Unidade da Quantidade Extra"
+                value={formData.unidadeQuantidadeExtra}
+                onChange={(value: 'porcoes' | 'unidades') => handleInputChange('unidadeQuantidadeExtra', value)}
+                options={unidadeExtraOptions}
+                required={false}
+              />
+            </div>
 
             {produtoSelecionado && (
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h3 className="font-medium text-blue-900 mb-2">Cálculo do Estoque</h3>
-                <div className="text-sm text-blue-700 space-y-1">
-                  <p>
-                    Quantidade Principal: {formData.quantidade} {produtoSelecionado.unidadeMedida}
-                  </p>
-                  <p>
-                    Quantidade Extra: {quantidadeExtra} {produtoSelecionado.unidadeMedida}
-                  </p>
-                  <p className="border-t pt-2">
-                    Total: {formData.quantidade + quantidadeExtra} {produtoSelecionado.unidadeMedida} × {produtoSelecionado.quantidadePorUnidade} {produtoSelecionado.unidadeConteudo} = 
-                    <span className="font-bold text-blue-900 ml-1">
-                      {quantidadeTotal} {produtoSelecionado.unidadeConteudo}
+                <h3 className="font-medium text-blue-900 mb-3">📊 Cálculo do Estoque</h3>
+                <div className="text-sm text-blue-700 space-y-2">
+                  <div className="flex justify-between">
+                    <span>Quantidade Principal:</span>
+                    <span className="font-medium">
+                      {formData.quantidade} {produtoSelecionado.unidadeMedida} × {produtoSelecionado.quantidadePorUnidade} = {formData.quantidade * produtoSelecionado.quantidadePorUnidade} {produtoSelecionado.unidadeConteudo}
                     </span>
-                  </p>
+                  </div>
+                  
+                  {formData.quantidadeExtra > 0 && (
+                    <div className="flex justify-between">
+                      <span>Quantidade Extra:</span>
+                      <span className="font-medium">
+                        {formData.quantidadeExtra} {formData.unidadeQuantidadeExtra === 'porcoes' ? produtoSelecionado.unidadeConteudo : 'unidades individuais'}
+                        {formData.unidadeQuantidadeExtra === 'unidades' && 
+                          ` (${(formData.quantidadeExtra / produtoSelecionado.quantidadePorUnidade).toFixed(2)} ${produtoSelecionado.unidadeConteudo})`
+                        }
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="border-t pt-2 flex justify-between font-bold text-blue-900">
+                    <span>Total no Estoque:</span>
+                    <span className="text-lg">
+                      {quantidadeTotal.toFixed(2)} {produtoSelecionado.unidadeConteudo}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}

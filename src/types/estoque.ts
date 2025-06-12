@@ -13,7 +13,9 @@ export interface ContagemEstoque {
   id: string;
   produtoId: string;
   quantidade: number; // quantidade de unidades contadas
-  quantidadeTotal: number; // quantidade * quantidadePorUnidade
+  quantidadeExtra: number; // quantidade extra
+  unidadeQuantidadeExtra: 'porcoes' | 'unidades'; // unidade da quantidade extra
+  quantidadeTotal: number; // quantidade total calculada
   dataContagem: Date;
   responsavel?: string;
   observacoes?: string;
@@ -29,6 +31,8 @@ export interface EstoqueFormData {
 export interface ContagemFormData {
   produtoId: string;
   quantidade: number;
+  quantidadeExtra: number;
+  unidadeQuantidadeExtra: 'porcoes' | 'unidades';
   responsavel?: string;
   observacoes?: string;
 }
