@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -5,20 +6,53 @@ import { useProducts } from "@/hooks/useProducts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Printer, Package, Eye, FileText } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Printer, Package, Eye, FileText, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+
+// Configurações de tamanhos de etiqueta
+const TAMANHOS_ETIQUETA = {
+  pequena: {
+    nome: "Pequena (50x30mm)",
+    width: "200px",
+    height: "120px",
+    fontSize: "10px",
+    labelSize: "9px",
+    contentSize: "10px",
+    padding: "6px",
+    spacing: "4px"
+  },
+  media: {
+    nome: "Média (70x50mm)", 
+    width: "280px",
+    height: "200px",
+    fontSize: "12px",
+    labelSize: "11px",
+    contentSize: "12px",
+    padding: "8px",
+    spacing: "6px"
+  },
+  grande: {
+    nome: "Grande (100x70mm)",
+    width: "400px",
+    height: "280px",
+    fontSize: "14px",
+    labelSize: "13px",
+    contentSize: "14px",
+    padding: "12px",
+    spacing: "8px"
+  }
+};
 
 const ImpressaoEtiquetas = () => {
   const { products } = useProducts();
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [tamanhoEtiqueta, setTamanhoEtiqueta] = useState(() => {
+    return localStorage.getItem('tamanho-etiqueta-termica') || 'media';
+  });
   const navigate = useNavigate();
-
-  // Check if optional dates should be shown
-  const getShowOptionalDates = () => {
-    const stored = localStorage.getItem('showOptionalDates');
-    return stored ? JSON.parse(stored) : false;
-  };
 
   const handleSelectProduct = (productId: string) => {
     setSelectedProducts(prev => 
@@ -36,7 +70,15 @@ const ImpressaoEtiquetas = () => {
     }
   };
 
-  // Helper function to safely format dates with improved display
+  const handleTamanhoChange = (novoTamanho: string) => {
+    setTamanhoEtiqueta(novoTamanho);
+    localStorage.setItem('tamanho-etiqueta-termica', novoTamanho);
+    toast({
+      title: "Configuração salva",
+      description: `Tamanho ${TAMANHOS_ETIQUETA[novoTamanho as keyof typeof TAMANHOS_ETIQUETA].nome} salvo como padrão.`,
+    });
+  };
+
   const formatDateSafe = (dateValue: any): string => {
     if (!dateValue) return '';
     
@@ -46,21 +88,15 @@ const ImpressaoEtiquetas = () => {
       if (dateValue instanceof Date) {
         date = dateValue;
       } else if (typeof dateValue === 'string') {
-        // Handle different date formats
         if (dateValue.includes('/')) {
-          // Handle formats like "DEZEMBRO/2025" or "31/12/2025"
           if (dateValue.match(/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+\/\d{4}$/)) {
-            // Format: DEZEMBRO/2025
             return dateValue;
           } else if (dateValue.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
-            // Format: 31/12/2025
             return dateValue;
           } else if (dateValue.match(/^\d{1,2}\/\d{4}$/)) {
-            // Format: 12/2025
             return dateValue;
           }
         } else {
-          // Handle YYYY-MM-DD format
           const [year, month, day] = dateValue.split('-').map(Number);
           if (year && month && day) {
             date = new Date(year, month - 1, day);
@@ -72,7 +108,6 @@ const ImpressaoEtiquetas = () => {
         return date.toLocaleDateString('pt-BR');
       }
       
-      // Return the original value if it's already formatted
       return dateValue;
     } catch (error) {
       console.warn('Error formatting date:', dateValue, error);
@@ -80,9 +115,9 @@ const ImpressaoEtiquetas = () => {
     }
   };
 
-  // Calcular número de páginas (considerando 6 etiquetas por página)
   const etiquetasPorPagina = 6;
   const totalPaginas = Math.ceil(selectedProducts.length / etiquetasPorPagina);
+  const configTamanho = TAMANHOS_ETIQUETA[tamanhoEtiqueta as keyof typeof TAMANHOS_ETIQUETA];
 
   const handlePrint = () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
@@ -96,13 +131,12 @@ const ImpressaoEtiquetas = () => {
       return;
     }
 
-    // Criar janela de impressão otimizada para impressoras térmicas
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Etiquetas Térmicas - ${selectedProducts.length} produtos</title>
+            <title>Etiquetas Térmicas - ${selectedProducts.length} produtos - ${configTamanho.nome}</title>
             <style>
               @page {
                 size: A4;
@@ -118,49 +152,56 @@ const ImpressaoEtiquetas = () => {
               }
               .etiqueta { 
                 border: 3px solid #000;
-                width: 320px;
-                height: 200px;
+                width: ${configTamanho.width};
+                height: ${configTamanho.height};
                 margin: 8px;
-                padding: 8px;
+                padding: ${configTamanho.padding};
                 float: left;
-                font-size: 12px;
+                font-size: ${configTamanho.fontSize};
                 page-break-inside: avoid;
                 background: white;
                 font-weight: 600;
                 color: #000;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
               }
               .campo {
-                margin-bottom: 6px;
+                margin-bottom: ${configTamanho.spacing};
                 border-bottom: 2px solid #333;
                 padding-bottom: 2px;
-                min-height: 18px;
+                min-height: 16px;
                 font-weight: bold;
+                flex-shrink: 0;
               }
               .label {
                 font-weight: 900;
-                font-size: 11px;
+                font-size: ${configTamanho.labelSize};
                 color: #000;
                 text-transform: uppercase;
               }
               .content {
                 font-weight: 800;
-                font-size: 12px;
+                font-size: ${configTamanho.contentSize};
                 color: #000;
                 text-transform: uppercase;
                 margin-top: 2px;
+                word-wrap: break-word;
+                overflow: hidden;
               }
               .grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 8px;
-                margin-bottom: 6px;
+                gap: 6px;
+                margin-bottom: ${configTamanho.spacing};
               }
               .checkbox-row {
                 display: grid;
                 grid-template-columns: 1fr 1fr 1fr;
-                gap: 6px;
-                font-size: 10px;
-                margin-bottom: 6px;
+                gap: 4px;
+                font-size: ${configTamanho.labelSize};
+                margin-bottom: ${configTamanho.spacing};
                 font-weight: 900;
               }
               .checkbox-item {
@@ -170,7 +211,7 @@ const ImpressaoEtiquetas = () => {
                 color: #000;
               }
               .checkbox-mark {
-                font-size: 14px;
+                font-size: 12px;
                 font-weight: 900;
                 margin-right: 2px;
               }
@@ -258,7 +299,6 @@ const ImpressaoEtiquetas = () => {
       `);
       printWindow.document.close();
       
-      // Aguardar carregamento e imprimir
       setTimeout(() => {
         printWindow.print();
       }, 500);
@@ -266,7 +306,7 @@ const ImpressaoEtiquetas = () => {
 
     toast({
       title: "Etiquetas enviadas para impressão",
-      description: `${selectedProducts.length} etiqueta(s) otimizada(s) para impressora térmica!`,
+      description: `${selectedProducts.length} etiqueta(s) ${configTamanho.nome} enviadas!`,
     });
   };
 
@@ -292,6 +332,41 @@ const ImpressaoEtiquetas = () => {
                 </div>
               </div>
             </div>
+
+            {/* Configurações de Tamanho */}
+            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
+              <CardHeader className="bg-gradient-to-r from-green-800 to-green-900 text-white rounded-t-lg">
+                <CardTitle className="flex items-center space-x-2">
+                  <Settings className="w-5 h-5" />
+                  <span>Configurações de Etiqueta Térmica</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="tamanho-etiqueta" className="text-sm font-medium text-gray-700 mb-2 block">
+                      Tamanho da Etiqueta
+                    </Label>
+                    <Select value={tamanhoEtiqueta} onValueChange={handleTamanhoChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(TAMANHOS_ETIQUETA).map(([key, config]) => (
+                          <SelectItem key={key} value={key}>
+                            {config.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Settings className="w-4 h-4" />
+                    <span>Configuração salva automaticamente</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Controles de Impressão */}
             <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
@@ -327,7 +402,7 @@ const ImpressaoEtiquetas = () => {
                       className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg"
                     >
                       <Printer className="w-4 h-4 mr-2" />
-                      Imprimir Térmico ({selectedProducts.length})
+                      Imprimir {configTamanho.nome} ({selectedProducts.length})
                       {selectedProducts.length > 0 && (
                         <span className="ml-1">
                           - {totalPaginas} pág{totalPaginas !== 1 ? 's' : ''}
@@ -347,8 +422,8 @@ const ImpressaoEtiquetas = () => {
                     <FileText className="w-5 h-5" />
                     <span className="font-medium">
                       {selectedProducts.length} etiqueta{selectedProducts.length !== 1 ? 's' : ''} 
+                      • Tamanho: {configTamanho.nome}
                       • Otimizada{selectedProducts.length !== 1 ? 's' : ''} para impressão térmica
-                      • Fonte monospace para melhor nitidez
                     </span>
                   </div>
                 </CardContent>

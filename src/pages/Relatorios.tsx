@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -118,80 +117,119 @@ const Relatorios = () => {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(excelData);
 
-    // Configurar largura das colunas
+    // Configurar largura das colunas para melhor visualização
     const colWidths = [
       { wch: 6 },   // ITEM
-      { wch: 25 },  // PRODUTO
-      { wch: 15 },  // LOTE
-      { wch: 15 },  // MARCA
-      { wch: 15 },  // DATA FABRICAÇÃO
-      { wch: 15 },  // DATA VALIDADE
-      { wch: 15 },  // DATA ABERTURA
-      { wch: 15 },  // UTILIZAR ATÉ
-      { wch: 15 },  // DIAS RESTANTES
+      { wch: 30 },  // PRODUTO
+      { wch: 18 },  // LOTE
+      { wch: 18 },  // MARCA
+      { wch: 16 },  // DATA FABRICAÇÃO
+      { wch: 16 },  // DATA VALIDADE
+      { wch: 16 },  // DATA ABERTURA
+      { wch: 16 },  // UTILIZAR ATÉ
+      { wch: 16 },  // DIAS RESTANTES
       { wch: 20 },  // LOCAL ARMAZENAMENTO
       { wch: 20 },  // RESPONSÁVEL
-      { wch: 20 },  // STATUS
-      { wch: 15 },  // CRIADO EM
-      { wch: 15 }   // ATUALIZADO EM
+      { wch: 22 },  // STATUS
+      { wch: 16 },  // CRIADO EM
+      { wch: 16 }   // ATUALIZADO EM
     ];
     ws['!cols'] = colWidths;
 
-    // Adicionar formatação condicional para o cabeçalho
+    // Aplicar formatação moderna ao cabeçalho
     const headerRange = XLSX.utils.decode_range(ws['!ref'] || 'A1');
     for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
       const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
       if (!ws[cellAddress]) continue;
       
       ws[cellAddress].s = {
-        font: { bold: true, sz: 12, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "366092" } },
-        alignment: { horizontal: "center", vertical: "center" },
+        font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "2563EB" } }, // Azul moderno
+        alignment: { horizontal: "center", vertical: "center", wrapText: true },
         border: {
-          top: { style: "thin", color: { rgb: "000000" } },
-          bottom: { style: "thin", color: { rgb: "000000" } },
-          left: { style: "thin", color: { rgb: "000000" } },
-          right: { style: "thin", color: { rgb: "000000" } }
+          top: { style: "thick", color: { rgb: "1E40AF" } },
+          bottom: { style: "thick", color: { rgb: "1E40AF" } },
+          left: { style: "thick", color: { rgb: "1E40AF" } },
+          right: { style: "thick", color: { rgb: "1E40AF" } }
         }
       };
     }
 
-    // Adicionar bordas para todas as células
+    // Aplicar formatação às células de dados com bordas e cores alternadas
     const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-    for (let row = range.s.r; row <= range.e.r; row++) {
+    for (let row = range.s.r + 1; row <= range.e.r; row++) {
       for (let col = range.s.c; col <= range.e.c; col++) {
         const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-        if (!ws[cellAddress]) continue;
+        if (!ws[cellAddress]) ws[cellAddress] = { v: '', t: 's' };
         
-        if (!ws[cellAddress].s) ws[cellAddress].s = {};
-        ws[cellAddress].s.border = {
-          top: { style: "thin", color: { rgb: "000000" } },
-          bottom: { style: "thin", color: { rgb: "000000" } },
-          left: { style: "thin", color: { rgb: "000000" } },
-          right: { style: "thin", color: { rgb: "000000" } }
+        ws[cellAddress].s = {
+          font: { sz: 11, color: { rgb: "1F2937" } },
+          alignment: { horizontal: "center", vertical: "center", wrapText: true },
+          border: {
+            top: { style: "thin", color: { rgb: "D1D5DB" } },
+            bottom: { style: "thin", color: { rgb: "D1D5DB" } },
+            left: { style: "thin", color: { rgb: "D1D5DB" } },
+            right: { style: "thin", color: { rgb: "D1D5DB" } }
+          },
+          fill: {
+            fgColor: { rgb: row % 2 === 0 ? "F9FAFB" : "FFFFFF" }
+          }
         };
-        
-        // Alternar cores das linhas
-        if (row > 0) {
-          ws[cellAddress].s.fill = {
-            fgColor: { rgb: row % 2 === 0 ? "F8F9FA" : "FFFFFF" }
-          };
+
+        // Formatação especial para coluna de STATUS
+        if (col === 11) { // Coluna STATUS
+          const cellValue = ws[cellAddress].v;
+          if (typeof cellValue === 'string') {
+            if (cellValue.includes('VÁLIDO')) {
+              ws[cellAddress].s.fill = { fgColor: { rgb: "DCFCE7" } };
+              ws[cellAddress].s.font = { ...ws[cellAddress].s.font, color: { rgb: "166534" } };
+            } else if (cellValue.includes('PRÓXIMO')) {
+              ws[cellAddress].s.fill = { fgColor: { rgb: "FEF3C7" } };
+              ws[cellAddress].s.font = { ...ws[cellAddress].s.font, color: { rgb: "92400E" } };
+            } else if (cellValue.includes('VENCIDO')) {
+              ws[cellAddress].s.fill = { fgColor: { rgb: "FEE2E2" } };
+              ws[cellAddress].s.font = { ...ws[cellAddress].s.font, color: { rgb: "991B1B" } };
+            }
+          }
+        }
+
+        // Formatação especial para coluna DIAS RESTANTES
+        if (col === 8) { // Coluna DIAS RESTANTES
+          const dias = parseInt(ws[cellAddress].v);
+          if (!isNaN(dias)) {
+            if (dias < 0) {
+              ws[cellAddress].s.fill = { fgColor: { rgb: "FEE2E2" } };
+              ws[cellAddress].s.font = { ...ws[cellAddress].s.font, color: { rgb: "991B1B" }, bold: true };
+            } else if (dias <= 7) {
+              ws[cellAddress].s.fill = { fgColor: { rgb: "FEF3C7" } };
+              ws[cellAddress].s.font = { ...ws[cellAddress].s.font, color: { rgb: "92400E" }, bold: true };
+            } else if (dias <= 30) {
+              ws[cellAddress].s.fill = { fgColor: { rgb: "DBEAFE" } };
+              ws[cellAddress].s.font = { ...ws[cellAddress].s.font, color: { rgb: "1E40AF" } };
+            }
+          }
         }
       }
     }
+
+    // Adicionar filtros automáticos
+    ws['!autofilter'] = { ref: `A1:${XLSX.utils.encode_cell({ r: range.e.r, c: range.e.c })}` };
+
+    // Congelar primeira linha
+    ws['!freeze'] = { xSplit: 0, ySplit: 1 };
 
     XLSX.utils.book_append_sheet(wb, ws, "Relatório de Produtos");
 
     // Gerar nome do arquivo com data/hora
     const now = new Date();
-    const timestamp = now.toLocaleString('pt-BR').replace(/[/:]/g, '-').replace(', ', '_');
-    const filename = `relatorio_produtos_${timestamp}.xlsx`;
+    const timestamp = now.toISOString().split('T')[0];
+    const filename = `relatorio_produtos_moderno_${timestamp}.xlsx`;
 
     XLSX.writeFile(wb, filename);
 
     toast({
-      title: "Relatório exportado com sucesso!",
-      description: `Arquivo "${filename}" foi baixado com ${filteredProducts.length} produto(s).`,
+      title: "📊 Relatório exportado com sucesso!",
+      description: `Planilha moderna "${filename}" foi baixada com ${filteredProducts.length} produto(s).`,
     });
   };
 
@@ -299,10 +337,10 @@ const Relatorios = () => {
                   </Button>
                   <Button
                     onClick={exportToExcel}
-                    className="gradient-blue text-white font-bold shadow-lg"
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg"
                   >
                     <FileDown className="w-4 h-4 mr-2" />
-                    Exportar para Excel ({filteredProducts.length})
+                    📊 Exportar Excel Moderno ({filteredProducts.length})
                   </Button>
                 </div>
               </CardContent>
