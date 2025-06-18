@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Download, FileText, BarChart3 } from "lucide-react";
 import { ProdutoEstoque, ContagemEstoque } from "@/types/estoque";
 import { toast } from "@/hooks/use-toast";
+import * as XLSX from 'xlsx';
 
 interface ExportarEstoqueProps {
   produtos: ProdutoEstoque[];
