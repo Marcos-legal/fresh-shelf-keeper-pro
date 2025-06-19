@@ -6,52 +6,24 @@ import { useProducts } from "@/hooks/useProducts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Printer, Package, Eye, FileText, Settings } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Printer, Package, Eye, FileText, Settings, Ruler } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-
-// Configurações de tamanhos de etiqueta
-const TAMANHOS_ETIQUETA = {
-  pequena: {
-    nome: "Pequena (50x30mm)",
-    width: "200px",
-    height: "120px",
-    fontSize: "10px",
-    labelSize: "9px",
-    contentSize: "10px",
-    padding: "6px",
-    spacing: "4px"
-  },
-  media: {
-    nome: "Média (70x50mm)", 
-    width: "280px",
-    height: "200px",
-    fontSize: "12px",
-    labelSize: "11px",
-    contentSize: "12px",
-    padding: "8px",
-    spacing: "6px"
-  },
-  grande: {
-    nome: "Grande (100x70mm)",
-    width: "400px",
-    height: "280px",
-    fontSize: "14px",
-    labelSize: "13px",
-    contentSize: "14px",
-    padding: "12px",
-    spacing: "8px"
-  }
-};
 
 const ImpressaoEtiquetas = () => {
   const { products } = useProducts();
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
-  const [tamanhoEtiqueta, setTamanhoEtiqueta] = useState(() => {
-    return localStorage.getItem('tamanho-etiqueta-termica') || 'media';
+  
+  // Configurações manuais de tamanho (em mm)
+  const [largura, setLargura] = useState(() => {
+    return parseInt(localStorage.getItem('etiqueta-largura') || '70');
   });
+  const [altura, setAltura] = useState(() => {
+    return parseInt(localStorage.getItem('etiqueta-altura') || '50');
+  });
+  
   const navigate = useNavigate();
 
   const handleSelectProduct = (productId: string) => {
@@ -70,13 +42,16 @@ const ImpressaoEtiquetas = () => {
     }
   };
 
-  const handleTamanhoChange = (novoTamanho: string) => {
-    setTamanhoEtiqueta(novoTamanho);
-    localStorage.setItem('tamanho-etiqueta-termica', novoTamanho);
-    toast({
-      title: "Configuração salva",
-      description: `Tamanho ${TAMANHOS_ETIQUETA[novoTamanho as keyof typeof TAMANHOS_ETIQUETA].nome} salvo como padrão.`,
-    });
+  const handleLarguraChange = (value: string) => {
+    const novaLargura = parseInt(value) || 50;
+    setLargura(novaLargura);
+    localStorage.setItem('etiqueta-largura', novaLargura.toString());
+  };
+
+  const handleAlturaChange = (value: string) => {
+    const novaAltura = parseInt(value) || 30;
+    setAltura(novaAltura);
+    localStorage.setItem('etiqueta-altura', novaAltura.toString());
   };
 
   const formatDateSafe = (dateValue: any): string => {
@@ -115,9 +90,56 @@ const ImpressaoEtiquetas = () => {
     }
   };
 
+  // Calcular configurações responsivas baseadas no tamanho
+  const getResponsiveConfig = () => {
+    const area = largura * altura;
+    const aspectRatio = largura / altura;
+    
+    // Configurações base para diferentes tamanhos
+    let fontSize, labelSize, contentSize, padding, spacing;
+    
+    if (area < 2000) { // Muito pequena (ex: 40x30)
+      fontSize = Math.max(8, Math.min(10, area / 250));
+      labelSize = fontSize - 1;
+      contentSize = fontSize;
+      padding = Math.max(4, largura * 0.08);
+      spacing = Math.max(2, altura * 0.04);
+    } else if (area < 4000) { // Pequena (ex: 50x40, 70x50)
+      fontSize = Math.max(10, Math.min(12, area / 300));
+      labelSize = fontSize - 1;
+      contentSize = fontSize;
+      padding = Math.max(6, largura * 0.085);
+      spacing = Math.max(3, altura * 0.06);
+    } else if (area < 8000) { // Média (ex: 80x70, 100x60)
+      fontSize = Math.max(11, Math.min(14, area / 400));
+      labelSize = fontSize - 1;
+      contentSize = fontSize;
+      padding = Math.max(8, largura * 0.09);
+      spacing = Math.max(4, altura * 0.08);
+    } else { // Grande (ex: 100x80+)
+      fontSize = Math.max(12, Math.min(16, area / 500));
+      labelSize = fontSize - 1;
+      contentSize = fontSize;
+      padding = Math.max(10, largura * 0.1);
+      spacing = Math.max(5, altura * 0.1);
+    }
+
+    return {
+      width: `${largura * 3.78}px`, // Conversão mm para px (96 DPI)
+      height: `${altura * 3.78}px`,
+      fontSize: `${fontSize}px`,
+      labelSize: `${labelSize}px`,
+      contentSize: `${contentSize}px`,
+      padding: `${Math.round(padding)}px`,
+      spacing: `${Math.round(spacing)}px`,
+      showGrid: aspectRatio > 1.2, // Mostrar grid se for mais largo
+      compactMode: area < 2500 // Modo compacto para etiquetas muito pequenas
+    };
+  };
+
   const etiquetasPorPagina = 6;
   const totalPaginas = Math.ceil(selectedProducts.length / etiquetasPorPagina);
-  const configTamanho = TAMANHOS_ETIQUETA[tamanhoEtiqueta as keyof typeof TAMANHOS_ETIQUETA];
+  const config = getResponsiveConfig();
 
   const handlePrint = () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
@@ -136,7 +158,7 @@ const ImpressaoEtiquetas = () => {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Etiquetas Térmicas - ${selectedProducts.length} produtos - ${configTamanho.nome}</title>
+            <title>Etiquetas Térmicas - ${selectedProducts.length} produtos - ${largura}x${altura}mm</title>
             <style>
               @page {
                 size: A4;
@@ -152,12 +174,12 @@ const ImpressaoEtiquetas = () => {
               }
               .etiqueta { 
                 border: 3px solid #000;
-                width: ${configTamanho.width};
-                height: ${configTamanho.height};
+                width: ${config.width};
+                height: ${config.height};
                 margin: 8px;
-                padding: ${configTamanho.padding};
+                padding: ${config.padding};
                 float: left;
-                font-size: ${configTamanho.fontSize};
+                font-size: ${config.fontSize};
                 page-break-inside: avoid;
                 background: white;
                 font-weight: 600;
@@ -166,54 +188,64 @@ const ImpressaoEtiquetas = () => {
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
+                overflow: hidden;
               }
               .campo {
-                margin-bottom: ${configTamanho.spacing};
+                margin-bottom: ${config.spacing};
                 border-bottom: 2px solid #333;
                 padding-bottom: 2px;
-                min-height: 16px;
+                min-height: ${config.compactMode ? '12px' : '16px'};
                 font-weight: bold;
                 flex-shrink: 0;
+                overflow: hidden;
               }
               .label {
                 font-weight: 900;
-                font-size: ${configTamanho.labelSize};
+                font-size: ${config.labelSize};
                 color: #000;
                 text-transform: uppercase;
+                line-height: 1;
               }
               .content {
                 font-weight: 800;
-                font-size: ${configTamanho.contentSize};
+                font-size: ${config.contentSize};
                 color: #000;
                 text-transform: uppercase;
                 margin-top: 2px;
                 word-wrap: break-word;
                 overflow: hidden;
+                line-height: 1.1;
+                max-height: ${config.compactMode ? '24px' : '32px'};
               }
               .grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 6px;
-                margin-bottom: ${configTamanho.spacing};
+                display: ${config.showGrid ? 'grid' : 'block'};
+                grid-template-columns: ${config.showGrid ? '1fr 1fr' : '1fr'};
+                gap: ${config.showGrid ? '4px' : '0'};
+                margin-bottom: ${config.spacing};
               }
               .checkbox-row {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 4px;
-                font-size: ${configTamanho.labelSize};
-                margin-bottom: ${configTamanho.spacing};
+                display: ${config.compactMode ? 'flex' : 'grid'};
+                ${config.compactMode ? 'justify-content: space-between' : 'grid-template-columns: 1fr 1fr 1fr'};
+                gap: ${config.compactMode ? '2px' : '4px'};
+                font-size: ${config.labelSize};
+                margin-bottom: ${config.spacing};
                 font-weight: 900;
+                flex-wrap: wrap;
               }
               .checkbox-item {
                 display: flex;
                 align-items: center;
                 font-weight: 900;
                 color: #000;
+                ${config.compactMode ? 'font-size: ' + (parseInt(config.labelSize) - 1) + 'px' : ''};
               }
               .checkbox-mark {
-                font-size: 12px;
+                font-size: ${config.compactMode ? '10px' : '12px'};
                 font-weight: 900;
                 margin-right: 2px;
+              }
+              .compact .campo {
+                margin-bottom: ${Math.max(2, parseInt(config.spacing) / 2)}px;
               }
               .clearfix::after {
                 content: "";
@@ -236,7 +268,7 @@ const ImpressaoEtiquetas = () => {
           <body>
             <div class="clearfix">
               ${selectedProductsData.map(product => `
-                <div class="etiqueta">
+                <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
                   <div class="campo">
                     <div class="label">PRODUTO:</div>
                     <div class="content">${(product.nome || '').toUpperCase()}</div>
@@ -246,12 +278,20 @@ const ImpressaoEtiquetas = () => {
                       <div class="label">LOTE:</div>
                       <div class="content">${(product.lote || '').toUpperCase()}</div>
                     </div>
+                    ${config.showGrid ? `
                     <div class="campo">
                       <div class="label">MARCA:</div>
                       <div class="content">${(product.marca || '').toUpperCase()}</div>
                     </div>
+                    ` : ''}
                   </div>
-                  ${product.showOptionalDates ? `
+                  ${!config.showGrid ? `
+                  <div class="campo">
+                    <div class="label">MARCA:</div>
+                    <div class="content">${(product.marca || '').toUpperCase()}</div>
+                  </div>
+                  ` : ''}
+                  ${product.showOptionalDates && !config.compactMode ? `
                   <div class="grid">
                     <div class="campo">
                       <div class="label">FABRIC.:</div>
@@ -268,29 +308,39 @@ const ImpressaoEtiquetas = () => {
                       <div class="label">ABERTURA:</div>
                       <div class="content">${formatDateSafe(product.dataAbertura)}</div>
                     </div>
+                    ${config.showGrid ? `
                     <div class="campo">
                       <div class="label">USAR ATÉ:</div>
                       <div class="content">${formatDateSafe(product.utilizarAte)}</div>
                     </div>
+                    ` : ''}
                   </div>
+                  ${!config.showGrid ? `
+                  <div class="campo">
+                    <div class="label">USAR ATÉ:</div>
+                    <div class="content">${formatDateSafe(product.utilizarAte)}</div>
+                  </div>
+                  ` : ''}
                   <div class="checkbox-row">
                     <div class="checkbox-item">
                       <span class="checkbox-mark">${product.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
-                      <span>REFRIG.</span>
+                      <span>REF</span>
                     </div>
                     <div class="checkbox-item">
                       <span class="checkbox-mark">${product.localArmazenamento === 'congelado' ? '■' : '□'}</span>
-                      <span>CONGEL.</span>
+                      <span>CON</span>
                     </div>
                     <div class="checkbox-item">
                       <span class="checkbox-mark">${product.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
-                      <span>AMBIENT.</span>
+                      <span>AMB</span>
                     </div>
                   </div>
+                  ${!config.compactMode ? `
                   <div class="campo">
                     <div class="label">RESPONSÁVEL:</div>
                     <div class="content">${(product.responsavel || '').toUpperCase()}</div>
                   </div>
+                  ` : ''}
                 </div>
               `).join('')}
             </div>
@@ -306,7 +356,7 @@ const ImpressaoEtiquetas = () => {
 
     toast({
       title: "Etiquetas enviadas para impressão",
-      description: `${selectedProducts.length} etiqueta(s) ${configTamanho.nome} enviadas!`,
+      description: `${selectedProducts.length} etiqueta(s) ${largura}x${altura}mm enviadas!`,
     });
   };
 
@@ -333,37 +383,62 @@ const ImpressaoEtiquetas = () => {
               </div>
             </div>
 
-            {/* Configurações de Tamanho */}
+            {/* Configurações de Tamanho Manual */}
             <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
               <CardHeader className="bg-gradient-to-r from-green-800 to-green-900 text-white rounded-t-lg">
                 <CardTitle className="flex items-center space-x-2">
-                  <Settings className="w-5 h-5" />
-                  <span>Configurações de Etiqueta Térmica</span>
+                  <Ruler className="w-5 h-5" />
+                  <span>Ajuste Manual de Tamanho</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                   <div>
-                    <Label htmlFor="tamanho-etiqueta" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Tamanho da Etiqueta
+                    <Label htmlFor="largura" className="text-sm font-medium text-gray-700 mb-2 block">
+                      Largura (mm)
                     </Label>
-                    <Select value={tamanhoEtiqueta} onValueChange={handleTamanhoChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(TAMANHOS_ETIQUETA).map(([key, config]) => (
-                          <SelectItem key={key} value={key}>
-                            {config.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      id="largura"
+                      type="number"
+                      min="30"
+                      max="150"
+                      value={largura}
+                      onChange={(e) => handleLarguraChange(e.target.value)}
+                      className="text-center"
+                    />
                   </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Settings className="w-4 h-4" />
-                    <span>Configuração salva automaticamente</span>
+                  <div>
+                    <Label htmlFor="altura" className="text-sm font-medium text-gray-700 mb-2 block">
+                      Altura (mm)
+                    </Label>
+                    <Input
+                      id="altura"
+                      type="number"
+                      min="20"
+                      max="100"
+                      value={altura}
+                      onChange={(e) => handleAlturaChange(e.target.value)}
+                      className="text-center"
+                    />
                   </div>
+                  <div className="flex flex-col items-center">
+                    <div className="text-sm text-gray-600 mb-2">Preview:</div>
+                    <div 
+                      className="border-2 border-gray-400 bg-white flex items-center justify-center text-xs font-bold text-gray-700"
+                      style={{
+                        width: `${Math.min(80, largura * 0.8)}px`,
+                        height: `${Math.min(60, altura * 0.8)}px`
+                      }}
+                    >
+                      {largura}×{altura}mm
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    <Settings className="w-4 h-4 inline mr-1" />
+                    Layout se adapta automaticamente ao tamanho • Configuração salva automaticamente
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -402,7 +477,7 @@ const ImpressaoEtiquetas = () => {
                       className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg"
                     >
                       <Printer className="w-4 h-4 mr-2" />
-                      Imprimir {configTamanho.nome} ({selectedProducts.length})
+                      Imprimir {largura}×{altura}mm ({selectedProducts.length})
                       {selectedProducts.length > 0 && (
                         <span className="ml-1">
                           - {totalPaginas} pág{totalPaginas !== 1 ? 's' : ''}
@@ -422,8 +497,8 @@ const ImpressaoEtiquetas = () => {
                     <FileText className="w-5 h-5" />
                     <span className="font-medium">
                       {selectedProducts.length} etiqueta{selectedProducts.length !== 1 ? 's' : ''} 
-                      • Tamanho: {configTamanho.nome}
-                      • Otimizada{selectedProducts.length !== 1 ? 's' : ''} para impressão térmica
+                      • Tamanho: {largura}×{altura}mm
+                      • Layout adaptativo otimizado para impressão térmica
                     </span>
                   </div>
                 </CardContent>

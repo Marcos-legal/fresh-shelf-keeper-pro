@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { EtiquetaView } from "@/components/EtiquetaView";
-import { Eye, CalendarIcon, RefreshCw, AlertTriangle } from "lucide-react";
+import { Eye, CalendarIcon, RefreshCw, AlertTriangle, Ruler } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,10 @@ const VisualizarEtiquetas = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [calendarOpen, setCalendarOpen] = useState(false);
+
+  // Recuperar tamanhos salvos das etiquetas
+  const largura = parseInt(localStorage.getItem('etiqueta-largura') || '70');
+  const altura = parseInt(localStorage.getItem('etiqueta-altura') || '50');
 
   console.log('Produtos carregados:', products);
   console.log('Total de produtos:', products.length);
@@ -123,11 +127,24 @@ const VisualizarEtiquetas = () => {
                     👁️ Visualizar Etiquetas
                   </h1>
                   <p className="text-gray-600 mt-1 text-lg">
-                    Visualize todas as etiquetas geradas ({products.length} produtos)
+                    Visualize todas as etiquetas geradas ({products.length} produtos) - Tamanho: {largura}×{altura}mm
                   </p>
                 </div>
               </div>
             </div>
+
+            {/* Informação do Tamanho Atual */}
+            <Card className="mb-4 bg-gradient-to-r from-green-50 to-green-100 border-green-200 shadow-lg">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2 text-green-700">
+                  <Ruler className="w-5 h-5" />
+                  <span className="font-medium">
+                    Etiquetas exibidas no tamanho configurado: {largura}×{altura}mm
+                    <span className="text-sm ml-2">(Configure o tamanho na página de Impressão)</span>
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Card de Controle */}
             <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
@@ -226,7 +243,7 @@ const VisualizarEtiquetas = () => {
                             <span className="text-sm text-red-600 font-bold">⚠️ PRODUTO VENCIDO</span>
                           </div>
                           <div className="border-4 border-red-500 rounded-lg p-2 bg-red-50 shadow-xl transform hover:scale-105 transition-all duration-200">
-                            <EtiquetaView product={product} />
+                            <EtiquetaView product={product} largura={largura} altura={altura} />
                           </div>
                         </div>
                       ))}
@@ -252,7 +269,7 @@ const VisualizarEtiquetas = () => {
                             <span className="text-sm text-green-600">Produto válido</span>
                           </div>
                           <div className="hover:shadow-lg transition-shadow duration-200">
-                            <EtiquetaView product={product} />
+                            <EtiquetaView product={product} largura={largura} altura={altura} />
                           </div>
                         </div>
                       ))}

@@ -4,9 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 
 interface EtiquetaViewProps {
   product: Product;
+  largura?: number;
+  altura?: number;
 }
 
-export function EtiquetaView({ product }: EtiquetaViewProps) {
+export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaViewProps) {
   const showOptionalDates = product.showOptionalDates ?? false;
 
   const formatDate = (date: Date | undefined | string) => {
@@ -47,106 +49,213 @@ export function EtiquetaView({ product }: EtiquetaViewProps) {
     }
   };
 
+  // Calcular configurações responsivas baseadas no tamanho
+  const getResponsiveConfig = () => {
+    const area = largura * altura;
+    const aspectRatio = largura / altura;
+    
+    let fontSize, padding, spacing;
+    
+    if (area < 2000) { // Muito pequena
+      fontSize = 10;
+      padding = 8;
+      spacing = 2;
+    } else if (area < 4000) { // Pequena
+      fontSize = 11;
+      padding = 12;
+      spacing = 3;
+    } else if (area < 8000) { // Média
+      fontSize = 12;
+      padding = 16;
+      spacing = 4;
+    } else { // Grande
+      fontSize = 14;
+      padding = 20;
+      spacing = 6;
+    }
+
+    return {
+      width: Math.max(280, largura * 4), // Conversão aproximada mm para px
+      height: Math.max(200, altura * 4),
+      fontSize,
+      padding,
+      spacing,
+      showGrid: aspectRatio > 1.2, // Grid se for mais largo
+      compactMode: area < 2500 // Modo compacto
+    };
+  };
+
+  const config = getResponsiveConfig();
   const hasCompleteData = product.nome && product.lote && product.marca && 
     product.dataAbertura && product.utilizarAte && product.responsavel;
 
   return (
-    <Card className="w-80 border-2 border-gray-400 bg-white overflow-hidden">
-      <CardContent className={`p-4 font-mono text-xs ${hasCompleteData ? 'flex flex-col justify-center items-center text-center min-h-[300px]' : ''}`}>
-        <div className="w-full max-w-full space-y-3">
-          <div className="border-b-2 border-gray-400 pb-2 w-full">
-            <span className="font-bold text-xs block mb-1">Nome do Produto:</span>
-            <div className="border-b border-gray-300 pb-1 min-h-[20px] text-xs word-wrap break-words overflow-hidden">
+    <Card 
+      className="border-2 border-gray-400 bg-white overflow-hidden"
+      style={{ 
+        width: `${config.width}px`,
+        height: `${config.height}px`
+      }}
+    >
+      <CardContent 
+        className={`font-mono ${hasCompleteData ? 'flex flex-col justify-center items-center text-center' : ''}`}
+        style={{ 
+          padding: `${config.padding}px`,
+          fontSize: `${config.fontSize}px`,
+          height: '100%',
+          boxSizing: 'border-box'
+        }}
+      >
+        <div className="w-full max-w-full h-full flex flex-col justify-between overflow-hidden">
+          <div className="border-b-2 border-gray-400 pb-2 w-full mb-2 overflow-hidden">
+            <span className="font-bold block mb-1" style={{ fontSize: `${config.fontSize - 1}px` }}>
+              PRODUTO:
+            </span>
+            <div 
+              className="border-b border-gray-300 pb-1 word-wrap break-words overflow-hidden font-bold text-black uppercase"
+              style={{ 
+                fontSize: `${config.fontSize}px`,
+                maxHeight: config.compactMode ? '16px' : '24px'
+              }}
+            >
               {product.nome || ''}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 w-full">
-            <div>
-              <span className="font-bold text-xs block mb-1">Lote nº:</span>
-              <div className="border-b border-gray-300 pb-1 min-h-[18px] text-xs overflow-hidden">
+          <div className={`${config.showGrid ? 'grid grid-cols-2 gap-2' : 'space-y-2'} w-full`}>
+            <div className="overflow-hidden">
+              <span className="font-bold block mb-1" style={{ fontSize: `${config.fontSize - 1}px` }}>
+                LOTE:
+              </span>
+              <div 
+                className="border-b border-gray-300 pb-1 overflow-hidden font-bold text-black uppercase"
+                style={{ fontSize: `${config.fontSize}px` }}
+              >
                 {product.lote || ''}
               </div>
             </div>
-            <div>
-              <span className="font-bold text-xs block mb-1">Marca:</span>
-              <div className="border-b border-gray-300 pb-1 min-h-[18px] text-xs overflow-hidden">
+            <div className="overflow-hidden">
+              <span className="font-bold block mb-1" style={{ fontSize: `${config.fontSize - 1}px` }}>
+                MARCA:
+              </span>
+              <div 
+                className="border-b border-gray-300 pb-1 overflow-hidden font-bold text-black uppercase"
+                style={{ fontSize: `${config.fontSize}px` }}
+              >
                 {product.marca || ''}
               </div>
             </div>
           </div>
 
-          {showOptionalDates && (
-            <div className="grid grid-cols-2 gap-3 w-full">
-              <div>
-                <span className="font-bold text-xs block mb-1">Fab.:</span>
-                <div className="border-b border-gray-300 pb-1 min-h-[18px] text-xs overflow-hidden">
+          {showOptionalDates && !config.compactMode && (
+            <div className={`${config.showGrid ? 'grid grid-cols-2 gap-2' : 'space-y-2'} w-full mt-2`}>
+              <div className="overflow-hidden">
+                <span className="font-bold block mb-1" style={{ fontSize: `${config.fontSize - 1}px` }}>
+                  FAB.:
+                </span>
+                <div 
+                  className="border-b border-gray-300 pb-1 overflow-hidden font-bold text-black"
+                  style={{ fontSize: `${config.fontSize}px` }}
+                >
                   {formatDate(product.dataFabricacao) || ''}
                 </div>
               </div>
-              <div>
-                <span className="font-bold text-xs block mb-1">Val.:</span>
-                <div className="border-b border-gray-300 pb-1 min-h-[18px] text-xs overflow-hidden">
+              <div className="overflow-hidden">
+                <span className="font-bold block mb-1" style={{ fontSize: `${config.fontSize - 1}px` }}>
+                  VAL.:
+                </span>
+                <div 
+                  className="border-b border-gray-300 pb-1 overflow-hidden font-bold text-black"
+                  style={{ fontSize: `${config.fontSize}px` }}
+                >
                   {formatDate(product.validade) || ''}
                 </div>
               </div>
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3 w-full">
-            <div>
-              <span className="font-bold text-xs block mb-1">DT Abert:</span>
-              <div className="border-b border-gray-300 pb-1 min-h-[18px] text-xs overflow-hidden">
+          <div className={`${config.showGrid ? 'grid grid-cols-2 gap-2' : 'space-y-2'} w-full mt-2`}>
+            <div className="overflow-hidden">
+              <span className="font-bold block mb-1" style={{ fontSize: `${config.fontSize - 1}px` }}>
+                ABERTURA:
+              </span>
+              <div 
+                className="border-b border-gray-300 pb-1 overflow-hidden font-bold text-black"
+                style={{ fontSize: `${config.fontSize}px` }}
+              >
                 {formatDate(product.dataAbertura) || ''}
               </div>
             </div>
-            <div>
-              <span className="font-bold text-xs block mb-1">Utilizar até:</span>
-              <div className="border-b border-gray-300 pb-1 min-h-[18px] text-xs overflow-hidden">
+            <div className="overflow-hidden">
+              <span className="font-bold block mb-1" style={{ fontSize: `${config.fontSize - 1}px` }}>
+                USAR ATÉ:
+              </span>
+              <div 
+                className="border-b border-gray-300 pb-1 overflow-hidden font-bold text-black"
+                style={{ fontSize: `${config.fontSize}px` }}
+              >
                 {formatDate(product.utilizarAte) || ''}
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 text-xs pt-2 w-full">
+          <div 
+            className={`${config.compactMode ? 'flex justify-between' : 'grid grid-cols-3 gap-1'} pt-2 w-full mt-2`}
+            style={{ fontSize: `${config.fontSize - 1}px` }}
+          >
             <label className="flex items-center space-x-1 justify-center">
               <input 
                 type="checkbox" 
                 checked={product.localArmazenamento === 'refrigerado'}
                 readOnly
-                className="w-3 h-3 flex-shrink-0"
+                className="flex-shrink-0"
+                style={{ width: '12px', height: '12px' }}
               />
-              <span className="font-bold text-xs">Refrig.</span>
+              <span className="font-bold text-black">
+                {config.compactMode ? 'REF' : 'REFRIG.'}
+              </span>
             </label>
             <label className="flex items-center space-x-1 justify-center">
               <input 
                 type="checkbox" 
                 checked={product.localArmazenamento === 'congelado'}
                 readOnly
-                className="w-3 h-3 flex-shrink-0"
+                className="flex-shrink-0"
+                style={{ width: '12px', height: '12px' }}
               />
-              <span className="font-bold text-xs">Congel.</span>
+              <span className="font-bold text-black">
+                {config.compactMode ? 'CON' : 'CONGEL.'}
+              </span>
             </label>
             <label className="flex items-center space-x-1 justify-center">
               <input 
                 type="checkbox" 
                 checked={product.localArmazenamento === 'ambiente'}
                 readOnly
-                className="w-3 h-3 flex-shrink-0"
+                className="flex-shrink-0"
+                style={{ width: '12px', height: '12px' }}
               />
-              <span className="font-bold text-xs">Ambient.</span>
+              <span className="font-bold text-black">
+                {config.compactMode ? 'AMB' : 'AMBIENT.'}
+              </span>
             </label>
           </div>
 
-          <div className="border-t-2 border-gray-400 pt-2 w-full">
-            <span className="font-bold text-xs block mb-1">Responsável:</span>
-            <div className="border-b border-gray-300 pb-1 min-h-[18px] text-xs overflow-hidden">
-              {product.responsavel || ''}
+          {!config.compactMode && (
+            <div className="border-t-2 border-gray-400 pt-2 w-full mt-2 overflow-hidden">
+              <span className="font-bold block mb-1" style={{ fontSize: `${config.fontSize - 1}px` }}>
+                RESPONSÁVEL:
+              </span>
+              <div 
+                className="border-b border-gray-300 pb-1 overflow-hidden font-bold text-black uppercase"
+                style={{ fontSize: `${config.fontSize}px` }}
+              >
+                {product.responsavel || ''}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>
   );
 }
-
