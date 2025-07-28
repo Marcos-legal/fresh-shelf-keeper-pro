@@ -9,8 +9,6 @@ interface EtiquetaViewProps {
 }
 
 export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaViewProps) {
-  const showOptionalDates = product.showOptionalDates ?? false;
-
   const formatDate = (date: Date | undefined | string) => {
     if (!date) return '';
     
@@ -49,243 +47,220 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
     }
   };
 
-  // Calcular configurações responsivas baseadas no tamanho
-  const getResponsiveConfig = () => {
-    const widthPx = Math.max(280, largura * 4); // Conversão aproximada mm para px
-    const heightPx = Math.max(200, altura * 4);
-    
-    // Calcular fontSize baseado na área da etiqueta para melhor adaptação
-    const area = widthPx * heightPx;
-    const baseSize = Math.sqrt(area) / 35; // Fórmula baseada na área
-    const fontSize = Math.max(6, Math.min(20, Math.floor(baseSize)));
-    
-    // Calcular padding e spacing proporcionalmente ao fontSize
-    const padding = Math.max(6, Math.floor(fontSize * 0.8));
-    const spacing = Math.max(1, Math.floor(fontSize * 0.25));
+  // Cálculo baseado na área total da etiqueta
+  const area = largura * altura;
+  const widthPx = largura * 3.78; // Conversão mm para px
+  const heightPx = altura * 3.78;
 
-    return {
-      width: widthPx,
-      height: heightPx,
-      fontSize,
-      padding,
-      spacing
-    };
-  };
-
-  const config = getResponsiveConfig();
-  const hasCompleteData = product.nome && product.lote && product.marca && 
-    product.dataAbertura && product.utilizarAte && product.responsavel;
+  // Tamanho da fonte baseado na área - mais suave e proporcional
+  const fontSize = Math.max(8, Math.min(18, Math.sqrt(area) * 0.28));
+  
+  // Espaçamento proporcional
+  const spacing = Math.max(2, fontSize * 0.15);
+  const padding = Math.max(8, fontSize * 0.7);
+  
+  // Altura das linhas baseada no fontSize
+  const lineHeight = fontSize + 4;
 
   return (
     <Card 
       className="border-2 border-gray-400 bg-white overflow-hidden"
       style={{ 
-        width: `${config.width}px`,
-        height: `${config.height}px`
+        width: `${widthPx}px`,
+        height: `${heightPx}px`
       }}
     >
       <CardContent 
-        className={`font-mono ${hasCompleteData ? 'flex flex-col justify-center items-center text-center' : ''}`}
+        className="font-sans h-full"
         style={{ 
-          padding: `${config.padding}px`,
-          fontSize: `${config.fontSize}px`,
-          height: '100%',
-          boxSizing: 'border-box'
+          padding: `${padding}px`,
+          fontSize: `${fontSize}px`,
+          lineHeight: `${fontSize + 2}px`
         }}
       >
-        <div className="w-full h-full flex flex-col justify-between" style={{ gap: `${config.spacing}px` }}>
-          {/* Nome do Produto - 2 linhas como na imagem */}
-          <div className="w-full">
-            <div className="flex items-baseline mb-1">
-              <span className="font-bold mr-2" style={{ fontSize: `${config.fontSize}px` }}>
-                Nome do Produto:
-              </span>
+        <div className="h-full flex flex-col" style={{ gap: `${spacing}px` }}>
+          
+          {/* Nome do Produto - 2 linhas */}
+          <div className="flex-none">
+            <div className="flex items-center mb-1">
+              <span className="font-bold text-black mr-2">Nome do Produto:</span>
               <div 
-                className="flex-1 border-b border-black"
-                style={{ height: `${config.fontSize + 2}px`, position: 'relative' }}
+                className="flex-1 border-b-2 border-black relative"
+                style={{ height: `${lineHeight}px` }}
               >
                 <span 
-                  className="absolute left-0 top-0 font-bold text-black uppercase"
-                  style={{ fontSize: `${config.fontSize - 1}px` }}
+                  className="absolute left-1 top-0 font-bold text-black uppercase"
+                  style={{ fontSize: `${fontSize - 1}px` }}
                 >
                   {product.nome || ''}
                 </span>
               </div>
             </div>
             <div 
-              className="w-full border-b border-black"
-              style={{ height: `${config.fontSize + 2}px` }}
-            >
-            </div>
+              className="w-full border-b-2 border-black"
+              style={{ height: `${lineHeight}px` }}
+            />
           </div>
 
-          {/* Lote e Marca na mesma linha */}
-          <div className="w-full flex gap-4">
-            <div className="flex items-baseline flex-1">
-              <span className="font-bold mr-2" style={{ fontSize: `${config.fontSize}px` }}>
-                Lote nº:
-              </span>
-              <div 
-                className="flex-1 border-b border-black"
-                style={{ height: `${config.fontSize + 2}px`, position: 'relative' }}
-              >
-                <span 
-                  className="absolute left-0 top-0 font-bold text-black uppercase"
-                  style={{ fontSize: `${config.fontSize - 1}px` }}
+          {/* Lote e Marca - mesma linha */}
+          <div className="flex-none">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center flex-1">
+                <span className="font-bold text-black mr-2">Lote nº:</span>
+                <div 
+                  className="flex-1 border-b-2 border-black relative"
+                  style={{ height: `${lineHeight}px` }}
                 >
-                  {product.lote || ''}
-                </span>
+                  <span 
+                    className="absolute left-1 top-0 font-bold text-black uppercase"
+                    style={{ fontSize: `${fontSize - 1}px` }}
+                  >
+                    {product.lote || ''}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="flex items-baseline flex-1">
-              <span className="font-bold mr-2" style={{ fontSize: `${config.fontSize}px` }}>
-                Marca:
-              </span>
-              <div 
-                className="flex-1 border-b border-black"
-                style={{ height: `${config.fontSize + 2}px`, position: 'relative' }}
-              >
-                <span 
-                  className="absolute left-0 top-0 font-bold text-black uppercase"
-                  style={{ fontSize: `${config.fontSize - 1}px` }}
+              <div className="flex items-center flex-1">
+                <span className="font-bold text-black mr-2">Marca:</span>
+                <div 
+                  className="flex-1 border-b-2 border-black relative"
+                  style={{ height: `${lineHeight}px` }}
                 >
-                  {product.marca || ''}
-                </span>
+                  <span 
+                    className="absolute left-1 top-0 font-bold text-black uppercase"
+                    style={{ fontSize: `${fontSize - 1}px` }}
+                  >
+                    {product.marca || ''}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Fab. e Val. na mesma linha */}
-          <div className="w-full flex gap-4">
-            <div className="flex items-baseline flex-1">
-              <span className="font-bold mr-2" style={{ fontSize: `${config.fontSize}px` }}>
-                Fab.:
-              </span>
-              <div 
-                className="flex-1 border-b border-black"
-                style={{ height: `${config.fontSize + 2}px`, position: 'relative' }}
-              >
-                <span 
-                  className="absolute left-0 top-0 font-bold text-black"
-                  style={{ fontSize: `${config.fontSize - 1}px` }}
+          {/* Fab. e Val. - mesma linha */}
+          <div className="flex-none">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center flex-1">
+                <span className="font-bold text-black mr-2">Fab.:</span>
+                <div 
+                  className="flex-1 border-b-2 border-black relative"
+                  style={{ height: `${lineHeight}px` }}
                 >
-                  {formatDate(product.dataFabricacao) || ''}
-                </span>
+                  <span 
+                    className="absolute left-1 top-0 font-bold text-black"
+                    style={{ fontSize: `${fontSize - 1}px` }}
+                  >
+                    {formatDate(product.dataFabricacao) || ''}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="flex items-baseline flex-1">
-              <span className="font-bold mr-2" style={{ fontSize: `${config.fontSize}px` }}>
-                Val.:
-              </span>
-              <div 
-                className="flex-1 border-b border-black"
-                style={{ height: `${config.fontSize + 2}px`, position: 'relative' }}
-              >
-                <span 
-                  className="absolute left-0 top-0 font-bold text-black"
-                  style={{ fontSize: `${config.fontSize - 1}px` }}
+              <div className="flex items-center flex-1">
+                <span className="font-bold text-black mr-2">Val.:</span>
+                <div 
+                  className="flex-1 border-b-2 border-black relative"
+                  style={{ height: `${lineHeight}px` }}
                 >
-                  {formatDate(product.validade) || ''}
-                </span>
+                  <span 
+                    className="absolute left-1 top-0 font-bold text-black"
+                    style={{ fontSize: `${fontSize - 1}px` }}
+                  >
+                    {formatDate(product.validade) || ''}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* DT Abert. e Utilizar até na mesma linha */}
-          <div className="w-full flex gap-4">
-            <div className="flex items-baseline flex-1">
-              <span className="font-bold mr-2" style={{ fontSize: `${config.fontSize}px` }}>
-                DT Abert:
-              </span>
-              <div 
-                className="flex-1 border-b border-black"
-                style={{ height: `${config.fontSize + 2}px`, position: 'relative' }}
-              >
-                <span 
-                  className="absolute left-0 top-0 font-bold text-black"
-                  style={{ fontSize: `${config.fontSize - 1}px` }}
+          {/* DT Abert. e Utilizar até - mesma linha */}
+          <div className="flex-none">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center flex-1">
+                <span className="font-bold text-black mr-2">DT Abert:</span>
+                <div 
+                  className="flex-1 border-b-2 border-black relative"
+                  style={{ height: `${lineHeight}px` }}
                 >
-                  {formatDate(product.dataAbertura) || ''}
-                </span>
+                  <span 
+                    className="absolute left-1 top-0 font-bold text-black"
+                    style={{ fontSize: `${fontSize - 1}px` }}
+                  >
+                    {formatDate(product.dataAbertura) || ''}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="flex items-baseline flex-1">
-              <span className="font-bold mr-2" style={{ fontSize: `${config.fontSize}px` }}>
-                Utilizar até:
-              </span>
-              <div 
-                className="flex-1 border-b border-black"
-                style={{ height: `${config.fontSize + 2}px`, position: 'relative' }}
-              >
-                <span 
-                  className="absolute left-0 top-0 font-bold text-black"
-                  style={{ fontSize: `${config.fontSize - 1}px` }}
+              <div className="flex items-center flex-1">
+                <span className="font-bold text-black mr-2">Utilizar até:</span>
+                <div 
+                  className="flex-1 border-b-2 border-black relative"
+                  style={{ height: `${lineHeight}px` }}
                 >
-                  {formatDate(product.utilizarAte) || ''}
-                </span>
+                  <span 
+                    className="absolute left-1 top-0 font-bold text-black"
+                    style={{ fontSize: `${fontSize - 1}px` }}
+                  >
+                    {formatDate(product.utilizarAte) || ''}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Checkboxes */}
-          <div 
-            className="w-full flex justify-start gap-6 items-center"
-            style={{ fontSize: `${config.fontSize}px` }}
-          >
-            <label className="flex items-center gap-2">
-              <div 
-                className="border-2 border-black flex items-center justify-center"
-                style={{ width: '16px', height: '16px' }}
-              >
-                {product.localArmazenamento === 'refrigerado' && (
-                  <span className="text-black font-bold">✓</span>
-                )}
-              </div>
-              <span className="font-bold text-black">Refrigerado</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <div 
-                className="border-2 border-black flex items-center justify-center"
-                style={{ width: '16px', height: '16px' }}
-              >
-                {product.localArmazenamento === 'congelado' && (
-                  <span className="text-black font-bold">✓</span>
-                )}
-              </div>
-              <span className="font-bold text-black">Congelado</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <div 
-                className="border-2 border-black flex items-center justify-center"
-                style={{ width: '16px', height: '16px' }}
-              >
-                {product.localArmazenamento === 'ambiente' && (
-                  <span className="text-black font-bold">✓</span>
-                )}
-              </div>
-              <span className="font-bold text-black">Ambiente</span>
-            </label>
+          {/* Checkboxes - Uma linha com 3 opções */}
+          <div className="flex-none">
+            <div className="flex items-center justify-start gap-8">
+              <label className="flex items-center gap-2">
+                <div 
+                  className="border-2 border-black flex items-center justify-center bg-white"
+                  style={{ width: `${fontSize + 2}px`, height: `${fontSize + 2}px` }}
+                >
+                  {product.localArmazenamento === 'refrigerado' && (
+                    <span className="text-black font-bold" style={{ fontSize: `${fontSize - 2}px` }}>✓</span>
+                  )}
+                </div>
+                <span className="font-bold text-black">Refrigerado</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <div 
+                  className="border-2 border-black flex items-center justify-center bg-white"
+                  style={{ width: `${fontSize + 2}px`, height: `${fontSize + 2}px` }}
+                >
+                  {product.localArmazenamento === 'congelado' && (
+                    <span className="text-black font-bold" style={{ fontSize: `${fontSize - 2}px` }}>✓</span>
+                  )}
+                </div>
+                <span className="font-bold text-black">Congelado</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <div 
+                  className="border-2 border-black flex items-center justify-center bg-white"
+                  style={{ width: `${fontSize + 2}px`, height: `${fontSize + 2}px` }}
+                >
+                  {product.localArmazenamento === 'ambiente' && (
+                    <span className="text-black font-bold" style={{ fontSize: `${fontSize - 2}px` }}>✓</span>
+                  )}
+                </div>
+                <span className="font-bold text-black">Ambiente</span>
+              </label>
+            </div>
           </div>
 
-          {/* Responsável */}
-          <div className="w-full">
-            <div className="flex items-baseline">
-              <span className="font-bold mr-2" style={{ fontSize: `${config.fontSize}px` }}>
-                Responsável:
-              </span>
+          {/* Responsável - linha final */}
+          <div className="flex-none">
+            <div className="flex items-center">
+              <span className="font-bold text-black mr-2">Responsável:</span>
               <div 
-                className="flex-1 border-b border-black"
-                style={{ height: `${config.fontSize + 2}px`, position: 'relative' }}
+                className="flex-1 border-b-2 border-black relative"
+                style={{ height: `${lineHeight}px` }}
               >
                 <span 
-                  className="absolute left-0 top-0 font-bold text-black uppercase"
-                  style={{ fontSize: `${config.fontSize - 1}px` }}
+                  className="absolute left-1 top-0 font-bold text-black uppercase"
+                  style={{ fontSize: `${fontSize - 1}px` }}
                 >
                   {product.responsavel || ''}
                 </span>
               </div>
             </div>
           </div>
+
         </div>
       </CardContent>
     </Card>
