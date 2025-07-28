@@ -51,37 +51,23 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
 
   // Calcular configurações responsivas baseadas no tamanho
   const getResponsiveConfig = () => {
-    const area = largura * altura;
-    const aspectRatio = largura / altura;
+    const widthPx = Math.max(280, largura * 4); // Conversão aproximada mm para px
+    const heightPx = Math.max(200, altura * 4);
     
-    let fontSize, padding, spacing;
+    // Calcular fontSize baseado na menor dimensão para manter proporções
+    const minDimension = Math.min(widthPx, heightPx);
+    const fontSize = Math.max(8, Math.min(16, Math.floor(minDimension / 25)));
     
-    if (area < 2000) { // Muito pequena
-      fontSize = 10;
-      padding = 8;
-      spacing = 2;
-    } else if (area < 4000) { // Pequena
-      fontSize = 11;
-      padding = 12;
-      spacing = 3;
-    } else if (area < 8000) { // Média
-      fontSize = 12;
-      padding = 16;
-      spacing = 4;
-    } else { // Grande
-      fontSize = 14;
-      padding = 20;
-      spacing = 6;
-    }
+    // Calcular padding e spacing proporcionalmente
+    const padding = Math.max(8, Math.floor(fontSize * 1.2));
+    const spacing = Math.max(2, Math.floor(fontSize * 0.3));
 
     return {
-      width: Math.max(280, largura * 4), // Conversão aproximada mm para px
-      height: Math.max(200, altura * 4),
+      width: widthPx,
+      height: heightPx,
       fontSize,
       padding,
-      spacing,
-      showGrid: aspectRatio > 1.2, // Grid se for mais largo
-      compactMode: area < 2500 // Modo compacto
+      spacing
     };
   };
 
