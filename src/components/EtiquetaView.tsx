@@ -54,14 +54,13 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
     const widthPx = Math.max(280, largura * 4); // Conversão aproximada mm para px
     const heightPx = Math.max(200, altura * 4);
     
-    // Calcular fontSize baseado na área da etiqueta para melhor adaptação
-    const area = widthPx * heightPx;
-    const baseSize = Math.sqrt(area) / 35; // Fórmula baseada na área
-    const fontSize = Math.max(6, Math.min(20, Math.floor(baseSize)));
+    // Calcular fontSize baseado na menor dimensão para manter proporções
+    const minDimension = Math.min(widthPx, heightPx);
+    const fontSize = Math.max(8, Math.min(16, Math.floor(minDimension / 25)));
     
-    // Calcular padding e spacing proporcionalmente ao fontSize
-    const padding = Math.max(6, Math.floor(fontSize * 0.8));
-    const spacing = Math.max(1, Math.floor(fontSize * 0.25));
+    // Calcular padding e spacing proporcionalmente
+    const padding = Math.max(8, Math.floor(fontSize * 1.2));
+    const spacing = Math.max(2, Math.floor(fontSize * 0.3));
 
     return {
       width: widthPx,
