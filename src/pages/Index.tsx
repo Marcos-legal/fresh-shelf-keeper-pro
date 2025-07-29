@@ -9,7 +9,7 @@ import { ProductTable } from "@/components/ProductTable";
 import { ProductForm } from "@/components/ProductForm";
 import { StatsCard } from "@/components/StatsCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Package, CheckCircle, AlertTriangle, XCircle, Thermometer, Snowflake, Home, Refrigerator, TrendingUp, Clock, Users } from "lucide-react";
+import { Plus, Package, CheckCircle, AlertTriangle, XCircle, Thermometer, Snowflake, Home, Refrigerator, TrendingUp, Clock, Users, Printer } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 
@@ -71,6 +71,274 @@ const Index = () => {
     
     setEditingProduct(product);
     setShowForm(true);
+  };
+
+  const handlePrintLabel = (product: Product) => {
+    // Configurações padrão para impressão rápida
+    const largura = parseInt(localStorage.getItem('etiqueta-largura') || '70');
+    const altura = parseInt(localStorage.getItem('etiqueta-altura') || '50');
+    
+    const formatDateSafe = (dateValue: any): string => {
+      if (!dateValue) return '';
+      
+      try {
+        let date: Date | null = null;
+        
+        if (dateValue instanceof Date) {
+          date = dateValue;
+        } else if (typeof dateValue === 'string') {
+          if (dateValue.includes('/')) {
+            if (dateValue.match(/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+\/\d{4}$/)) {
+              return dateValue;
+            } else if (dateValue.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+              return dateValue;
+            } else if (dateValue.match(/^\d{1,2}\/\d{4}$/)) {
+              return dateValue;
+            }
+          } else {
+            const [year, month, day] = dateValue.split('-').map(Number);
+            if (year && month && day) {
+              date = new Date(year, month - 1, day);
+            }
+          }
+        }
+        
+        if (date && !isNaN(date.getTime())) {
+          return date.toLocaleDateString('pt-BR');
+        }
+        
+        return dateValue;
+      } catch (error) {
+        console.warn('Error formatting date:', dateValue, error);
+        return '';
+      }
+    };
+
+    const getResponsiveConfig = () => {
+      const area = largura * altura;
+      let fontSize, labelSize, contentSize, padding, spacing;
+      
+      if (area < 2000) {
+        fontSize = Math.max(8, Math.min(10, area / 250));
+        labelSize = fontSize - 1;
+        contentSize = fontSize;
+        padding = Math.max(4, largura * 0.08);
+        spacing = Math.max(2, altura * 0.04);
+      } else if (area < 4000) {
+        fontSize = Math.max(10, Math.min(12, area / 300));
+        labelSize = fontSize - 1;
+        contentSize = fontSize;
+        padding = Math.max(6, largura * 0.085);
+        spacing = Math.max(3, altura * 0.06);
+      } else if (area < 8000) {
+        fontSize = Math.max(11, Math.min(14, area / 400));
+        labelSize = fontSize - 1;
+        contentSize = fontSize;
+        padding = Math.max(8, largura * 0.09);
+        spacing = Math.max(4, altura * 0.08);
+      } else {
+        fontSize = Math.max(12, Math.min(16, area / 500));
+        labelSize = fontSize - 1;
+        contentSize = fontSize;
+        padding = Math.max(10, largura * 0.1);
+        spacing = Math.max(5, altura * 0.1);
+      }
+
+      return {
+        width: `${largura * 3.78}px`,
+        height: `${altura * 3.78}px`,
+        fontSize: `${fontSize}px`,
+        labelSize: `${labelSize}px`,
+        contentSize: `${contentSize}px`,
+        padding: `${Math.round(padding)}px`,
+        spacing: `${Math.round(spacing)}px`,
+        showGrid: (largura / altura) > 1.2,
+        compactMode: area < 2500
+      };
+    };
+
+    const config = getResponsiveConfig();
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Etiqueta - ${product.nome} - ${largura}x${altura}mm</title>
+            <style>
+              @page {
+                size: A4;
+                margin: 0.5cm;
+              }
+              body { 
+                font-family: 'Courier New', 'Liberation Mono', monospace; 
+                margin: 0; 
+                padding: 0;
+                line-height: 1.1;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              .etiqueta { 
+                border: 3px solid #000;
+                width: ${config.width};
+                height: ${config.height};
+                margin: 8px;
+                padding: ${config.padding};
+                font-size: ${config.fontSize};
+                background: white;
+                font-weight: 600;
+                color: #000;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                overflow: hidden;
+              }
+              .campo {
+                margin-bottom: ${config.spacing};
+                border-bottom: 2px solid #333;
+                padding-bottom: 2px;
+                min-height: ${config.compactMode ? '12px' : '16px'};
+                font-weight: bold;
+                flex-shrink: 0;
+                overflow: hidden;
+              }
+              .label {
+                font-weight: 900;
+                font-size: ${config.labelSize};
+                color: #000;
+                text-transform: uppercase;
+                line-height: 1;
+              }
+              .content {
+                font-weight: 800;
+                font-size: ${config.contentSize};
+                color: #000;
+                text-transform: uppercase;
+                margin-top: 2px;
+                word-wrap: break-word;
+                overflow: hidden;
+                line-height: 1.1;
+                max-height: ${config.compactMode ? '24px' : '32px'};
+              }
+              .grid {
+                display: ${config.showGrid ? 'grid' : 'block'};
+                grid-template-columns: ${config.showGrid ? '1fr 1fr' : '1fr'};
+                gap: ${config.showGrid ? '4px' : '0'};
+                margin-bottom: ${config.spacing};
+              }
+              .checkbox-row {
+                display: ${config.compactMode ? 'flex' : 'grid'};
+                ${config.compactMode ? 'justify-content: space-between' : 'grid-template-columns: 1fr 1fr 1fr'};
+                gap: ${config.compactMode ? '2px' : '4px'};
+                font-size: ${config.labelSize};
+                margin-bottom: ${config.spacing};
+                font-weight: 900;
+                flex-wrap: wrap;
+              }
+              .checkbox-item {
+                display: flex;
+                align-items: center;
+                font-weight: 900;
+                color: #000;
+                ${config.compactMode ? 'font-size: ' + (parseInt(config.labelSize) - 1) + 'px' : ''};
+              }
+              .checkbox-mark {
+                font-size: ${config.compactMode ? '10px' : '12px'};
+                font-weight: 900;
+                margin-right: 2px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
+              <div class="campo">
+                <div class="label">PRODUTO:</div>
+                <div class="content">${(product.nome || '').toUpperCase()}</div>
+              </div>
+              <div class="grid">
+                <div class="campo">
+                  <div class="label">LOTE:</div>
+                  <div class="content">${(product.lote || '').toUpperCase()}</div>
+                </div>
+                ${config.showGrid ? `
+                <div class="campo">
+                  <div class="label">MARCA:</div>
+                  <div class="content">${(product.marca || '').toUpperCase()}</div>
+                </div>
+                ` : ''}
+              </div>
+              ${!config.showGrid ? `
+              <div class="campo">
+                <div class="label">MARCA:</div>
+                <div class="content">${(product.marca || '').toUpperCase()}</div>
+              </div>
+              ` : ''}
+              ${product.showOptionalDates && !config.compactMode ? `
+              <div class="grid">
+                <div class="campo">
+                  <div class="label">FABRIC.:</div>
+                  <div class="content">${formatDateSafe(product.dataFabricacao)}</div>
+                </div>
+                <div class="campo">
+                  <div class="label">VALID.:</div>
+                  <div class="content">${formatDateSafe(product.validade)}</div>
+                </div>
+              </div>
+              ` : ''}
+              <div class="grid">
+                <div class="campo">
+                  <div class="label">ABERTURA:</div>
+                  <div class="content">${formatDateSafe(product.dataAbertura)}</div>
+                </div>
+                ${config.showGrid ? `
+                <div class="campo">
+                  <div class="label">USAR ATÉ:</div>
+                  <div class="content">${formatDateSafe(product.utilizarAte)}</div>
+                </div>
+                ` : ''}
+              </div>
+              ${!config.showGrid ? `
+              <div class="campo">
+                <div class="label">USAR ATÉ:</div>
+                <div class="content">${formatDateSafe(product.utilizarAte)}</div>
+              </div>
+              ` : ''}
+              <div class="checkbox-row">
+                <div class="checkbox-item">
+                  <span class="checkbox-mark">${product.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
+                  <span>REF</span>
+                </div>
+                <div class="checkbox-item">
+                  <span class="checkbox-mark">${product.localArmazenamento === 'congelado' ? '■' : '□'}</span>
+                  <span>CON</span>
+                </div>
+                <div class="checkbox-item">
+                  <span class="checkbox-mark">${product.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
+                  <span>AMB</span>
+                </div>
+              </div>
+              ${!config.compactMode ? `
+              <div class="campo">
+                <div class="label">RESPONSÁVEL:</div>
+                <div class="content">${(product.responsavel || '').toUpperCase()}</div>
+              </div>
+              ` : ''}
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+    }
+
+    toast({
+      title: "Etiqueta enviada para impressão",
+      description: `Etiqueta de ${product.nome} ${largura}x${altura}mm enviada!`,
+    });
   };
 
   // Produtos próximos do vencimento (7 dias)
@@ -327,6 +595,7 @@ const Index = () => {
               products={products}
               onEdit={handleEditClick}
               onDelete={handleDeleteProduct}
+              onPrintLabel={handlePrintLabel}
               title="Todos os Produtos"
             />
           </div>
