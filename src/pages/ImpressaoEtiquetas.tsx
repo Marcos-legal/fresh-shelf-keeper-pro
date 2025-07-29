@@ -360,6 +360,189 @@ const ImpressaoEtiquetas = () => {
     });
   };
 
+  const handlePrintSingle = (product: any) => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Etiqueta - ${product.nome} - ${largura}x${altura}mm</title>
+            <style>
+              @page {
+                size: A4;
+                margin: 0.5cm;
+              }
+              body { 
+                font-family: 'Courier New', 'Liberation Mono', monospace; 
+                margin: 0; 
+                padding: 0;
+                line-height: 1.1;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              .etiqueta { 
+                border: 3px solid #000;
+                width: ${config.width};
+                height: ${config.height};
+                margin: 8px;
+                padding: ${config.padding};
+                font-size: ${config.fontSize};
+                background: white;
+                font-weight: 600;
+                color: #000;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                overflow: hidden;
+              }
+              .campo {
+                margin-bottom: ${config.spacing};
+                border-bottom: 2px solid #333;
+                padding-bottom: 2px;
+                min-height: ${config.compactMode ? '12px' : '16px'};
+                font-weight: bold;
+                flex-shrink: 0;
+                overflow: hidden;
+              }
+              .label {
+                font-weight: 900;
+                font-size: ${config.labelSize};
+                color: #000;
+                text-transform: uppercase;
+                line-height: 1;
+              }
+              .content {
+                font-weight: 800;
+                font-size: ${config.contentSize};
+                color: #000;
+                text-transform: uppercase;
+                margin-top: 2px;
+                word-wrap: break-word;
+                overflow: hidden;
+                line-height: 1.1;
+                max-height: ${config.compactMode ? '24px' : '32px'};
+              }
+              .grid {
+                display: ${config.showGrid ? 'grid' : 'block'};
+                grid-template-columns: ${config.showGrid ? '1fr 1fr' : '1fr'};
+                gap: ${config.showGrid ? '4px' : '0'};
+                margin-bottom: ${config.spacing};
+              }
+              .checkbox-row {
+                display: ${config.compactMode ? 'flex' : 'grid'};
+                ${config.compactMode ? 'justify-content: space-between' : 'grid-template-columns: 1fr 1fr 1fr'};
+                gap: ${config.compactMode ? '2px' : '4px'};
+                font-size: ${config.labelSize};
+                margin-bottom: ${config.spacing};
+                font-weight: 900;
+                flex-wrap: wrap;
+              }
+              .checkbox-item {
+                display: flex;
+                align-items: center;
+                font-weight: 900;
+                color: #000;
+                ${config.compactMode ? 'font-size: ' + (parseInt(config.labelSize) - 1) + 'px' : ''};
+              }
+              .checkbox-mark {
+                font-size: ${config.compactMode ? '10px' : '12px'};
+                font-weight: 900;
+                margin-right: 2px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
+              <div class="campo">
+                <div class="label">PRODUTO:</div>
+                <div class="content">${(product.nome || '').toUpperCase()}</div>
+              </div>
+              <div class="grid">
+                <div class="campo">
+                  <div class="label">LOTE:</div>
+                  <div class="content">${(product.lote || '').toUpperCase()}</div>
+                </div>
+                ${config.showGrid ? `
+                <div class="campo">
+                  <div class="label">MARCA:</div>
+                  <div class="content">${(product.marca || '').toUpperCase()}</div>
+                </div>
+                ` : ''}
+              </div>
+              ${!config.showGrid ? `
+              <div class="campo">
+                <div class="label">MARCA:</div>
+                <div class="content">${(product.marca || '').toUpperCase()}</div>
+              </div>
+              ` : ''}
+              ${product.showOptionalDates && !config.compactMode ? `
+              <div class="grid">
+                <div class="campo">
+                  <div class="label">FABRIC.:</div>
+                  <div class="content">${formatDateSafe(product.dataFabricacao)}</div>
+                </div>
+                <div class="campo">
+                  <div class="label">VALID.:</div>
+                  <div class="content">${formatDateSafe(product.validade)}</div>
+                </div>
+              </div>
+              ` : ''}
+              <div class="grid">
+                <div class="campo">
+                  <div class="label">ABERTURA:</div>
+                  <div class="content">${formatDateSafe(product.dataAbertura)}</div>
+                </div>
+                ${config.showGrid ? `
+                <div class="campo">
+                  <div class="label">USAR ATÉ:</div>
+                  <div class="content">${formatDateSafe(product.utilizarAte)}</div>
+                </div>
+                ` : ''}
+              </div>
+              ${!config.showGrid ? `
+              <div class="campo">
+                <div class="label">USAR ATÉ:</div>
+                <div class="content">${formatDateSafe(product.utilizarAte)}</div>
+              </div>
+              ` : ''}
+              <div class="checkbox-row">
+                <div class="checkbox-item">
+                  <span class="checkbox-mark">${product.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
+                  <span>REF</span>
+                </div>
+                <div class="checkbox-item">
+                  <span class="checkbox-mark">${product.localArmazenamento === 'congelado' ? '■' : '□'}</span>
+                  <span>CON</span>
+                </div>
+                <div class="checkbox-item">
+                  <span class="checkbox-mark">${product.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
+                  <span>AMB</span>
+                </div>
+              </div>
+              ${!config.compactMode ? `
+              <div class="campo">
+                <div class="label">RESPONSÁVEL:</div>
+                <div class="content">${(product.responsavel || '').toUpperCase()}</div>
+              </div>
+              ` : ''}
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+    }
+
+    toast({
+      title: "Etiqueta enviada para impressão",
+      description: `Etiqueta de ${product.nome} ${largura}x${altura}mm enviada!`,
+    });
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
@@ -505,33 +688,96 @@ const ImpressaoEtiquetas = () => {
               </Card>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {products.map((product) => (
-                <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center space-x-3">
-                      <Checkbox
-                        checked={selectedProducts.includes(product.id)}
-                        onCheckedChange={() => handleSelectProduct(product.id)}
-                      />
-                      <Package className="w-5 h-5 text-blue-600" />
-                      <CardTitle className="text-sm">{product.nome}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-sm">
-                    <div className="space-y-1">
-                      <p><span className="font-medium">Lote:</span> {product.lote}</p>
-                      <p><span className="font-medium">Marca:</span> {product.marca}</p>
-                      {product.validade && (
-                        <p><span className="font-medium">Validade:</span> {formatDateSafe(product.validade)}</p>
-                      )}
-                      <p><span className="font-medium">Local:</span> {product.localArmazenamento}</p>
-                      <p><span className="font-medium">Responsável:</span> {product.responsavel}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {/* Botões de Impressão Rápida */}
+            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
+              <CardHeader className="bg-gradient-to-r from-purple-800 to-purple-900 text-white rounded-t-lg">
+                <CardTitle className="flex items-center space-x-2">
+                  <Printer className="w-5 h-5" />
+                  <span>Impressão Rápida - Produtos Cadastrados</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="text-sm text-gray-600 mb-4">
+                  Clique em qualquer produto para imprimir sua etiqueta instantaneamente
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {products.map(product => (
+                    <Button
+                      key={product.id}
+                      variant="outline"
+                      className="h-auto p-4 text-left justify-start border-2 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
+                      onClick={() => handlePrintSingle(product)}
+                    >
+                      <div className="flex items-center space-x-3 w-full">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                          <Printer className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-gray-900 truncate">
+                            {product.nome}
+                          </div>
+                          <div className="text-sm text-gray-600 truncate">
+                            Lote: {product.lote || 'N/A'} | {product.marca || 'N/A'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {product.localArmazenamento === 'refrigerado' && '❄️ Refrigerado'}
+                            {product.localArmazenamento === 'congelado' && '🧊 Congelado'}
+                            {product.localArmazenamento === 'ambiente' && '🌡️ Ambiente'}
+                            {product.localArmazenamento === 'camara-fria' && '🏢 Câmara Fria'}
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+                {products.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p>Nenhum produto cadastrado ainda.</p>
+                    <p className="text-sm">Cadastre produtos para usar a impressão rápida.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Seleção Multiple Tradicional */}
+            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
+              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg">
+                <CardTitle className="flex items-center space-x-2">
+                  <Checkbox className="mr-2" />
+                  <span>Seleção Múltipla - Para Impressão em Lote</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {products.map((product) => (
+                    <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center space-x-3">
+                          <Checkbox
+                            checked={selectedProducts.includes(product.id)}
+                            onCheckedChange={() => handleSelectProduct(product.id)}
+                          />
+                          <Package className="w-5 h-5 text-blue-600" />
+                          <CardTitle className="text-sm">{product.nome}</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="text-sm">
+                        <div className="space-y-1">
+                          <p><span className="font-medium">Lote:</span> {product.lote}</p>
+                          <p><span className="font-medium">Marca:</span> {product.marca}</p>
+                          {product.validade && (
+                            <p><span className="font-medium">Validade:</span> {formatDateSafe(product.validade)}</p>
+                          )}
+                          <p><span className="font-medium">Local:</span> {product.localArmazenamento}</p>
+                          <p><span className="font-medium">Responsável:</span> {product.responsavel}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </main>
       </div>
