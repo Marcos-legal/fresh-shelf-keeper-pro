@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ResponsaveisProvider } from "@/contexts/ResponsaveisContext";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Refrigerado from "./pages/Refrigerado";
@@ -28,11 +29,12 @@ const queryClient = new QueryClient({
 
 const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
-    <ResponsaveisProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <ResponsaveisProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/refrigerado" element={<Refrigerado />} />
@@ -50,6 +52,7 @@ const App: React.FC = () => (
         </BrowserRouter>
       </TooltipProvider>
     </ResponsaveisProvider>
+  </ThemeProvider>
   </QueryClientProvider>
 );
 

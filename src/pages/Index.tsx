@@ -12,10 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Plus, Package, CheckCircle, AlertTriangle, XCircle, Thermometer, Snowflake, Home, Refrigerator, TrendingUp, Clock, Users, Printer } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { DashboardChart } from "@/components/DashboardChart";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { products, addProduct, updateProduct, deleteProduct, stats, getProductsByCategory } = useProducts();
+  const { products, loading, addProduct, updateProduct, deleteProduct, stats, getProductsByCategory } = useProducts();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
 
@@ -361,12 +365,47 @@ const Index = () => {
   // Produtos vencidos
   const produtosVencidos = products.filter(product => product.status === 'vencido');
 
+  if (loading) {
+    return (
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <AppSidebar />
+          <main className="flex-1">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center space-x-4">
+                  <SidebarTrigger className="lg:hidden" />
+                  <Skeleton className="h-12 w-12 rounded-xl" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-64" />
+                    <Skeleton className="h-4 w-48" />
+                  </div>
+                </div>
+                <Skeleton className="h-10 w-32" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-32" />
+                ))}
+              </div>
+            </div>
+          </main>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <main className="flex-1">
           <div className="p-6">
+            {/* Breadcrumbs */}
+            <div className="mb-6">
+              <Breadcrumbs />
+            </div>
+
             {/* Header Moderno */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-4">
@@ -376,28 +415,41 @@ const Index = () => {
                     <Package className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                       Dashboard Inteligente
                     </h1>
-                    <p className="text-gray-600 mt-1 flex items-center space-x-2">
+                    <p className="text-muted-foreground mt-1 flex items-center space-x-2">
                       <TrendingUp className="w-4 h-4" />
                       <span>Controle total de validades em tempo real</span>
                     </p>
                   </div>
                 </div>
               </div>
-              <Button 
-                onClick={() => {
-                  setEditingProduct(null);
-                  setShowForm(!showForm);
-                }} 
-                className="gradient-blue text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                size="lg"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                {showForm ? 'Cancelar' : 'Novo Produto'}
-              </Button>
+              <div className="flex items-center space-x-3">
+                <ThemeToggle />
+                <Button 
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setShowForm(!showForm);
+                  }} 
+                  className="gradient-blue text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  size="lg"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  {showForm ? 'Cancelar' : 'Novo Produto'}
+                </Button>
+              </div>
             </div>
+
+            {/* Gráficos Interativos */}
+            <DashboardChart 
+              categoryData={stats.porCategoria}
+              statusData={{
+                validos: stats.validos,
+                proximoVencimento: stats.proximoVencimento,
+                vencidos: stats.vencidos
+              }}
+            />
 
             {/* Cards de Estatísticas Principais */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -434,74 +486,74 @@ const Index = () => {
             {/* Cards de Locais de Armazenamento - Clicáveis */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <Card 
-                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200"
+                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-primary/10 to-primary/20 border-primary/20"
                 onClick={() => navigate('/refrigerado')}
               >
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between text-blue-700">
+                  <CardTitle className="flex items-center justify-between text-primary">
                     <span className="text-lg font-semibold">Refrigerado</span>
                     <Thermometer className="w-6 h-6" />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-blue-900 mb-1">
+                  <div className="text-3xl font-bold text-foreground mb-1">
                     {stats.porCategoria.refrigerado}
                   </div>
-                  <p className="text-sm text-blue-600">produtos refrigerados</p>
+                  <p className="text-sm text-muted-foreground">produtos refrigerados</p>
                 </CardContent>
               </Card>
 
               <Card 
-                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200"
+                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-secondary/10 to-secondary/20 border-secondary/20"
                 onClick={() => navigate('/congelado')}
               >
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between text-cyan-700">
+                  <CardTitle className="flex items-center justify-between text-secondary">
                     <span className="text-lg font-semibold">Congelado</span>
                     <Snowflake className="w-6 h-6" />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-cyan-900 mb-1">
+                  <div className="text-3xl font-bold text-foreground mb-1">
                     {stats.porCategoria.congelado}
                   </div>
-                  <p className="text-sm text-cyan-600">produtos congelados</p>
+                  <p className="text-sm text-muted-foreground">produtos congelados</p>
                 </CardContent>
               </Card>
 
               <Card 
-                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-green-50 to-green-100 border-green-200"
+                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-accent/10 to-accent/20 border-accent/20"
                 onClick={() => navigate('/ambiente')}
               >
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between text-green-700">
+                  <CardTitle className="flex items-center justify-between text-accent-foreground">
                     <span className="text-lg font-semibold">Ambiente</span>
                     <Home className="w-6 h-6" />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-green-900 mb-1">
+                  <div className="text-3xl font-bold text-foreground mb-1">
                     {stats.porCategoria.ambiente}
                   </div>
-                  <p className="text-sm text-green-600">temperatura ambiente</p>
+                  <p className="text-sm text-muted-foreground">temperatura ambiente</p>
                 </CardContent>
               </Card>
 
               <Card 
-                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200"
+                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-muted/30 to-muted/50 border-muted"
                 onClick={() => navigate('/camara-fria')}
               >
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between text-purple-700">
+                  <CardTitle className="flex items-center justify-between text-muted-foreground">
                     <span className="text-lg font-semibold">Câmara Fria</span>
                     <Refrigerator className="w-6 h-6" />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-purple-900 mb-1">
+                  <div className="text-3xl font-bold text-foreground mb-1">
                     {stats.porCategoria['camara-fria']}
                   </div>
-                  <p className="text-sm text-purple-600">câmara refrigerada</p>
+                  <p className="text-sm text-muted-foreground">câmara refrigerada</p>
                 </CardContent>
               </Card>
             </div>
@@ -510,22 +562,22 @@ const Index = () => {
             {(proximosVencimento.length > 0 || produtosVencidos.length > 0) && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 {proximosVencimento.length > 0 && (
-                  <Card className="border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50">
+                  <Card className="border-warning/50 bg-gradient-to-br from-warning/10 to-warning/20 animate-fade-in">
                     <CardHeader>
-                      <CardTitle className="flex items-center space-x-2 text-yellow-700">
+                      <CardTitle className="flex items-center space-x-2 text-warning">
                         <Clock className="w-5 h-5" />
                         <span>Atenção Requerida</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-yellow-700 mb-4">
+                      <p className="text-warning mb-4">
                         {proximosVencimento.length} produto(s) vencendo em breve
                       </p>
                       <div className="space-y-2">
                         {proximosVencimento.slice(0, 3).map(product => (
-                          <div key={product.id} className="flex justify-between items-center p-2 bg-white rounded-lg">
-                            <span className="font-medium text-gray-900">{product.nome}</span>
-                            <span className="text-sm text-yellow-600">{product.lote}</span>
+                          <div key={product.id} className="flex justify-between items-center p-2 bg-background rounded-lg shadow-sm">
+                            <span className="font-medium text-foreground">{product.nome}</span>
+                            <span className="text-sm text-warning">{product.lote}</span>
                           </div>
                         ))}
                       </div>
