@@ -232,22 +232,22 @@ const VisualizarEtiquetas = () => {
                       <AlertTriangle className="w-6 h-6 text-red-600" />
                       <h2 className="text-2xl font-bold text-red-700">🚨 Produtos Vencidos</h2>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {expiredProducts.map((product) => (
-                        <div key={product.id} className="print:break-inside-avoid">
-                          <div className="mb-2 flex items-center space-x-2">
-                            <Checkbox
-                              checked={selectedProducts.includes(product.id)}
-                              onCheckedChange={() => handleSelectProduct(product.id)}
-                            />
-                            <span className="text-sm text-red-600 font-bold">⚠️ PRODUTO VENCIDO</span>
-                          </div>
-                          <div className="border-4 border-red-500 rounded-lg p-2 bg-red-50 shadow-xl transform hover:scale-105 transition-all duration-200">
-                            <EtiquetaView product={product} largura={largura} altura={altura} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                     <div className="etiquetas-grid grid gap-4 auto-fit-etiquetas">
+                       {expiredProducts.map((product) => (
+                         <div key={product.id} className="etiqueta-container print:break-inside-avoid">
+                           <div className="mb-2 flex items-center space-x-2 print:hidden">
+                             <Checkbox
+                               checked={selectedProducts.includes(product.id)}
+                               onCheckedChange={() => handleSelectProduct(product.id)}
+                             />
+                             <span className="text-sm text-red-600 font-bold">⚠️ PRODUTO VENCIDO</span>
+                           </div>
+                           <div className="etiqueta-wrapper border-4 border-red-500 rounded-lg p-2 bg-red-50 shadow-lg hover:shadow-xl transition-all duration-200">
+                             <EtiquetaView product={product} largura={largura} altura={altura} />
+                           </div>
+                         </div>
+                       ))}
+                     </div>
                   </div>
                 )}
 
@@ -258,22 +258,22 @@ const VisualizarEtiquetas = () => {
                       <Eye className="w-6 h-6 text-green-600" />
                       <h2 className="text-2xl font-bold text-green-700">✅ Produtos Válidos</h2>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {validProducts.map((product) => (
-                        <div key={product.id} className="print:break-inside-avoid">
-                          <div className="mb-2 flex items-center space-x-2">
-                            <Checkbox
-                              checked={selectedProducts.includes(product.id)}
-                              onCheckedChange={() => handleSelectProduct(product.id)}
-                            />
-                            <span className="text-sm text-green-600">Produto válido</span>
-                          </div>
-                          <div className="hover:shadow-lg transition-shadow duration-200">
-                            <EtiquetaView product={product} largura={largura} altura={altura} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                     <div className="etiquetas-grid grid gap-4 auto-fit-etiquetas">
+                       {validProducts.map((product) => (
+                         <div key={product.id} className="etiqueta-container print:break-inside-avoid">
+                           <div className="mb-2 flex items-center space-x-2 print:hidden">
+                             <Checkbox
+                               checked={selectedProducts.includes(product.id)}
+                               onCheckedChange={() => handleSelectProduct(product.id)}
+                             />
+                             <span className="text-sm text-green-600">Produto válido</span>
+                           </div>
+                           <div className="etiqueta-wrapper hover:shadow-lg transition-shadow duration-200 border border-gray-200 rounded-lg p-2 bg-white">
+                             <EtiquetaView product={product} largura={largura} altura={altura} />
+                           </div>
+                         </div>
+                       ))}
+                     </div>
                   </div>
                 )}
               </div>

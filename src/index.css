@@ -126,3 +126,84 @@
 .gradient-danger {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
+
+/* Estilos para impressão térmica */
+@media print {
+  /* Reset da página para impressão */
+  @page {
+    margin: 0;
+    size: auto;
+  }
+  
+  /* Ocultar elementos desnecessários na impressão */
+  .print\\:hidden {
+    display: none !important;
+  }
+  
+  /* Estilos específicos para etiquetas térmicas */
+  .etiqueta-termica {
+    width: var(--etiqueta-width) !important;
+    height: var(--etiqueta-height) !important;
+    font-size: var(--etiqueta-font-size) !important;
+    border: 2px solid #000 !important;
+    background: white !important;
+    box-shadow: none !important;
+    transform: none !important;
+    margin: 0 !important;
+    page-break-inside: avoid;
+  }
+  
+  .etiqueta-container {
+    page-break-inside: avoid;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .etiqueta-wrapper {
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+  
+  /* Grid responsivo para impressão */
+  .etiquetas-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(var(--etiqueta-width, 70mm), 1fr)) !important;
+    gap: 2mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* Layout responsivo para visualização */
+.auto-fit-etiquetas {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* Garantir que as etiquetas mantenham proporção */
+.etiqueta-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.etiqueta-wrapper {
+  display: inline-block;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Estilos para diferentes tamanhos de impressora térmica */
+@media print and (max-width: 58mm) {
+  .etiquetas-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media print and (max-width: 80mm) {
+  .etiquetas-grid {
+    grid-template-columns: repeat(auto-fit, minmax(70mm, 1fr)) !important;
+  }
+}

@@ -47,28 +47,40 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
     }
   };
 
-  // Cálculo baseado na área total da etiqueta
-  const area = largura * altura;
-  const widthPx = largura * 3.78; // Conversão mm para px
-  const heightPx = altura * 3.78;
+  // Conversão otimizada para impressão térmica
+  const widthMm = largura;
+  const heightMm = altura;
+  
+  // Usar unidades CSS em mm para impressão precisa
+  const cssWidth = `${widthMm}mm`;
+  const cssHeight = `${heightMm}mm`;
+  
+  // Para visualização na tela (conversão aproximada: 1mm = 3.78px)
+  const screenWidth = `${widthMm * 3.78}px`;
+  const screenHeight = `${heightMm * 3.78}px`;
 
-  // Tamanho da fonte baseado na área - mais suave e proporcional
-  const fontSize = Math.max(8, Math.min(18, Math.sqrt(area) * 0.28));
-  
-  // Espaçamento proporcional
-  const spacing = Math.max(2, fontSize * 0.15);
-  const padding = Math.max(8, fontSize * 0.7);
-  
-  // Altura das linhas baseada no fontSize
-  const lineHeight = fontSize + 4;
+  // Cálculo responsivo baseado no tamanho da etiqueta
+  const area = largura * altura;
+  const fontSize = Math.max(6, Math.min(16, Math.sqrt(area) * 0.25));
+  const spacing = Math.max(1, fontSize * 0.12);
+  const padding = Math.max(4, fontSize * 0.5);
+  const lineHeight = fontSize + 2;
 
   return (
     <Card 
-      className="border-2 border-gray-400 bg-white overflow-hidden"
+      className="etiqueta-termica border-2 border-gray-400 bg-white overflow-hidden"
       style={{ 
-        width: `${widthPx}px`,
-        height: `${heightPx}px`
-      }}
+        // Usar px para visualização na tela
+        width: screenWidth,
+        height: screenHeight,
+        // CSS custom properties para impressão
+        '--etiqueta-width': cssWidth,
+        '--etiqueta-height': cssHeight,
+        '--etiqueta-font-size': `${fontSize}px`,
+        '--etiqueta-spacing': `${spacing}px`,
+        '--etiqueta-padding': `${padding}px`,
+        '--etiqueta-line-height': `${lineHeight}px`
+      } as React.CSSProperties}
     >
       <CardContent 
         className="font-sans h-full"
