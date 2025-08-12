@@ -9,7 +9,9 @@ import { ProductTable } from "@/components/ProductTable";
 import { ProductForm } from "@/components/ProductForm";
 import { StatsCard } from "@/components/StatsCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Package, CheckCircle, AlertTriangle, XCircle, Thermometer, Snowflake, Home, Refrigerator, TrendingUp, Clock, Users, Printer } from "lucide-react";
+import { Plus, Package, CheckCircle, AlertTriangle, XCircle, Thermometer, Snowflake, Home, Refrigerator, TrendingUp, Clock, Users, Printer, Eye, FileText } from "lucide-react";
+import { QuickActionBar } from "@/components/QuickActionBar";
+import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -451,6 +453,26 @@ const Index = () => {
               }}
             />
 
+            {/* Barra de Ações Rápidas */}
+            <QuickActionBar
+              onNewProduct={() => {
+                setEditingProduct(null);
+                setShowForm(true);
+              }}
+              totalProducts={stats.total}
+              expiredCount={stats.vencidos}
+              expiringCount={stats.proximoVencimento}
+              onRefresh={() => window.location.reload()}
+              onExport={() => toast({
+                title: "Exportação",
+                description: "Funcionalidade em desenvolvimento...",
+              })}
+              onImport={() => toast({
+                title: "Importação",
+                description: "Funcionalidade em desenvolvimento...",
+              })}
+            />
+
             {/* Cards de Estatísticas Principais */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <StatsCard
@@ -459,6 +481,9 @@ const Index = () => {
                 icon={Package}
                 variant="default"
                 description="Produtos cadastrados"
+                onClick={() => navigate('/')}
+                actionIcon={Eye}
+                actionLabel="Ver"
               />
               <StatsCard
                 title="Produtos Válidos"
@@ -466,20 +491,29 @@ const Index = () => {
                 icon={CheckCircle}
                 variant="success"
                 description="Em condições ideais"
+                onClick={() => navigate('/relatorios')}
+                actionIcon={FileText}
+                actionLabel="Relatório"
               />
               <StatsCard
-                title="Próximo Vencimento"
+                title="Próx. Vencimento"
                 value={stats.proximoVencimento}
                 icon={AlertTriangle}
                 variant="warning"
-                description="Vence em até 7 dias"
+                description="Atenção necessária"
+                onClick={() => navigate('/relatorios')}
+                actionIcon={Clock}
+                actionLabel="Ver Lista"
               />
               <StatsCard
-                title="Vencidos"
+                title="Produtos Vencidos"
                 value={stats.vencidos}
                 icon={XCircle}
                 variant="danger"
-                description="Necessita atenção"
+                description="Requer ação imediata"
+                onClick={() => navigate('/relatorios')}
+                actionIcon={AlertTriangle}
+                actionLabel="Urgente"
               />
             </div>
 
@@ -652,6 +686,28 @@ const Index = () => {
             />
           </div>
         </main>
+
+        {/* Floating Action Button */}
+        <FloatingActionButton
+          onNewProduct={() => {
+            setEditingProduct(null);
+            setShowForm(true);
+          }}
+          onQuickPrint={() => navigate('/impressao-etiquetas')}
+          onReports={() => navigate('/relatorios')}
+          onExport={() => toast({
+            title: "Exportação",
+            description: "Funcionalidade em desenvolvimento...",
+          })}
+          onImport={() => toast({
+            title: "Importação", 
+            description: "Funcionalidade em desenvolvimento...",
+          })}
+          onSettings={() => toast({
+            title: "Configurações",
+            description: "Funcionalidade em desenvolvimento...",
+          })}
+        />
       </div>
     </SidebarProvider>
   );
