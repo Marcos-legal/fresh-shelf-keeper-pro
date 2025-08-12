@@ -411,7 +411,7 @@ const Index = () => {
             {/* Header Moderno */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-4">
-                <SidebarTrigger className="lg:hidden" />
+                <SidebarTrigger className="hover:bg-muted rounded-lg transition-colors p-2" />
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 gradient-blue rounded-xl flex items-center justify-center shadow-lg">
                     <Package className="w-7 h-7 text-white" />

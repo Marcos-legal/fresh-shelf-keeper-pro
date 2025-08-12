@@ -148,7 +148,7 @@ export function useProducts() {
     
     const daysToExpire = Math.ceil((targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     
-    if (daysToExpire <= 7) {
+    if (daysToExpire <= 1) {
       return 'proximo-vencimento';
     }
     

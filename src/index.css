@@ -198,6 +198,27 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
+/* Gradientes e bordas melhoradas */
+.gradient-border {
+  @apply relative overflow-hidden border border-border/50;
+  background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)/0.3));
+  box-shadow: 0 4px 20px -4px hsl(var(--primary)/0.1);
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1px;
+  background: linear-gradient(45deg, hsl(var(--primary)), transparent, hsl(var(--primary)));
+  border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: subtract;
+}
+
 /* Garantir que as etiquetas mantenham proporção */
 .etiqueta-container {
   display: flex;

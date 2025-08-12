@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
-import { TrendingUp } from "lucide-react"
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts"
+import { TrendingUp, Package, AlertTriangle } from "lucide-react"
 
 interface DashboardChartProps {
   categoryData: Record<string, number>
@@ -57,59 +57,131 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
     { name: "Vencidos", value: statusData.vencidos, fill: "hsl(var(--destructive))" },
   ]
 
+  const totalProducts = Object.values(categoryData).reduce((acc, val) => acc + val, 0)
+  const totalStatus = statusData.validos + statusData.proximoVencimento + statusData.vencidos
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <Card className="animate-fade-in">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            Produtos por Local
+      <Card className="animate-fade-in hover-scale gradient-border">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-primary" />
+              <span className="gradient-text">Distribuição por Local</span>
+            </div>
+            <div className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full">
+              Total: {totalProducts}
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={barData}>
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                <defs>
+                  <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
+                  </linearGradient>
+                  <linearGradient id="barGradient2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--chart-2))" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
+                  </linearGradient>
+                  <linearGradient id="barGradient3" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--chart-3))" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="hsl(var(--chart-3))" stopOpacity={0.3} />
+                  </linearGradient>
+                  <linearGradient id="barGradient4" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--chart-4))" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="hsl(var(--chart-4))" stopOpacity={0.3} />
+                  </linearGradient>
+                </defs>
                 <XAxis 
                   dataKey="name" 
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                   angle={-45}
                   textAnchor="end"
                   height={60}
+                  stroke="hsl(var(--border))"
                 />
-                <YAxis tick={{ fontSize: 12 }} />
+                <YAxis 
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  stroke="hsl(var(--border))"
+                />
                 <ChartTooltip 
                   content={<ChartTooltipContent />}
+                  cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
                 />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} />
+                <Bar 
+                  dataKey="value" 
+                  radius={[6, 6, 0, 0]}
+                >
+                  {barData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={`url(#barGradient${(index % 4) + 1})`} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
         </CardContent>
       </Card>
 
-      <Card className="animate-fade-in">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            Status dos Produtos
+      <Card className="animate-fade-in hover-scale gradient-border">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-warning" />
+              <span className="gradient-text">Status de Validade</span>
+            </div>
+            <div className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full">
+              Total: {totalStatus}
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={320}>
               <PieChart>
+                <defs>
+                  <linearGradient id="pieGradient1" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0.4} />
+                  </linearGradient>
+                  <linearGradient id="pieGradient2" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--warning))" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="hsl(var(--warning))" stopOpacity={0.4} />
+                  </linearGradient>
+                  <linearGradient id="pieGradient3" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--destructive))" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="hsl(var(--destructive))" stopOpacity={0.4} />
+                  </linearGradient>
+                </defs>
                 <Pie
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  outerRadius={100}
+                  outerRadius={90}
+                  innerRadius={40}
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}`}
-                  labelLine={false}
+                  stroke="hsl(var(--background))"
+                  strokeWidth={2}
                 />
                 <ChartTooltip 
-                  content={<ChartTooltipContent />}
+                  content={<ChartTooltipContent 
+                    formatter={(value, name) => [
+                      `${value} produto${value !== 1 ? 's' : ''}`,
+                      name
+                    ]}
+                  />}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  formatter={(value, entry) => (
+                    <span style={{ color: entry.color, fontWeight: 500 }}>
+                      {value}: {entry.payload.value}
+                    </span>
+                  )}
                 />
               </PieChart>
             </ResponsiveContainer>

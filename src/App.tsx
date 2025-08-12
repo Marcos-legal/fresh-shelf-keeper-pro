@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ResponsaveisProvider } from "@/contexts/ResponsaveisContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Refrigerado from "./pages/Refrigerado";
@@ -32,27 +33,29 @@ const App: React.FC = () => (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <ResponsaveisProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/refrigerado" element={<Refrigerado />} />
-            <Route path="/congelado" element={<Congelado />} />
-            <Route path="/ambiente" element={<Ambiente />} />
-            <Route path="/camara-fria" element={<CamaraFria />} />
-            <Route path="/cadastro" element={<Cadastro />} />
-            <Route path="/relatorios" element={<Relatorios />} />
-            <Route path="/impressao-etiquetas" element={<ImpressaoEtiquetas />} />
-            <Route path="/visualizar-etiquetas" element={<VisualizarEtiquetas />} />
-            <Route path="/contagem-estoque" element={<ContagemEstoque />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ResponsaveisProvider>
-  </ThemeProvider>
+          <SidebarProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/refrigerado" element={<Refrigerado />} />
+              <Route path="/congelado" element={<Congelado />} />
+              <Route path="/ambiente" element={<Ambiente />} />
+              <Route path="/camara-fria" element={<CamaraFria />} />
+              <Route path="/cadastro" element={<Cadastro />} />
+              <Route path="/relatorios" element={<Relatorios />} />
+              <Route path="/impressao-etiquetas" element={<ImpressaoEtiquetas />} />
+              <Route path="/visualizar-etiquetas" element={<VisualizarEtiquetas />} />
+              <Route path="/contagem-estoque" element={<ContagemEstoque />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+          </SidebarProvider>
+        </TooltipProvider>
+      </ResponsaveisProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
