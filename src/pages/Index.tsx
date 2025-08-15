@@ -18,6 +18,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DashboardChart } from "@/components/DashboardChart";
 import { Skeleton } from "@/components/ui/skeleton";
+import { escapeHtml } from "@/lib/security";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -170,7 +171,7 @@ const Index = () => {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Etiqueta - ${product.nome} - ${largura}x${altura}mm</title>
+            <title>Etiqueta - ${escapeHtml(product.nome || '')} - ${escapeHtml(largura.toString())}x${escapeHtml(altura.toString())}mm</title>
             <style>
               @page {
                 size: A4;
@@ -260,54 +261,54 @@ const Index = () => {
             <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
               <div class="campo">
                 <div class="label">PRODUTO:</div>
-                <div class="content">${(product.nome || '').toUpperCase()}</div>
+                <div class="content">${escapeHtml((product.nome || '').toUpperCase())}</div>
               </div>
               <div class="grid">
                 <div class="campo">
                   <div class="label">LOTE:</div>
-                  <div class="content">${(product.lote || '').toUpperCase()}</div>
+                  <div class="content">${escapeHtml((product.lote || '').toUpperCase())}</div>
                 </div>
                 ${config.showGrid ? `
                 <div class="campo">
                   <div class="label">MARCA:</div>
-                  <div class="content">${(product.marca || '').toUpperCase()}</div>
+                  <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
                 </div>
                 ` : ''}
               </div>
               ${!config.showGrid ? `
               <div class="campo">
                 <div class="label">MARCA:</div>
-                <div class="content">${(product.marca || '').toUpperCase()}</div>
+                <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
               </div>
               ` : ''}
               ${product.showOptionalDates && !config.compactMode ? `
               <div class="grid">
                 <div class="campo">
                   <div class="label">FABRIC.:</div>
-                  <div class="content">${formatDateSafe(product.dataFabricacao)}</div>
+                  <div class="content">${escapeHtml(formatDateSafe(product.dataFabricacao))}</div>
                 </div>
                 <div class="campo">
                   <div class="label">VALID.:</div>
-                  <div class="content">${formatDateSafe(product.validade)}</div>
+                  <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
                 </div>
               </div>
               ` : ''}
               <div class="grid">
                 <div class="campo">
                   <div class="label">ABERTURA:</div>
-                  <div class="content">${formatDateSafe(product.dataAbertura)}</div>
+                  <div class="content">${escapeHtml(formatDateSafe(product.dataAbertura))}</div>
                 </div>
                 ${config.showGrid ? `
                 <div class="campo">
                   <div class="label">USAR ATÉ:</div>
-                  <div class="content">${formatDateSafe(product.utilizarAte)}</div>
+                  <div class="content">${escapeHtml(formatDateSafe(product.utilizarAte))}</div>
                 </div>
                 ` : ''}
               </div>
               ${!config.showGrid ? `
               <div class="campo">
                 <div class="label">USAR ATÉ:</div>
-                <div class="content">${formatDateSafe(product.utilizarAte)}</div>
+                <div class="content">${escapeHtml(formatDateSafe(product.utilizarAte))}</div>
               </div>
               ` : ''}
               <div class="checkbox-row">
@@ -327,7 +328,7 @@ const Index = () => {
               ${!config.compactMode ? `
               <div class="campo">
                 <div class="label">RESPONSÁVEL:</div>
-                <div class="content">${(product.responsavel || '').toUpperCase()}</div>
+                <div class="content">${escapeHtml((product.responsavel || '').toUpperCase())}</div>
               </div>
               ` : ''}
             </div>

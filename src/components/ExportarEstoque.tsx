@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Download, FileText, BarChart3 } from "lucide-react";
 import { ProdutoEstoque, ContagemEstoque } from "@/types/estoque";
 import { toast } from "@/hooks/use-toast";
+import { sanitizeForExcel } from "@/lib/security";
 import * as XLSX from 'xlsx';
 
 interface ExportarEstoqueProps {
@@ -41,17 +42,17 @@ export function ExportarEstoque({ produtos, contagens, getEstoqueAtual }: Export
 
         return {
           'ITEM': index + 1,
-          '📦 PRODUTO': produto.nome,
-          '📏 UNIDADE MEDIDA': produto.unidadeMedida,
-          '🔢 QTD POR UNIDADE': `${produto.quantidadePorUnidade} ${produto.unidadeConteudo}`,
-          '📊 ESTOQUE ATUAL': `${estoqueAtual.toFixed(2)} ${produto.unidadeConteudo}`,
-          '📈 MÉDIA ESTOQUE': `${mediaEstoque.toFixed(2)} ${produto.unidadeConteudo}`,
+          '📦 PRODUTO': sanitizeForExcel(produto.nome || ''),
+          '📏 UNIDADE MEDIDA': sanitizeForExcel(produto.unidadeMedida || ''),
+          '🔢 QTD POR UNIDADE': sanitizeForExcel(`${produto.quantidadePorUnidade} ${produto.unidadeConteudo}`),
+          '📊 ESTOQUE ATUAL': sanitizeForExcel(`${estoqueAtual.toFixed(2)} ${produto.unidadeConteudo}`),
+          '📈 MÉDIA ESTOQUE': sanitizeForExcel(`${mediaEstoque.toFixed(2)} ${produto.unidadeConteudo}`),
           '🔄 TOTAL CONTAGENS': totalContagens,
-          '📅 ÚLTIMA CONTAGEM': ultimaContagem ? formatarData(ultimaContagem.dataContagem) : 'Nunca contado',
-          '👤 ÚLTIMO RESPONSÁVEL': ultimaContagem?.responsavel || 'Não informado',
-          '📝 STATUS': estoqueAtual > 0 ? '✅ EM ESTOQUE' : '❌ SEM ESTOQUE',
-          '⚠️ ALERTA': estoqueAtual < (mediaEstoque * 0.2) ? '🔴 ESTOQUE BAIXO' : '🟢 OK',
-          '📊 MOVIMENTAÇÃO': totalContagens > 5 ? '🔥 ALTA' : totalContagens > 2 ? '🔸 MÉDIA' : '🔹 BAIXA'
+          '📅 ÚLTIMA CONTAGEM': sanitizeForExcel(ultimaContagem ? formatarData(ultimaContagem.dataContagem) : 'Nunca contado'),
+          '👤 ÚLTIMO RESPONSÁVEL': sanitizeForExcel(ultimaContagem?.responsavel || 'Não informado'),
+          '📝 STATUS': sanitizeForExcel(estoqueAtual > 0 ? '✅ EM ESTOQUE' : '❌ SEM ESTOQUE'),
+          '⚠️ ALERTA': sanitizeForExcel(estoqueAtual < (mediaEstoque * 0.2) ? '🔴 ESTOQUE BAIXO' : '🟢 OK'),
+          '📊 MOVIMENTAÇÃO': sanitizeForExcel(totalContagens > 5 ? '🔥 ALTA' : totalContagens > 2 ? '🔸 MÉDIA' : '🔹 BAIXA')
         };
       });
 
@@ -184,20 +185,20 @@ export function ExportarEstoque({ produtos, contagens, getEstoqueAtual }: Export
             produto?.unidadeConteudo : 'unidades individuais'}` : 'Nenhuma';
 
         return {
-          'ID': `#${String(index + 1).padStart(4, '0')}`,
-          '📦 PRODUTO': produto?.nome || 'Produto removido',
-          '📊 QTD PRINCIPAL': `${contagem.quantidade} ${produto?.unidadeMedida || '-'}`,
-          '➕ QTD EXTRA': quantidadeExtraTexto,
-          '🧮 TOTAL CALCULADO': `${contagem.quantidadeTotal.toFixed(2)} ${produto?.unidadeConteudo || '-'}`,
-          '📅 DATA/HORA': formatarData(contagem.dataContagem),
-          '👤 RESPONSÁVEL': contagem.responsavel || 'Não informado',
-          '📝 OBSERVAÇÕES': contagem.observacoes || 'Nenhuma observação',
-          '⚙️ CÁLCULO': produto ? 
+          'ID': sanitizeForExcel(`#${String(index + 1).padStart(4, '0')}`),
+          '📦 PRODUTO': sanitizeForExcel(produto?.nome || 'Produto removido'),
+          '📊 QTD PRINCIPAL': sanitizeForExcel(`${contagem.quantidade} ${produto?.unidadeMedida || '-'}`),
+          '➕ QTD EXTRA': sanitizeForExcel(quantidadeExtraTexto),
+          '🧮 TOTAL CALCULADO': sanitizeForExcel(`${contagem.quantidadeTotal.toFixed(2)} ${produto?.unidadeConteudo || '-'}`),
+          '📅 DATA/HORA': sanitizeForExcel(formatarData(contagem.dataContagem)),
+          '👤 RESPONSÁVEL': sanitizeForExcel(contagem.responsavel || 'Não informado'),
+          '📝 OBSERVAÇÕES': sanitizeForExcel(contagem.observacoes || 'Nenhuma observação'),
+          '⚙️ CÁLCULO': sanitizeForExcel(produto ? 
             `${contagem.quantidade} × ${produto.quantidadePorUnidade} + ${contagem.quantidadeExtra || 0}` : 
-            'Produto removido',
-          '🎯 STATUS': contagem.quantidadeTotal > 0 ? '✅ VÁLIDA' : '⚪ ZERADA',
-          '📈 IMPACTO': contagem.quantidadeTotal > 100 ? '🔥 ALTO' : 
-                       contagem.quantidadeTotal > 50 ? '🔸 MÉDIO' : '🔹 BAIXO'
+            'Produto removido'),
+          '🎯 STATUS': sanitizeForExcel(contagem.quantidadeTotal > 0 ? '✅ VÁLIDA' : '⚪ ZERADA'),
+          '📈 IMPACTO': sanitizeForExcel(contagem.quantidadeTotal > 100 ? '🔥 ALTO' : 
+                       contagem.quantidadeTotal > 50 ? '🔸 MÉDIO' : '🔹 BAIXO')
         };
       });
 
