@@ -23,7 +23,7 @@ export function EstoqueSearchFilter({
   onRefresh,
   isLoading = false
 }: EstoqueSearchFilterProps) {
-  const activeFiltersCount = [searchTerm, filterResponsavel].filter(Boolean).length;
+  const activeFiltersCount = [searchTerm, filterResponsavel !== 'all' ? filterResponsavel : ''].filter(Boolean).length;
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 p-4 bg-card rounded-lg border">
@@ -44,7 +44,7 @@ export function EstoqueSearchFilter({
             <SelectValue placeholder="Filtrar por responsável" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
             {responsaveis.map((responsavel) => (
               <SelectItem key={responsavel} value={responsavel}>
                 {responsavel}

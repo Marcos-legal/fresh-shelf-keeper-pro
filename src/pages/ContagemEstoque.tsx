@@ -31,7 +31,7 @@ export default function ContagemEstoque() {
   const [showProdutoForm, setShowProdutoForm] = useState(false);
   const [showContagemForm, setShowContagemForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterResponsavel, setFilterResponsavel] = useState('');
+  const [filterResponsavel, setFilterResponsavel] = useState('all');
 
   // Filtros
   const responsaveis = [...new Set(contagens.map(c => c.responsavel).filter(Boolean))] as string[];
@@ -45,7 +45,7 @@ export default function ContagemEstoque() {
     const matchesSearch = !searchTerm || 
       produto?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       contagem.observacoes?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesResponsavel = !filterResponsavel || contagem.responsavel === filterResponsavel;
+    const matchesResponsavel = filterResponsavel === 'all' || contagem.responsavel === filterResponsavel;
     return matchesSearch && matchesResponsavel;
   });
 
