@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProdutoEstoqueForm } from "@/components/ProdutoEstoqueForm";
 import { ContagemEstoqueForm } from "@/components/ContagemEstoqueForm";
 import { ExportarEstoque } from "@/components/ExportarEstoque";
-import { useEstoque } from "@/hooks/useEstoque";
+import { useEstoqueSupabase } from "@/hooks/useEstoqueSupabase";
+import { EstoqueSearchFilter } from "@/components/EstoqueSearchFilter";
+import { EstoqueStats } from "@/components/EstoqueStats";
 import { Package, Calculator, Plus, Trash2, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -21,11 +23,31 @@ export default function ContagemEstoque() {
     deleteProdutoEstoque,
     addContagem,
     deleteContagem,
-    getEstoqueAtual
-  } = useEstoque();
+    getEstoqueAtual,
+    migrarDadosLocalStorage,
+    refreshData
+  } = useEstoqueSupabase();
 
   const [showProdutoForm, setShowProdutoForm] = useState(false);
   const [showContagemForm, setShowContagemForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterResponsavel, setFilterResponsavel] = useState('');
+
+  // Filtros
+  const responsaveis = [...new Set(contagens.map(c => c.responsavel).filter(Boolean))] as string[];
+  
+  const filteredProdutos = produtos.filter(produto => 
+    produto.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const filteredContagens = contagens.filter(contagem => {
+    const produto = produtos.find(p => p.id === contagem.produto_id);
+    const matchesSearch = !searchTerm || 
+      produto?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contagem.observacoes?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesResponsavel = !filterResponsavel || contagem.responsavel === filterResponsavel;
+    return matchesSearch && matchesResponsavel;
+  });
 
   if (loading) {
     return (
@@ -51,6 +73,15 @@ export default function ContagemEstoque() {
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold gradient-text">Contagem de Estoque</h1>
             <div className="flex space-x-2">
+              <Button 
+                variant="secondary" 
+                onClick={migrarDadosLocalStorage}
+                className="text-sm"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Migrar dados locais
+              </Button>
+              
               <ExportarEstoque 
                 produtos={produtos}
                 contagens={contagens}
@@ -100,17 +131,35 @@ export default function ContagemEstoque() {
             </div>
           </div>
 
+          {/* Estatísticas */}
+          <EstoqueStats 
+            produtos={produtos}
+            contagens={contagens}
+            getEstoqueAtual={getEstoqueAtual}
+          />
+
+          {/* Filtros de Busca */}
+          <EstoqueSearchFilter
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            filterResponsavel={filterResponsavel}
+            onFilterResponsavelChange={setFilterResponsavel}
+            responsaveis={responsaveis}
+            onRefresh={refreshData}
+            isLoading={loading}
+          />
+
           {/* Produtos Cadastrados */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Package className="w-5 h-5" />
                 <span>Produtos Cadastrados</span>
-                <Badge variant="secondary">{produtos.length}</Badge>
+                <Badge variant="secondary">{filteredProdutos.length}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {produtos.length === 0 ? (
+              {filteredProdutos.length === 0 ? (
                 <div className="text-center py-8">
                   <Package className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                   <p className="text-gray-500 mb-4">Nenhum produto cadastrado para estoque</p>
@@ -131,18 +180,18 @@ export default function ContagemEstoque() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {produtos.map((produto) => {
+                    {filteredProdutos.map((produto) => {
                       const estoqueAtual = getEstoqueAtual(produto.id);
                       return (
                         <TableRow key={produto.id}>
                           <TableCell className="font-medium">{produto.nome}</TableCell>
-                          <TableCell>{produto.unidadeMedida}</TableCell>
+                          <TableCell>{produto.unidade_medida}</TableCell>
                           <TableCell>
-                            {produto.quantidadePorUnidade} {produto.unidadeConteudo}
+                            {produto.quantidade_por_unidade} {produto.unidade_conteudo}
                           </TableCell>
                           <TableCell>
                             <Badge variant={estoqueAtual > 0 ? "default" : "secondary"}>
-                              {estoqueAtual} {produto.unidadeConteudo}
+                              {estoqueAtual} {produto.unidade_conteudo}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -169,11 +218,11 @@ export default function ContagemEstoque() {
               <CardTitle className="flex items-center space-x-2">
                 <Calculator className="w-5 h-5" />
                 <span>Histórico de Contagens</span>
-                <Badge variant="secondary">{contagens.length}</Badge>
+                <Badge variant="secondary">{filteredContagens.length}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {contagens.length === 0 ? (
+              {filteredContagens.length === 0 ? (
                 <div className="text-center py-8">
                   <Calculator className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                   <p className="text-gray-500">Nenhuma contagem realizada ainda</p>
@@ -192,13 +241,13 @@ export default function ContagemEstoque() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {contagens
-                      .sort((a, b) => new Date(b.dataContagem).getTime() - new Date(a.dataContagem).getTime())
+                    {filteredContagens
+                      .sort((a, b) => new Date(b.data_contagem).getTime() - new Date(a.data_contagem).getTime())
                       .map((contagem) => {
-                        const produto = produtos.find(p => p.id === contagem.produtoId);
-                        const quantidadeExtraTexto = contagem.quantidadeExtra > 0 ? 
-                          `${contagem.quantidadeExtra} ${contagem.unidadeQuantidadeExtra === 'porcoes' ? 
-                            produto?.unidadeConteudo : 'un. ind.'}` : '-';
+                        const produto = produtos.find(p => p.id === contagem.produto_id);
+                        const quantidadeExtraTexto = contagem.quantidade_extra > 0 ? 
+                          `${contagem.quantidade_extra} ${contagem.unidade_quantidade_extra === 'porcoes' ? 
+                            produto?.unidade_conteudo : 'un. ind.'}` : '-';
                         
                         return (
                           <TableRow key={contagem.id}>
@@ -206,7 +255,7 @@ export default function ContagemEstoque() {
                               {produto?.nome || 'Produto removido'}
                             </TableCell>
                             <TableCell>
-                              {contagem.quantidade} {produto?.unidadeMedida}
+                              {contagem.quantidade} {produto?.unidade_medida}
                             </TableCell>
                             <TableCell>
                               <Badge variant="secondary" className="text-xs">
@@ -215,12 +264,12 @@ export default function ContagemEstoque() {
                             </TableCell>
                             <TableCell>
                               <Badge variant="outline">
-                                {contagem.quantidadeTotal.toFixed(2)} {produto?.unidadeConteudo}
+                                {contagem.quantidade_total.toFixed(2)} {produto?.unidade_conteudo}
                               </Badge>
                             </TableCell>
                             <TableCell>{contagem.responsavel || '-'}</TableCell>
                             <TableCell>
-                              {contagem.dataContagem.toLocaleDateString('pt-BR', {
+                              {new Date(contagem.data_contagem).toLocaleDateString('pt-BR', {
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric',

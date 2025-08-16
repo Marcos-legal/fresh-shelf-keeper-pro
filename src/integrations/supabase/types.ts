@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      contagens_estoque: {
+        Row: {
+          created_at: string
+          data_contagem: string
+          id: string
+          observacoes: string | null
+          produto_id: string
+          quantidade: number
+          quantidade_extra: number
+          quantidade_total: number
+          responsavel: string | null
+          unidade_quantidade_extra: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_contagem?: string
+          id?: string
+          observacoes?: string | null
+          produto_id: string
+          quantidade?: number
+          quantidade_extra?: number
+          quantidade_total?: number
+          responsavel?: string | null
+          unidade_quantidade_extra?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          data_contagem?: string
+          id?: string
+          observacoes?: string | null
+          produto_id?: string
+          quantidade?: number
+          quantidade_extra?: number
+          quantidade_total?: number
+          responsavel?: string | null
+          unidade_quantidade_extra?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contagens_estoque_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos_estoque"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand: string
@@ -68,6 +118,39 @@ export type Database = {
           storage?: string
           use_by_date?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      produtos_estoque: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          quantidade_por_unidade: number
+          unidade_conteudo: string
+          unidade_medida: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          quantidade_por_unidade?: number
+          unidade_conteudo: string
+          unidade_medida: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          quantidade_por_unidade?: number
+          unidade_conteudo?: string
+          unidade_medida?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calculator, Save } from "lucide-react";
-import { ContagemFormData, ProdutoEstoque } from "@/types/estoque";
+import { ContagemFormData, ProdutoEstoque } from "@/hooks/useEstoqueSupabase";
 import { SelectField } from "@/components/form/SelectField";
 import { NumberInputField } from "@/components/form/NumberInputField";
 import { TextInputField } from "@/components/form/TextInputField";
@@ -17,29 +17,29 @@ interface ContagemEstoqueFormProps {
 
 export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEstoqueFormProps) {
   const [formData, setFormData] = useState<ContagemFormData>({
-    produtoId: '',
+    produto_id: '',
     quantidade: 0,
-    quantidadeExtra: 0,
-    unidadeQuantidadeExtra: 'porcoes',
+    quantidade_extra: 0,
+    unidade_quantidade_extra: 'porcoes',
     responsavel: '',
     observacoes: '',
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof ContagemFormData, string>>>({});
 
-  const produtoSelecionado = produtos.find(p => p.id === formData.produtoId);
+  const produtoSelecionado = produtos.find(p => p.id === formData.produto_id);
   
   const calcularQuantidadeTotal = () => {
     if (!produtoSelecionado) return 0;
     
-    const quantidadeBase = formData.quantidade * produtoSelecionado.quantidadePorUnidade;
+    const quantidadeBase = formData.quantidade * produtoSelecionado.quantidade_por_unidade;
     
-    if (formData.unidadeQuantidadeExtra === 'porcoes') {
-      return quantidadeBase + formData.quantidadeExtra;
+    if (formData.unidade_quantidade_extra === 'porcoes') {
+      return quantidadeBase + formData.quantidade_extra;
     } else {
       // Se for unidades individuais, calcular quantas porções representam
-      const porcoesPorUnidade = produtoSelecionado.quantidadePorUnidade;
-      const porcoesExtras = formData.quantidadeExtra / porcoesPorUnidade;
+      const porcoesPorUnidade = produtoSelecionado.quantidade_por_unidade;
+      const porcoesExtras = formData.quantidade_extra / porcoesPorUnidade;
       return quantidadeBase + porcoesExtras;
     }
   };
@@ -48,7 +48,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
 
   const produtoOptions = produtos.map(produto => ({
     value: produto.id,
-    label: `${produto.nome} (${produto.quantidadePorUnidade} ${produto.unidadeConteudo}/${produto.unidadeMedida})`
+    label: `${produto.nome} (${produto.quantidade_por_unidade} ${produto.unidade_conteudo}/${produto.unidade_medida})`
   }));
 
   const unidadeExtraOptions = [
@@ -74,8 +74,8 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
     e.preventDefault();
     const validationErrors: Partial<Record<keyof ContagemFormData, string>> = {};
     
-    if (!formData.produtoId) {
-      validationErrors.produtoId = 'Produto é obrigatório';
+    if (!formData.produto_id) {
+      validationErrors.produto_id = 'Produto é obrigatório';
     }
     
     if (formData.quantidade < 0) {
@@ -85,10 +85,10 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
     if (Object.keys(validationErrors).length === 0) {
       onSubmit(formData);
       setFormData({
-        produtoId: '',
+        produto_id: '',
         quantidade: 0,
-        quantidadeExtra: 0,
-        unidadeQuantidadeExtra: 'porcoes',
+        quantidade_extra: 0,
+        unidade_quantidade_extra: 'porcoes',
         responsavel: '',
         observacoes: '',
       });
@@ -156,17 +156,17 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                   <div className="flex justify-between">
                     <span>Quantidade Principal:</span>
                     <span className="font-medium">
-                      {formData.quantidade} {produtoSelecionado.unidadeMedida} × {produtoSelecionado.quantidadePorUnidade} = {formData.quantidade * produtoSelecionado.quantidadePorUnidade} {produtoSelecionado.unidadeConteudo}
+                      {formData.quantidade} {produtoSelecionado.unidade_medida} × {produtoSelecionado.quantidade_por_unidade} = {formData.quantidade * produtoSelecionado.quantidade_por_unidade} {produtoSelecionado.unidade_conteudo}
                     </span>
                   </div>
                   
-                  {formData.quantidadeExtra > 0 && (
+                  {formData.quantidade_extra > 0 && (
                     <div className="flex justify-between">
                       <span>Quantidade Extra:</span>
                       <span className="font-medium">
-                        {formData.quantidadeExtra} {formData.unidadeQuantidadeExtra === 'porcoes' ? produtoSelecionado.unidadeConteudo : 'unidades individuais'}
-                        {formData.unidadeQuantidadeExtra === 'unidades' && 
-                          ` (${(formData.quantidadeExtra / produtoSelecionado.quantidadePorUnidade).toFixed(2)} ${produtoSelecionado.unidadeConteudo})`
+                        {formData.quantidade_extra} {formData.unidade_quantidade_extra === 'porcoes' ? produtoSelecionado.unidade_conteudo : 'unidades individuais'}
+                        {formData.unidade_quantidade_extra === 'unidades' && 
+                          ` (${(formData.quantidade_extra / produtoSelecionado.quantidade_por_unidade).toFixed(2)} ${produtoSelecionado.unidade_conteudo})`
                         }
                       </span>
                     </div>
@@ -175,7 +175,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                   <div className="border-t pt-2 flex justify-between font-bold text-blue-900">
                     <span>Total no Estoque:</span>
                     <span className="text-lg">
-                      {quantidadeTotal.toFixed(2)} {produtoSelecionado.unidadeConteudo}
+                      {quantidadeTotal.toFixed(2)} {produtoSelecionado.unidade_conteudo}
                     </span>
                   </div>
                 </div>
