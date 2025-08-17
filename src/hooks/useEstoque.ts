@@ -19,8 +19,8 @@ export function useEstoque() {
       if (produtosStored) {
         const parsedProdutos = JSON.parse(produtosStored).map((p: any) => ({
           ...p,
-          criadoEm: new Date(p.criadoEm),
-          atualizadoEm: new Date(p.atualizadoEm),
+          created_at: p.created_at || new Date(p.criadoEm).toISOString(),
+          updated_at: p.updated_at || new Date(p.atualizadoEm).toISOString(),
         }));
         setProdutos(parsedProdutos);
       }
@@ -28,10 +28,10 @@ export function useEstoque() {
       if (contagensStored) {
         const parsedContagens = JSON.parse(contagensStored).map((c: any) => ({
           ...c,
-          dataContagem: new Date(c.dataContagem),
+          data_contagem: c.data_contagem || new Date(c.dataContagem).toISOString(),
           // Garantir compatibilidade com versões antigas
-          quantidadeExtra: c.quantidadeExtra || 0,
-          unidadeQuantidadeExtra: c.unidadeQuantidadeExtra || 'porcoes',
+          quantidade_extra: c.quantidade_extra || c.quantidadeExtra || 0,
+          unidade_quantidade_extra: c.unidade_quantidade_extra || c.unidadeQuantidadeExtra || 'porcoes',
         }));
         setContagens(parsedContagens);
       }
@@ -67,8 +67,8 @@ export function useEstoque() {
     const novoProduto: ProdutoEstoque = {
       id: crypto.randomUUID(),
       ...data,
-      criadoEm: new Date(),
-      atualizadoEm: new Date(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
     
     const updatedProdutos = [...produtos, novoProduto];
@@ -79,7 +79,7 @@ export function useEstoque() {
   const updateProdutoEstoque = (id: string, data: Partial<EstoqueFormData>) => {
     const updatedProdutos = produtos.map(produto => 
       produto.id === id 
-        ? { ...produto, ...data, atualizadoEm: new Date() }
+        ? { ...produto, ...data, updated_at: new Date().toISOString() }
         : produto
     );
     saveProdutos(updatedProdutos);
@@ -91,37 +91,37 @@ export function useEstoque() {
     saveProdutos(updatedProdutos);
     
     // Remover contagens relacionadas
-    const updatedContagens = contagens.filter(contagem => contagem.produtoId !== id);
+    const updatedContagens = contagens.filter(contagem => contagem.produto_id !== id);
     saveContagens(updatedContagens);
   };
 
   // Adicionar contagem
   const addContagem = (data: ContagemFormData) => {
-    const produto = produtos.find(p => p.id === data.produtoId);
+    const produto = produtos.find(p => p.id === data.produto_id);
     if (!produto) return;
 
     // Calcular quantidade total considerando a unidade da quantidade extra
-    const quantidadeBase = data.quantidade * produto.quantidadePorUnidade;
+    const quantidadeBase = data.quantidade * produto.quantidade_por_unidade;
     let quantidadeTotal = quantidadeBase;
 
-    if (data.quantidadeExtra > 0) {
-      if (data.unidadeQuantidadeExtra === 'porcoes') {
-        quantidadeTotal += data.quantidadeExtra;
+    if (data.quantidade_extra > 0) {
+      if (data.unidade_quantidade_extra === 'porcoes') {
+        quantidadeTotal += data.quantidade_extra;
       } else {
         // Se for unidades individuais, converter para porções
-        const porcoesExtras = data.quantidadeExtra / produto.quantidadePorUnidade;
+        const porcoesExtras = data.quantidade_extra / produto.quantidade_por_unidade;
         quantidadeTotal += porcoesExtras;
       }
     }
 
     const novaContagem: ContagemEstoque = {
       id: crypto.randomUUID(),
-      produtoId: data.produtoId,
+      produto_id: data.produto_id,
       quantidade: data.quantidade,
-      quantidadeExtra: data.quantidadeExtra,
-      unidadeQuantidadeExtra: data.unidadeQuantidadeExtra,
-      quantidadeTotal,
-      dataContagem: new Date(),
+      quantidade_extra: data.quantidade_extra,
+      unidade_quantidade_extra: data.unidade_quantidade_extra,
+      quantidade_total: quantidadeTotal,
+      data_contagem: new Date().toISOString(),
       responsavel: data.responsavel,
       observacoes: data.observacoes,
     };
@@ -138,8 +138,8 @@ export function useEstoque() {
 
   // Obter estoque atual por produto
   const getEstoqueAtual = (produtoId: string) => {
-    const contagensProduto = contagens.filter(c => c.produtoId === produtoId);
-    return contagensProduto.reduce((total, contagem) => total + contagem.quantidadeTotal, 0);
+    const contagensProduto = contagens.filter(c => c.produto_id === produtoId);
+    return contagensProduto.reduce((total, contagem) => total + contagem.quantidade_total, 0);
   };
 
   return {

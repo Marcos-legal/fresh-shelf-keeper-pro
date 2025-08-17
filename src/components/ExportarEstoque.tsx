@@ -15,14 +15,14 @@ interface ExportarEstoqueProps {
 export function ExportarEstoque({ produtos, contagens, getEstoqueAtual }: ExportarEstoqueProps) {
   const [loading, setLoading] = useState(false);
 
-  const formatarData = (data: Date) => {
+  const formatarData = (data: string) => {
     return new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    }).format(data);
+    }).format(new Date(data));
   };
 
   const exportarRelatorioCompleto = () => {
@@ -32,23 +32,23 @@ export function ExportarEstoque({ produtos, contagens, getEstoqueAtual }: Export
       // Preparar dados para planilha Excel moderna
       const dadosProdutos = produtos.map((produto, index) => {
         const estoqueAtual = getEstoqueAtual(produto.id);
-        const contagensProduto = contagens.filter(c => c.produtoId === produto.id);
+        const contagensProduto = contagens.filter(c => c.produto_id === produto.id);
         const ultimaContagem = contagensProduto
-          .sort((a, b) => new Date(b.dataContagem).getTime() - new Date(a.dataContagem).getTime())[0];
+          .sort((a, b) => new Date(b.data_contagem).getTime() - new Date(a.data_contagem).getTime())[0];
         
         const totalContagens = contagensProduto.length;
         const mediaEstoque = totalContagens > 0 ? 
-          contagensProduto.reduce((acc, c) => acc + c.quantidadeTotal, 0) / totalContagens : 0;
+          contagensProduto.reduce((acc, c) => acc + c.quantidade_total, 0) / totalContagens : 0;
 
         return {
           'ITEM': index + 1,
           '📦 PRODUTO': sanitizeForExcel(produto.nome || ''),
-          '📏 UNIDADE MEDIDA': sanitizeForExcel(produto.unidadeMedida || ''),
-          '🔢 QTD POR UNIDADE': sanitizeForExcel(`${produto.quantidadePorUnidade} ${produto.unidadeConteudo}`),
-          '📊 ESTOQUE ATUAL': sanitizeForExcel(`${estoqueAtual.toFixed(2)} ${produto.unidadeConteudo}`),
-          '📈 MÉDIA ESTOQUE': sanitizeForExcel(`${mediaEstoque.toFixed(2)} ${produto.unidadeConteudo}`),
+          '📏 UNIDADE MEDIDA': sanitizeForExcel(produto.unidade_medida || ''),
+          '🔢 QTD POR UNIDADE': sanitizeForExcel(`${produto.quantidade_por_unidade} ${produto.unidade_conteudo}`),
+          '📊 ESTOQUE ATUAL': sanitizeForExcel(`${estoqueAtual.toFixed(2)} ${produto.unidade_conteudo}`),
+          '📈 MÉDIA ESTOQUE': sanitizeForExcel(`${mediaEstoque.toFixed(2)} ${produto.unidade_conteudo}`),
           '🔄 TOTAL CONTAGENS': totalContagens,
-          '📅 ÚLTIMA CONTAGEM': sanitizeForExcel(ultimaContagem ? formatarData(ultimaContagem.dataContagem) : 'Nunca contado'),
+          '📅 ÚLTIMA CONTAGEM': sanitizeForExcel(ultimaContagem ? formatarData(ultimaContagem.data_contagem) : 'Nunca contado'),
           '👤 ÚLTIMO RESPONSÁVEL': sanitizeForExcel(ultimaContagem?.responsavel || 'Não informado'),
           '📝 STATUS': sanitizeForExcel(estoqueAtual > 0 ? '✅ EM ESTOQUE' : '❌ SEM ESTOQUE'),
           '⚠️ ALERTA': sanitizeForExcel(estoqueAtual < (mediaEstoque * 0.2) ? '🔴 ESTOQUE BAIXO' : '🟢 OK'),
@@ -179,26 +179,26 @@ export function ExportarEstoque({ produtos, contagens, getEstoqueAtual }: Export
     try {
       // Preparar dados do histórico com formatação moderna
       const dadosHistorico = contagens.map((contagem, index) => {
-        const produto = produtos.find(p => p.id === contagem.produtoId);
-        const quantidadeExtraTexto = contagem.quantidadeExtra > 0 ? 
-          `${contagem.quantidadeExtra} ${contagem.unidadeQuantidadeExtra === 'porcoes' ? 
-            produto?.unidadeConteudo : 'unidades individuais'}` : 'Nenhuma';
+        const produto = produtos.find(p => p.id === contagem.produto_id);
+        const quantidadeExtraTexto = contagem.quantidade_extra > 0 ? 
+          `${contagem.quantidade_extra} ${contagem.unidade_quantidade_extra === 'porcoes' ? 
+            produto?.unidade_conteudo : 'unidades individuais'}` : 'Nenhuma';
 
         return {
           'ID': sanitizeForExcel(`#${String(index + 1).padStart(4, '0')}`),
           '📦 PRODUTO': sanitizeForExcel(produto?.nome || 'Produto removido'),
-          '📊 QTD PRINCIPAL': sanitizeForExcel(`${contagem.quantidade} ${produto?.unidadeMedida || '-'}`),
+          '📊 QTD PRINCIPAL': sanitizeForExcel(`${contagem.quantidade} ${produto?.unidade_medida || '-'}`),
           '➕ QTD EXTRA': sanitizeForExcel(quantidadeExtraTexto),
-          '🧮 TOTAL CALCULADO': sanitizeForExcel(`${contagem.quantidadeTotal.toFixed(2)} ${produto?.unidadeConteudo || '-'}`),
-          '📅 DATA/HORA': sanitizeForExcel(formatarData(contagem.dataContagem)),
+          '🧮 TOTAL CALCULADO': sanitizeForExcel(`${contagem.quantidade_total.toFixed(2)} ${produto?.unidade_conteudo || '-'}`),
+          '📅 DATA/HORA': sanitizeForExcel(formatarData(contagem.data_contagem)),
           '👤 RESPONSÁVEL': sanitizeForExcel(contagem.responsavel || 'Não informado'),
           '📝 OBSERVAÇÕES': sanitizeForExcel(contagem.observacoes || 'Nenhuma observação'),
           '⚙️ CÁLCULO': sanitizeForExcel(produto ? 
-            `${contagem.quantidade} × ${produto.quantidadePorUnidade} + ${contagem.quantidadeExtra || 0}` : 
+            `${contagem.quantidade} × ${produto.quantidade_por_unidade} + ${contagem.quantidade_extra || 0}` : 
             'Produto removido'),
-          '🎯 STATUS': sanitizeForExcel(contagem.quantidadeTotal > 0 ? '✅ VÁLIDA' : '⚪ ZERADA'),
-          '📈 IMPACTO': sanitizeForExcel(contagem.quantidadeTotal > 100 ? '🔥 ALTO' : 
-                       contagem.quantidadeTotal > 50 ? '🔸 MÉDIO' : '🔹 BAIXO')
+          '🎯 STATUS': sanitizeForExcel(contagem.quantidade_total > 0 ? '✅ VÁLIDA' : '⚪ ZERADA'),
+          '📈 IMPACTO': sanitizeForExcel(contagem.quantidade_total > 100 ? '🔥 ALTO' : 
+                       contagem.quantidade_total > 50 ? '🔸 MÉDIO' : '🔹 BAIXO')
         };
       });
 

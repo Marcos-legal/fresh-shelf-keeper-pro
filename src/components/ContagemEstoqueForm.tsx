@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calculator, Save } from "lucide-react";
-import { ContagemFormData, ProdutoEstoque } from "@/hooks/useEstoqueSupabase";
+import { ContagemFormData, ProdutoEstoque } from "@/types/estoque";
 import { SelectField } from "@/components/form/SelectField";
 import { NumberInputField } from "@/components/form/NumberInputField";
 import { TextInputField } from "@/components/form/TextInputField";
@@ -112,17 +112,17 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
           <div className="grid grid-cols-1 gap-6">
             <SelectField
               label="Produto"
-              value={formData.produtoId}
-              onChange={(value: string) => handleInputChange('produtoId', value)}
+              value={formData.produto_id}
+              onChange={(value: string) => handleInputChange('produto_id', value)}
               options={produtoOptions}
               placeholder="Selecione um produto"
-              error={errors.produtoId}
+              error={errors.produto_id}
               required
             />
 
             <NumberInputField
               id="quantidade"
-              label={`Quantidade Principal${produtoSelecionado ? ` (${produtoSelecionado.unidadeMedida})` : ''}`}
+              label={`Quantidade Principal${produtoSelecionado ? ` (${produtoSelecionado.unidade_medida})` : ''}`}
               value={formData.quantidade}
               onChange={(value) => handleNumberInputChange('quantidade', value)}
               error={errors.quantidade}
@@ -132,18 +132,18 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
 
             <div className="grid grid-cols-2 gap-4">
               <NumberInputField
-                id="quantidadeExtra"
+                id="quantidade_extra"
                 label="Quantidade Extra"
-                value={formData.quantidadeExtra}
-                onChange={(value) => handleNumberInputChange('quantidadeExtra', value)}
+                value={formData.quantidade_extra}
+                onChange={(value) => handleNumberInputChange('quantidade_extra', value)}
                 min={0}
                 required={false}
               />
 
               <SelectField
                 label="Unidade da Quantidade Extra"
-                value={formData.unidadeQuantidadeExtra}
-                onChange={(value: 'porcoes' | 'unidades') => handleInputChange('unidadeQuantidadeExtra', value)}
+                value={formData.unidade_quantidade_extra}
+                onChange={(value: 'porcoes' | 'unidades') => handleInputChange('unidade_quantidade_extra', value)}
                 options={unidadeExtraOptions}
                 required={false}
               />
