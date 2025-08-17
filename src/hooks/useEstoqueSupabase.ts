@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface ProdutoEstoque {
   id: string;
@@ -39,6 +40,7 @@ export interface ContagemFormData {
   quantidade: number;
   quantidade_extra: number;
   unidade_quantidade_extra: 'porcoes' | 'unidades';
+  data_contagem: string;
   responsavel?: string;
   observacoes?: string;
 }
@@ -47,6 +49,7 @@ export function useEstoqueSupabase() {
   const [produtos, setProdutos] = useState<ProdutoEstoque[]>([]);
   const [contagens, setContagens] = useState<ContagemEstoque[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const { toast } = useToast();
 
   // Carregar produtos
@@ -102,10 +105,22 @@ export function useEstoqueSupabase() {
 
   // Adicionar produto de estoque
   const addProdutoEstoque = async (data: EstoqueFormData) => {
+    if (!user) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar logado para adicionar produtos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('produtos_estoque')
-        .insert([data]);
+        .insert([{
+          ...data,
+          user_id: user.id
+        }]);
       
       if (error) throw error;
       
@@ -176,6 +191,15 @@ export function useEstoqueSupabase() {
 
   // Adicionar contagem
   const addContagem = async (data: ContagemFormData) => {
+    if (!user) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar logado para adicionar contagens.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const produto = produtos.find(p => p.id === data.produto_id);
       if (!produto) {
@@ -198,6 +222,7 @@ export function useEstoqueSupabase() {
       const contagemData = {
         ...data,
         quantidade_total: quantidadeTotal,
+        user_id: user.id
       };
 
       const { error } = await supabase

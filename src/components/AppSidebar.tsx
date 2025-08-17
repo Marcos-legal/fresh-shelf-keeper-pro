@@ -30,6 +30,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { UserMenu } from "./UserMenu";
 
 const menuItems = [
   {
@@ -121,6 +122,12 @@ export function AppSidebar() {
               <span className="text-success font-medium">Online</span>
             </div>
           </div>
+        </div>
+
+        {/* User Menu */}
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-xs text-sidebar-foreground/70">Usuário</span>
+          <UserMenu />
         </div>
       </SidebarHeader>
       
