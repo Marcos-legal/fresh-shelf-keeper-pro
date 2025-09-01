@@ -6,12 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Loader2, LogIn, UserPlus } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Package, Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function Auth() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // Separate states for login and signup
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [signupData, setSignupData] = useState({ email: '', password: '' });
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('login');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [signupSuccess, setSignupSuccess] = useState(false);
+  
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
@@ -22,13 +30,90 @@ export default function Auth() {
     }
   }, [user, navigate]);
 
+  // Clear form data when switching tabs
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setErrors({});
+    setSignupSuccess(false);
+  };
+
+  // Translate Supabase errors to Portuguese
+  const translateError = (error: any): string => {
+    if (!error) return '';
+    
+    const message = error.message?.toLowerCase() || '';
+    
+    if (message.includes('invalid login credentials') || message.includes('email not confirmed')) {
+      return 'Email ou senha incorretos. Verifique se confirmou seu email.';
+    }
+    if (message.includes('user already registered')) {
+      return 'Este email já está cadastrado. Tente fazer login.';
+    }
+    if (message.includes('email rate limit exceeded')) {
+      return 'Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.';
+    }
+    if (message.includes('password should be at least')) {
+      return 'A senha deve ter pelo menos 6 caracteres.';
+    }
+    if (message.includes('signup is disabled')) {
+      return 'Cadastro temporariamente desabilitado.';
+    }
+    if (message.includes('invalid email')) {
+      return 'Email inválido. Verifique o formato.';
+    }
+    
+    return 'Erro inesperado. Tente novamente.';
+  };
+
+  // Validate email format
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Validate password strength
+  const validatePassword = (password: string): { isValid: boolean; message: string } => {
+    if (password.length < 6) {
+      return { isValid: false, message: 'Mínimo de 6 caracteres' };
+    }
+    if (password.length >= 8 && /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return { isValid: true, message: 'Senha forte' };
+    }
+    if (password.length >= 6) {
+      return { isValid: true, message: 'Senha adequada' };
+    }
+    return { isValid: false, message: 'Senha muito fraca' };
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrors({});
     
-    const { error } = await signIn(email, password);
+    // Validate inputs
+    const newErrors: { [key: string]: string } = {};
     
-    if (!error) {
+    if (!loginData.email) {
+      newErrors.loginEmail = 'Email é obrigatório';
+    } else if (!validateEmail(loginData.email)) {
+      newErrors.loginEmail = 'Email inválido';
+    }
+    
+    if (!loginData.password) {
+      newErrors.loginPassword = 'Senha é obrigatória';
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setIsLoading(false);
+      return;
+    }
+    
+    const { error } = await signIn(loginData.email, loginData.password);
+    
+    if (error) {
+      setErrors({ general: translateError(error) });
+    } else {
       navigate('/');
     }
     
@@ -38,16 +123,43 @@ export default function Auth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrors({});
+    setSignupSuccess(false);
     
-    const { error } = await signUp(email, password);
+    // Validate inputs
+    const newErrors: { [key: string]: string } = {};
+    
+    if (!signupData.email) {
+      newErrors.signupEmail = 'Email é obrigatório';
+    } else if (!validateEmail(signupData.email)) {
+      newErrors.signupEmail = 'Email inválido';
+    }
+    
+    if (!signupData.password) {
+      newErrors.signupPassword = 'Senha é obrigatória';
+    } else {
+      const passwordValidation = validatePassword(signupData.password);
+      if (!passwordValidation.isValid) {
+        newErrors.signupPassword = passwordValidation.message;
+      }
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setIsLoading(false);
+      return;
+    }
+    
+    const { error } = await signUp(signupData.email, signupData.password);
+    
+    if (error) {
+      setErrors({ general: translateError(error) });
+    } else {
+      setSignupSuccess(true);
+      setSignupData({ email: '', password: '' });
+    }
     
     setIsLoading(false);
-    
-    if (!error) {
-      // Keep user on auth page to see the confirmation message
-      setEmail('');
-      setPassword('');
-    }
   };
 
   return (
@@ -75,7 +187,27 @@ export default function Auth() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="w-full">
+            {/* General Error Display */}
+            {errors.general && (
+              <Alert className="mb-4 border-destructive/50 bg-destructive/10">
+                <AlertCircle className="h-4 w-4 text-destructive" />
+                <AlertDescription className="text-destructive">
+                  {errors.general}
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {/* Success Message */}
+            {signupSuccess && (
+              <Alert className="mb-4 border-green-500/50 bg-green-50 dark:bg-green-950/50">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-700 dark:text-green-300">
+                  Conta criada com sucesso! Verifique seu email para ativar a conta.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login" className="flex items-center space-x-2">
                   <LogIn className="w-4 h-4" />
@@ -95,23 +227,47 @@ export default function Auth() {
                       id="login-email"
                       type="email"
                       placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={loginData.email}
+                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                       required
                       disabled={isLoading}
+                      className={errors.loginEmail ? 'border-destructive focus-visible:ring-destructive' : ''}
                     />
+                    {errors.loginEmail && (
+                      <p className="text-sm text-destructive">{errors.loginEmail}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Senha</Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      placeholder="Digite sua senha"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={isLoading}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="login-password"
+                        type={showLoginPassword ? "text" : "password"}
+                        placeholder="Digite sua senha"
+                        value={loginData.password}
+                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                        required
+                        disabled={isLoading}
+                        className={`pr-10 ${errors.loginPassword ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        disabled={isLoading}
+                      >
+                        {showLoginPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                    {errors.loginPassword && (
+                      <p className="text-sm text-destructive">{errors.loginPassword}</p>
+                    )}
                   </div>
                   <Button 
                     type="submit" 
@@ -132,24 +288,53 @@ export default function Auth() {
                       id="register-email"
                       type="email"
                       placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={signupData.email}
+                      onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
                       required
                       disabled={isLoading}
+                      className={errors.signupEmail ? 'border-destructive focus-visible:ring-destructive' : ''}
                     />
+                    {errors.signupEmail && (
+                      <p className="text-sm text-destructive">{errors.signupEmail}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="register-password">Senha</Label>
-                    <Input
-                      id="register-password"
-                      type="password"
-                      placeholder="Crie uma senha segura"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      minLength={6}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="register-password"
+                        type={showSignupPassword ? "text" : "password"}
+                        placeholder="Crie uma senha segura"
+                        value={signupData.password}
+                        onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                        required
+                        disabled={isLoading}
+                        minLength={6}
+                        className={`pr-10 ${errors.signupPassword ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowSignupPassword(!showSignupPassword)}
+                        disabled={isLoading}
+                      >
+                        {showSignupPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                    {errors.signupPassword && (
+                      <p className="text-sm text-destructive">{errors.signupPassword}</p>
+                    )}
+                    {signupData.password && (
+                      <div className="text-xs text-muted-foreground">
+                        {validatePassword(signupData.password).message}
+                      </div>
+                    )}
                   </div>
                   <Button 
                     type="submit" 
