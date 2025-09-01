@@ -2,14 +2,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { handleError } from '@/lib/error-handler';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: unknown }>;
-  signIn: (email: string, password: string) => Promise<{ error: unknown }>;
+  signUp: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -65,7 +64,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     
     if (error) {
-      handleError(error);
+      toast({
+        title: "Erro no cadastro",
+        description: error.message,
+        variant: "destructive",
+      });
     } else {
       toast({
         title: "Cadastro realizado!",
@@ -83,7 +86,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     
     if (error) {
-      handleError(error);
+      toast({
+        title: "Erro no login",
+        description: error.message,
+        variant: "destructive",
+      });
     }
     
     return { error };

@@ -6,24 +6,21 @@ import { parseValidadeDate } from '@/utils/productValidation';
 const STORAGE_KEY = 'sistema-validade-produtos';
 
 // Helper function to safely parse dates
-const safeParseDate = (dateValue: unknown): Date | undefined => {
+const safeParseDate = (dateValue: any): Date | undefined => {
   if (!dateValue) return undefined;
   
   try {
     // Handle complex date structure from localStorage
-    if (typeof dateValue === 'object' && dateValue !== null) {
-      const obj = dateValue as Record<string, any>;
-      if (obj._type === 'Date' && obj.value) {
-        if (obj.value.iso) {
-          const date = new Date(obj.value.iso);
-          return isNaN(date.getTime()) ? undefined : date;
-        }
+    if (typeof dateValue === 'object' && dateValue._type === 'Date' && dateValue.value) {
+      if (dateValue.value.iso) {
+        const date = new Date(dateValue.value.iso);
+        return isNaN(date.getTime()) ? undefined : date;
       }
-      
-      // Handle undefined values stored as objects
-      if (obj._type === 'undefined' || obj.value === 'undefined') {
-        return undefined;
-      }
+    }
+    
+    // Handle undefined values stored as objects
+    if (typeof dateValue === 'object' && (dateValue._type === 'undefined' || dateValue.value === 'undefined')) {
+      return undefined;
     }
     
     // Handle string dates in YYYY-MM-DD format
@@ -76,7 +73,7 @@ export function useProducts() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsedProducts = JSON.parse(stored).map((p: Record<string, any>) => {
+        const parsedProducts = JSON.parse(stored).map((p: any) => {
           const dataFabricacao = safeParseDate(p.dataFabricacao);
           const validade = safeParseDate(p.validade);
           const dataAbertura = safeParseDate(p.dataAbertura);
