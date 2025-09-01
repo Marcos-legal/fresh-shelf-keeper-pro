@@ -17,7 +17,7 @@ export function useEstoque() {
       const contagensStored = localStorage.getItem(CONTAGENS_STORAGE_KEY);
       
       if (produtosStored) {
-        const parsedProdutos = JSON.parse(produtosStored).map((p: any) => ({
+        const parsedProdutos = JSON.parse(produtosStored).map((p: Record<string, any>) => ({
           ...p,
           created_at: p.created_at || new Date(p.criadoEm).toISOString(),
           updated_at: p.updated_at || new Date(p.atualizadoEm).toISOString(),
@@ -26,7 +26,7 @@ export function useEstoque() {
       }
       
       if (contagensStored) {
-        const parsedContagens = JSON.parse(contagensStored).map((c: any) => ({
+        const parsedContagens = JSON.parse(contagensStored).map((c: Record<string, any>) => ({
           ...c,
           data_contagem: c.data_contagem || new Date(c.dataContagem).toISOString(),
           // Garantir compatibilidade com versões antigas
