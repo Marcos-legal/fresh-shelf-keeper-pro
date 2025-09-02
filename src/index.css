@@ -217,6 +217,8 @@
   border-radius: inherit;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: subtract;
+  pointer-events: none; /* Fix: Permite cliques nos elementos internos */
+  z-index: -1; /* Fix: Garante que fique atrás do conteúdo */
 }
 
 /* Garantir que as etiquetas mantenham proporção */
