@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Package, Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { HCAPTCHA_ENABLED, HCAPTCHA_SITE_KEY } from '@/config/hcaptcha';
 
 export default function Auth() {
   // Separate states for login and signup
@@ -68,7 +69,9 @@ export default function Auth() {
     if (message.includes('invalid email')) {
       return 'Email inválido. Verifique o formato.';
     }
-    
+    if (message.includes('captcha') || message.includes('not-using-dummy-secret')) {
+      return 'Falha na verificação de segurança (hCaptcha). Configure as chaves no Supabase ou desative o CAPTCHA nas configurações.';
+    }
     return 'Erro inesperado. Tente novamente.';
   };
 
@@ -151,7 +154,7 @@ export default function Auth() {
       }
     }
 
-    if (!captchaToken) {
+    if (HCAPTCHA_ENABLED && !captchaToken) {
       newErrors.captcha = 'Por favor, complete a verificação de segurança';
     }
     
@@ -357,30 +360,31 @@ export default function Auth() {
                     )}
                   </div>
                   
-                  {/* hCaptcha */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center space-x-2">
-                      <Shield className="w-4 h-4" />
-                      <span>Verificação de Segurança</span>
-                    </Label>
-                    <div className="flex justify-center">
-                      <HCaptcha
-                        ref={captchaRef}
-                        sitekey="10000000-ffff-ffff-ffff-000000000001" // Chave de teste do hCaptcha
-                        onVerify={(token) => setCaptchaToken(token)}
-                        onExpire={() => setCaptchaToken(null)}
-                        onError={() => setCaptchaToken(null)}
-                      />
+                  {HCAPTCHA_ENABLED && (
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <Shield className="w-4 h-4" />
+                        <span>Verificação de Segurança</span>
+                      </Label>
+                      <div className="flex justify-center">
+                        <HCaptcha
+                          ref={captchaRef}
+                          sitekey={HCAPTCHA_SITE_KEY}
+                          onVerify={(token) => setCaptchaToken(token)}
+                          onExpire={() => setCaptchaToken(null)}
+                          onError={() => setCaptchaToken(null)}
+                        />
+                      </div>
+                      {errors.captcha && (
+                        <p className="text-sm text-destructive text-center">{errors.captcha}</p>
+                      )}
                     </div>
-                    {errors.captcha && (
-                      <p className="text-sm text-destructive text-center">{errors.captcha}</p>
-                    )}
-                  </div>
+                  )}
 
                   <Button 
                     type="submit" 
                     className="w-full" 
-                    disabled={isLoading || !captchaToken}
+                    disabled={isLoading || (HCAPTCHA_ENABLED && !captchaToken)}
                   >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Criar Conta
