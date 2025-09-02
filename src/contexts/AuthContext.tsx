@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, captchaToken?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -52,16 +52,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, captchaToken?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const signUpOptions: any = {
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl
       }
-    });
+    };
+
+    // Adicionar captcha token se fornecido
+    if (captchaToken) {
+      signUpOptions.options.captchaToken = captchaToken;
+    }
+
+    const { error } = await supabase.auth.signUp(signUpOptions);
     
     if (error) {
       toast({

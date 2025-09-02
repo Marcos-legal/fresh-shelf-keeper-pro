@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Package, Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Package, Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 export default function Auth() {
   // Separate states for login and signup
@@ -19,6 +20,8 @@ export default function Auth() {
   const [activeTab, setActiveTab] = useState('login');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
   
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
@@ -35,6 +38,10 @@ export default function Auth() {
     setActiveTab(value);
     setErrors({});
     setSignupSuccess(false);
+    setCaptchaToken(null);
+    if (captchaRef.current) {
+      captchaRef.current.resetCaptcha();
+    }
   };
 
   // Translate Supabase errors to Portuguese
@@ -143,6 +150,10 @@ export default function Auth() {
         newErrors.signupPassword = passwordValidation.message;
       }
     }
+
+    if (!captchaToken) {
+      newErrors.captcha = 'Por favor, complete a verificação de segurança';
+    }
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -150,13 +161,22 @@ export default function Auth() {
       return;
     }
     
-    const { error } = await signUp(signupData.email, signupData.password);
+    const { error } = await signUp(signupData.email, signupData.password, captchaToken);
     
     if (error) {
       setErrors({ general: translateError(error) });
+      // Reset captcha on error
+      if (captchaRef.current) {
+        captchaRef.current.resetCaptcha();
+      }
+      setCaptchaToken(null);
     } else {
       setSignupSuccess(true);
       setSignupData({ email: '', password: '' });
+      setCaptchaToken(null);
+      if (captchaRef.current) {
+        captchaRef.current.resetCaptcha();
+      }
     }
     
     setIsLoading(false);
@@ -336,19 +356,41 @@ export default function Auth() {
                       </div>
                     )}
                   </div>
+                  
+                  {/* hCaptcha */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center space-x-2">
+                      <Shield className="w-4 h-4" />
+                      <span>Verificação de Segurança</span>
+                    </Label>
+                    <div className="flex justify-center">
+                      <HCaptcha
+                        ref={captchaRef}
+                        sitekey="10000000-ffff-ffff-ffff-000000000001" // Chave de teste do hCaptcha
+                        onVerify={(token) => setCaptchaToken(token)}
+                        onExpire={() => setCaptchaToken(null)}
+                        onError={() => setCaptchaToken(null)}
+                      />
+                    </div>
+                    {errors.captcha && (
+                      <p className="text-sm text-destructive text-center">{errors.captcha}</p>
+                    )}
+                  </div>
+
                   <Button 
                     type="submit" 
                     className="w-full" 
-                    disabled={isLoading}
+                    disabled={isLoading || !captchaToken}
                   >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Criar Conta
                   </Button>
                 </form>
                 
-                <div className="text-sm text-muted-foreground text-center mt-4 p-3 bg-muted/50 rounded-lg">
-                  <p>💡 <strong>Dica:</strong> Após o cadastro, você receberá um email de confirmação. 
-                  Para testes rápidos, você pode desabilitar a confirmação de email nas configurações do Supabase.</p>
+                <div className="text-sm text-muted-foreground text-center mt-4 p-3 bg-muted/50 rounded-lg space-y-2">
+                  <p>💡 <strong>Dica:</strong> Após o cadastro, você receberá um email de confirmação.</p>
+                  <p>🛡️ <strong>Segurança:</strong> Complete a verificação acima para criar sua conta.</p>
+                  <p className="text-xs">Para testes rápidos, você pode desabilitar a confirmação de email nas configurações do Supabase.</p>
                 </div>
               </TabsContent>
             </Tabs>
