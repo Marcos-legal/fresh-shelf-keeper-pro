@@ -10,21 +10,31 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Package, Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { HCAPTCHA_ENABLED, HCAPTCHA_SITE_KEY } from '@/config/hcaptcha';
-
 export default function Auth() {
   // Separate states for login and signup
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
-  const [signupData, setSignupData] = useState({ email: '', password: '' });
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
+  const [signupData, setSignupData] = useState({
+    email: '',
+    password: ''
+  });
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<{
+    [key: string]: string;
+  }>({});
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRef = useRef<HCaptcha>(null);
-  
-  const { signIn, signUp, user } = useAuth();
+  const {
+    signIn,
+    signUp,
+    user
+  } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
@@ -48,9 +58,7 @@ export default function Auth() {
   // Translate Supabase errors to Portuguese
   const translateError = (error: any): string => {
     if (!error) return '';
-    
     const message = error.message?.toLowerCase() || '';
-    
     if (message.includes('invalid login credentials') || message.includes('email not confirmed')) {
       return 'Email ou senha incorretos. Verifique se confirmou seu email.';
     }
@@ -82,69 +90,82 @@ export default function Auth() {
   };
 
   // Validate password strength
-  const validatePassword = (password: string): { isValid: boolean; message: string } => {
+  const validatePassword = (password: string): {
+    isValid: boolean;
+    message: string;
+  } => {
     if (password.length < 6) {
-      return { isValid: false, message: 'Mínimo de 6 caracteres' };
+      return {
+        isValid: false,
+        message: 'Mínimo de 6 caracteres'
+      };
     }
     if (password.length >= 8 && /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      return { isValid: true, message: 'Senha forte' };
+      return {
+        isValid: true,
+        message: 'Senha forte'
+      };
     }
     if (password.length >= 6) {
-      return { isValid: true, message: 'Senha adequada' };
+      return {
+        isValid: true,
+        message: 'Senha adequada'
+      };
     }
-    return { isValid: false, message: 'Senha muito fraca' };
+    return {
+      isValid: false,
+      message: 'Senha muito fraca'
+    };
   };
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
-    
+
     // Validate inputs
-    const newErrors: { [key: string]: string } = {};
-    
+    const newErrors: {
+      [key: string]: string;
+    } = {};
     if (!loginData.email) {
       newErrors.loginEmail = 'Email é obrigatório';
     } else if (!validateEmail(loginData.email)) {
       newErrors.loginEmail = 'Email inválido';
     }
-    
     if (!loginData.password) {
       newErrors.loginPassword = 'Senha é obrigatória';
     }
-    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setIsLoading(false);
       return;
     }
-    
-    const { error } = await signIn(loginData.email, loginData.password);
-    
+    const {
+      error
+    } = await signIn(loginData.email, loginData.password);
     if (error) {
-      setErrors({ general: translateError(error) });
+      setErrors({
+        general: translateError(error)
+      });
     } else {
       navigate('/');
     }
-    
     setIsLoading(false);
   };
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
     setSignupSuccess(false);
-    
+
     // Validate inputs
-    const newErrors: { [key: string]: string } = {};
-    
+    const newErrors: {
+      [key: string]: string;
+    } = {};
     if (!signupData.email) {
       newErrors.signupEmail = 'Email é obrigatório';
     } else if (!validateEmail(signupData.email)) {
       newErrors.signupEmail = 'Email inválido';
     }
-    
     if (!signupData.password) {
       newErrors.signupPassword = 'Senha é obrigatória';
     } else {
@@ -153,21 +174,21 @@ export default function Auth() {
         newErrors.signupPassword = passwordValidation.message;
       }
     }
-
     if (HCAPTCHA_ENABLED && !captchaToken) {
       newErrors.captcha = 'Por favor, complete a verificação de segurança';
     }
-    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setIsLoading(false);
       return;
     }
-    
-    const { error } = await signUp(signupData.email, signupData.password, captchaToken);
-    
+    const {
+      error
+    } = await signUp(signupData.email, signupData.password, captchaToken);
     if (error) {
-      setErrors({ general: translateError(error) });
+      setErrors({
+        general: translateError(error)
+      });
       // Reset captcha on error
       if (captchaRef.current) {
         captchaRef.current.resetCaptcha();
@@ -175,18 +196,18 @@ export default function Auth() {
       setCaptchaToken(null);
     } else {
       setSignupSuccess(true);
-      setSignupData({ email: '', password: '' });
+      setSignupData({
+        email: '',
+        password: ''
+      });
       setCaptchaToken(null);
       if (captchaRef.current) {
         captchaRef.current.resetCaptcha();
       }
     }
-    
     setIsLoading(false);
   };
-
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+  return <div className="min-h-screen bg-background flex items-center justify-center p-4 my-0 py-[16px] px-[300px]">
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -211,24 +232,20 @@ export default function Auth() {
           </CardHeader>
           <CardContent>
             {/* General Error Display */}
-            {errors.general && (
-              <Alert className="mb-4 border-destructive/50 bg-destructive/10">
+            {errors.general && <Alert className="mb-4 border-destructive/50 bg-destructive/10">
                 <AlertCircle className="h-4 w-4 text-destructive" />
                 <AlertDescription className="text-destructive">
                   {errors.general}
                 </AlertDescription>
-              </Alert>
-            )}
+              </Alert>}
             
             {/* Success Message */}
-            {signupSuccess && (
-              <Alert className="mb-4 border-green-500/50 bg-green-50 dark:bg-green-950/50">
+            {signupSuccess && <Alert className="mb-4 border-green-500/50 bg-green-50 dark:bg-green-950/50">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-700 dark:text-green-300">
                   Conta criada com sucesso! Verifique seu email para ativar a conta.
                 </AlertDescription>
-              </Alert>
-            )}
+              </Alert>}
             
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
@@ -246,57 +263,26 @@ export default function Auth() {
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={loginData.email}
-                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                      required
-                      disabled={isLoading}
-                      className={errors.loginEmail ? 'border-destructive focus-visible:ring-destructive' : ''}
-                    />
-                    {errors.loginEmail && (
-                      <p className="text-sm text-destructive">{errors.loginEmail}</p>
-                    )}
+                    <Input id="login-email" type="email" placeholder="seu@email.com" value={loginData.email} onChange={e => setLoginData({
+                    ...loginData,
+                    email: e.target.value
+                  })} required disabled={isLoading} className={errors.loginEmail ? 'border-destructive focus-visible:ring-destructive' : ''} />
+                    {errors.loginEmail && <p className="text-sm text-destructive">{errors.loginEmail}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Senha</Label>
                     <div className="relative">
-                      <Input
-                        id="login-password"
-                        type={showLoginPassword ? "text" : "password"}
-                        placeholder="Digite sua senha"
-                        value={loginData.password}
-                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                        required
-                        disabled={isLoading}
-                        className={`pr-10 ${errors.loginPassword ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        disabled={isLoading}
-                      >
-                        {showLoginPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
+                      <Input id="login-password" type={showLoginPassword ? "text" : "password"} placeholder="Digite sua senha" value={loginData.password} onChange={e => setLoginData({
+                      ...loginData,
+                      password: e.target.value
+                    })} required disabled={isLoading} className={`pr-10 ${errors.loginPassword ? 'border-destructive focus-visible:ring-destructive' : ''}`} />
+                      <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent" onClick={() => setShowLoginPassword(!showLoginPassword)} disabled={isLoading}>
+                        {showLoginPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                       </Button>
                     </div>
-                    {errors.loginPassword && (
-                      <p className="text-sm text-destructive">{errors.loginPassword}</p>
-                    )}
+                    {errors.loginPassword && <p className="text-sm text-destructive">{errors.loginPassword}</p>}
                   </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isLoading}
-                  >
+                  <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Entrar no Sistema
                   </Button>
@@ -307,85 +293,41 @@ export default function Auth() {
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="register-email">Email</Label>
-                    <Input
-                      id="register-email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={signupData.email}
-                      onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                      required
-                      disabled={isLoading}
-                      className={errors.signupEmail ? 'border-destructive focus-visible:ring-destructive' : ''}
-                    />
-                    {errors.signupEmail && (
-                      <p className="text-sm text-destructive">{errors.signupEmail}</p>
-                    )}
+                    <Input id="register-email" type="email" placeholder="seu@email.com" value={signupData.email} onChange={e => setSignupData({
+                    ...signupData,
+                    email: e.target.value
+                  })} required disabled={isLoading} className={errors.signupEmail ? 'border-destructive focus-visible:ring-destructive' : ''} />
+                    {errors.signupEmail && <p className="text-sm text-destructive">{errors.signupEmail}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="register-password">Senha</Label>
                     <div className="relative">
-                      <Input
-                        id="register-password"
-                        type={showSignupPassword ? "text" : "password"}
-                        placeholder="Crie uma senha segura"
-                        value={signupData.password}
-                        onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                        required
-                        disabled={isLoading}
-                        minLength={6}
-                        className={`pr-10 ${errors.signupPassword ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowSignupPassword(!showSignupPassword)}
-                        disabled={isLoading}
-                      >
-                        {showSignupPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
+                      <Input id="register-password" type={showSignupPassword ? "text" : "password"} placeholder="Crie uma senha segura" value={signupData.password} onChange={e => setSignupData({
+                      ...signupData,
+                      password: e.target.value
+                    })} required disabled={isLoading} minLength={6} className={`pr-10 ${errors.signupPassword ? 'border-destructive focus-visible:ring-destructive' : ''}`} />
+                      <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent" onClick={() => setShowSignupPassword(!showSignupPassword)} disabled={isLoading}>
+                        {showSignupPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                       </Button>
                     </div>
-                    {errors.signupPassword && (
-                      <p className="text-sm text-destructive">{errors.signupPassword}</p>
-                    )}
-                    {signupData.password && (
-                      <div className="text-xs text-muted-foreground">
+                    {errors.signupPassword && <p className="text-sm text-destructive">{errors.signupPassword}</p>}
+                    {signupData.password && <div className="text-xs text-muted-foreground">
                         {validatePassword(signupData.password).message}
-                      </div>
-                    )}
+                      </div>}
                   </div>
                   
-                  {HCAPTCHA_ENABLED && (
-                    <div className="space-y-2">
+                  {HCAPTCHA_ENABLED && <div className="space-y-2">
                       <Label className="flex items-center space-x-2">
                         <Shield className="w-4 h-4" />
                         <span>Verificação de Segurança</span>
                       </Label>
                       <div className="flex justify-center">
-                        <HCaptcha
-                          ref={captchaRef}
-                          sitekey={HCAPTCHA_SITE_KEY}
-                          onVerify={(token) => setCaptchaToken(token)}
-                          onExpire={() => setCaptchaToken(null)}
-                          onError={() => setCaptchaToken(null)}
-                        />
+                        <HCaptcha ref={captchaRef} sitekey={HCAPTCHA_SITE_KEY} onVerify={token => setCaptchaToken(token)} onExpire={() => setCaptchaToken(null)} onError={() => setCaptchaToken(null)} />
                       </div>
-                      {errors.captcha && (
-                        <p className="text-sm text-destructive text-center">{errors.captcha}</p>
-                      )}
-                    </div>
-                  )}
+                      {errors.captcha && <p className="text-sm text-destructive text-center">{errors.captcha}</p>}
+                    </div>}
 
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isLoading || (HCAPTCHA_ENABLED && !captchaToken)}
-                  >
+                  <Button type="submit" className="w-full" disabled={isLoading || HCAPTCHA_ENABLED && !captchaToken}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Criar Conta
                   </Button>
@@ -406,6 +348,5 @@ export default function Auth() {
           © 2024 Sistema de Validade - Versão 2.0
         </p>
       </div>
-    </div>
-  );
+    </div>;
 }
