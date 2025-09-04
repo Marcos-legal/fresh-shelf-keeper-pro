@@ -1,24 +1,27 @@
 import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { useProducts } from "@/hooks/useProducts";
+import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { EtiquetaView } from "@/components/EtiquetaView";
-import { Eye, CalendarIcon, RefreshCw, AlertTriangle, Ruler } from "lucide-react";
+import { Eye, CalendarIcon, RefreshCw, AlertTriangle, Ruler, Grid, List } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const VisualizarEtiquetas = () => {
-  const { products, updateProduct } = useProducts();
+  const { user } = useAuth();
+  const { products, updateProduct, loading } = useProductsSupabase();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Recuperar tamanhos salvos das etiquetas
   const largura = parseInt(localStorage.getItem('etiqueta-largura') || '70');
@@ -133,18 +136,48 @@ const VisualizarEtiquetas = () => {
               </div>
             </div>
 
-            {/* Informação do Tamanho Atual */}
-            <Card className="mb-4 bg-gradient-to-r from-green-50 to-green-100 border-green-200 shadow-lg">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2 text-green-700">
-                  <Ruler className="w-5 h-5" />
-                  <span className="font-medium">
-                    Etiquetas exibidas no tamanho configurado: {largura}×{altura}mm
-                    <span className="text-sm ml-2">(Configure o tamanho na página de Impressão)</span>
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Informação do Tamanho e Controles de Visualização */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+              <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200 shadow-lg">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2 text-green-700">
+                    <Ruler className="w-5 h-5" />
+                    <span className="font-medium">
+                      Tamanho configurado: {largura}×{altura}mm
+                      <span className="text-sm ml-2">(Configure na página de Impressão)</span>
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 shadow-lg">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-700 font-medium">Modo de Visualização:</span>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant={viewMode === 'grid' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setViewMode('grid')}
+                        className="h-8"
+                      >
+                        <Grid className="w-4 h-4 mr-1" />
+                        Grade
+                      </Button>
+                      <Button
+                        variant={viewMode === 'list' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setViewMode('list')}
+                        className="h-8"
+                      >
+                        <List className="w-4 h-4 mr-1" />
+                        Lista
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Card de Controle */}
             <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
@@ -223,57 +256,117 @@ const VisualizarEtiquetas = () => {
               </Card>
             )}
 
-            {products.length > 0 ? (
+            {!user ? (
+              <div className="text-center py-12">
+                <AlertTriangle className="w-16 h-16 text-amber-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Acesso Restrito
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Faça login para visualizar suas etiquetas.
+                </p>
+                <Button 
+                  onClick={() => window.location.href = '/auth'}
+                  className="gradient-blue text-white"
+                >
+                  Fazer Login
+                </Button>
+              </div>
+            ) : loading ? (
+              <div className="text-center py-12">
+                <RefreshCw className="w-16 h-16 text-blue-400 mx-auto mb-4 animate-spin" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Carregando etiquetas...
+                </h3>
+                <p className="text-gray-600">
+                  Por favor, aguarde enquanto carregamos seus produtos.
+                </p>
+              </div>
+            ) : products.length > 0 ? (
               <div className="space-y-8">
                 {/* Produtos Vencidos - Destaque Especial */}
                 {expiredProducts.length > 0 && (
                   <div>
-                    <div className="flex items-center space-x-3 mb-4">
+                    <div className="flex items-center space-x-3 mb-6">
                       <AlertTriangle className="w-6 h-6 text-red-600" />
-                      <h2 className="text-2xl font-bold text-red-700">🚨 Produtos Vencidos</h2>
+                      <h2 className="text-2xl font-bold text-red-700">🚨 Produtos Vencidos ({expiredProducts.length})</h2>
                     </div>
-                     <div className="etiquetas-grid grid gap-4 auto-fit-etiquetas">
-                       {expiredProducts.map((product) => (
-                         <div key={product.id} className="etiqueta-container print:break-inside-avoid">
-                           <div className="mb-2 flex items-center space-x-2 print:hidden">
-                             <Checkbox
-                               checked={selectedProducts.includes(product.id)}
-                               onCheckedChange={() => handleSelectProduct(product.id)}
-                             />
-                             <span className="text-sm text-red-600 font-bold">⚠️ PRODUTO VENCIDO</span>
-                           </div>
-                           <div className="etiqueta-wrapper border-4 border-red-500 rounded-lg p-2 bg-red-50 shadow-lg hover:shadow-xl transition-all duration-200">
-                             <EtiquetaView product={product} largura={largura} altura={altura} />
-                           </div>
-                         </div>
-                       ))}
-                     </div>
+                    <div className={cn(
+                      viewMode === 'grid' 
+                        ? "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        : "space-y-4"
+                    )}>
+                      {expiredProducts.map((product) => (
+                        <div key={product.id} className={cn(
+                          "print:break-inside-avoid",
+                          viewMode === 'list' && "flex items-center space-x-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg"
+                        )}>
+                          <div className={cn(
+                            "flex items-center space-x-2 print:hidden",
+                            viewMode === 'list' ? "flex-shrink-0" : "mb-3"
+                          )}>
+                            <Checkbox
+                              checked={selectedProducts.includes(product.id)}
+                              onCheckedChange={() => handleSelectProduct(product.id)}
+                            />
+                            <span className="text-sm text-red-600 font-bold whitespace-nowrap">⚠️ VENCIDO</span>
+                          </div>
+                          <div className={cn(
+                            "border-4 border-red-500 rounded-lg p-3 bg-red-50 shadow-lg hover:shadow-xl transition-all duration-200",
+                            viewMode === 'list' && "flex-1"
+                          )}>
+                            <EtiquetaView 
+                              product={product} 
+                              largura={viewMode === 'list' ? 50 : largura} 
+                              altura={viewMode === 'list' ? 35 : altura} 
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
                 {/* Produtos Válidos */}
                 {validProducts.length > 0 && (
                   <div>
-                    <div className="flex items-center space-x-3 mb-4">
+                    <div className="flex items-center space-x-3 mb-6">
                       <Eye className="w-6 h-6 text-green-600" />
-                      <h2 className="text-2xl font-bold text-green-700">✅ Produtos Válidos</h2>
+                      <h2 className="text-2xl font-bold text-green-700">✅ Produtos Válidos ({validProducts.length})</h2>
                     </div>
-                     <div className="etiquetas-grid grid gap-4 auto-fit-etiquetas">
-                       {validProducts.map((product) => (
-                         <div key={product.id} className="etiqueta-container print:break-inside-avoid">
-                           <div className="mb-2 flex items-center space-x-2 print:hidden">
-                             <Checkbox
-                               checked={selectedProducts.includes(product.id)}
-                               onCheckedChange={() => handleSelectProduct(product.id)}
-                             />
-                             <span className="text-sm text-green-600">Produto válido</span>
-                           </div>
-                           <div className="etiqueta-wrapper hover:shadow-lg transition-shadow duration-200 border border-gray-200 rounded-lg p-2 bg-white">
-                             <EtiquetaView product={product} largura={largura} altura={altura} />
-                           </div>
-                         </div>
-                       ))}
-                     </div>
+                    <div className={cn(
+                      viewMode === 'grid' 
+                        ? "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        : "space-y-4"
+                    )}>
+                      {validProducts.map((product) => (
+                        <div key={product.id} className={cn(
+                          "print:break-inside-avoid",
+                          viewMode === 'list' && "flex items-center space-x-4 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                        )}>
+                          <div className={cn(
+                            "flex items-center space-x-2 print:hidden",
+                            viewMode === 'list' ? "flex-shrink-0" : "mb-3"
+                          )}>
+                            <Checkbox
+                              checked={selectedProducts.includes(product.id)}
+                              onCheckedChange={() => handleSelectProduct(product.id)}
+                            />
+                            <span className="text-sm text-green-600 whitespace-nowrap">✓ Válido</span>
+                          </div>
+                          <div className={cn(
+                            "hover:shadow-lg transition-shadow duration-200 border border-gray-200 rounded-lg p-3 bg-white",
+                            viewMode === 'list' && "flex-1"
+                          )}>
+                            <EtiquetaView 
+                              product={product} 
+                              largura={viewMode === 'list' ? 50 : largura} 
+                              altura={viewMode === 'list' ? 35 : altura} 
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
