@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { useProducts } from "@/hooks/useProducts";
+import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const Relatorios = () => {
-  const { products } = useProducts();
+  const { products } = useProductsSupabase();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredProducts, setFilteredProducts] = useState(products);

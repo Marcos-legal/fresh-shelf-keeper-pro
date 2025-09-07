@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { useProducts } from "@/hooks/useProducts";
+import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Product, ProductFormData } from "@/types/product";
 import { ProductTable } from "@/components/ProductTable";
 import { ProductForm } from "@/components/ProductForm";
@@ -22,7 +22,7 @@ import { escapeHtml } from "@/lib/security";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { products, loading, addProduct, updateProduct, deleteProduct, stats, getProductsByCategory } = useProducts();
+  const { products, loading, addProduct, updateProduct, deleteProduct, stats, getProductsByCategory } = useProductsSupabase();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
+import { Pagination } from "@/components/ui/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,6 +23,9 @@ const VisualizarEtiquetas = () => {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'valido' | 'proximo-vencimento' | 'vencido'>('all');
+  const itemsPerPage = 12;
 
   // Recuperar tamanhos salvos das etiquetas
   const largura = parseInt(localStorage.getItem('etiqueta-largura') || '70');
@@ -44,9 +48,19 @@ const VisualizarEtiquetas = () => {
     return targetDate && targetDate < now;
   };
 
-  // Separar produtos por status
-  const expiredProducts = products.filter(product => isProductExpired(product));
-  const validProducts = products.filter(product => !isProductExpired(product));
+  // Filtrar produtos por status
+  const filteredProducts = products.filter(product => {
+    if (statusFilter === 'all') return true;
+    return product.status === statusFilter;
+  });
+
+  const expiredProducts = filteredProducts.filter(product => isProductExpired(product));
+  const validProducts = filteredProducts.filter(product => !isProductExpired(product));
+
+  // Paginação
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
 
   const handleSelectProduct = (productId: string) => {
     setSelectedProducts(prev => 

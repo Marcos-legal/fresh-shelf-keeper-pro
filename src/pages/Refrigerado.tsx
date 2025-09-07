@@ -2,11 +2,11 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProductTable } from "@/components/ProductTable";
-import { useProducts } from "@/hooks/useProducts";
+import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Thermometer } from "lucide-react";
 
 const Refrigerado = () => {
-  const { products, updateDataAbertura, deleteProduct } = useProducts();
+  const { products, updateDataAbertura, deleteProduct } = useProductsSupabase();
   
   const refrigeradoProducts = products.filter(product => product.localArmazenamento === 'refrigerado');
 

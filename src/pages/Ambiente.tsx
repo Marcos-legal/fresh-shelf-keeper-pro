@@ -2,11 +2,11 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProductTable } from "@/components/ProductTable";
-import { useProducts } from "@/hooks/useProducts";
+import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Home } from "lucide-react";
 
 const Ambiente = () => {
-  const { products, updateDataAbertura, deleteProduct } = useProducts();
+  const { products, updateDataAbertura, deleteProduct } = useProductsSupabase();
   
   const ambienteProducts = products.filter(product => product.localArmazenamento === 'ambiente');
 

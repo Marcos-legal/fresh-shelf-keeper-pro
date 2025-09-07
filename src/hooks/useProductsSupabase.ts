@@ -284,6 +284,69 @@ export function useProductsSupabase() {
     },
   };
 
+  // Atualizar data de abertura
+  const updateDataAbertura = async (id: string, novaData: Date) => {
+    if (!novaData || isNaN(novaData.getTime())) {
+      console.warn('Invalid date provided for updateDataAbertura:', novaData);
+      return;
+    }
+
+    try {
+      // Primeiro buscar o produto para calcular o novo use_by_date
+      const product = products.find(p => p.id === id);
+      if (!product) {
+        toast({
+          title: "Erro",
+          description: "Produto não encontrado.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Calcular nova data de uso baseada nos dias para vencer
+      let useByDate = null;
+      if (product.diasParaVencer && product.diasParaVencer > 0) {
+        const utilizarAte = new Date(novaData);
+        utilizarAte.setDate(utilizarAte.getDate() + product.diasParaVencer);
+        useByDate = utilizarAte.toISOString().split('T')[0];
+      }
+
+      // Atualizar no banco
+      const { error } = await supabase
+        .from('products')
+        .update({
+          opening_date: novaData.toISOString().split('T')[0],
+          use_by_date: useByDate,
+        })
+        .eq('id', parseInt(id));
+
+      if (error) {
+        console.error('Erro ao atualizar data de abertura:', error);
+        toast({
+          title: "Erro ao atualizar data",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Recarregar produtos
+      await loadProducts();
+      
+      toast({
+        title: "Data atualizada",
+        description: "Data de abertura foi atualizada com sucesso!",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar data de abertura:', error);
+      toast({
+        title: "Erro ao atualizar data",
+        description: "Ocorreu um erro ao atualizar a data de abertura.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     products: productsWithStatus,
     loading,
@@ -291,6 +354,7 @@ export function useProductsSupabase() {
     addProduct,
     updateProduct,
     deleteProduct,
+    updateDataAbertura,
     getProductsByCategory,
     refreshProducts: loadProducts,
   };

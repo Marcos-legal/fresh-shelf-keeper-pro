@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { useProducts } from "@/hooks/useProducts";
+import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { escapeHtml } from "@/lib/security";
 
 const ImpressaoEtiquetas = () => {
-  const { products } = useProducts();
+  const { products } = useProductsSupabase();
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   
   // Configurações manuais de tamanho (em mm)

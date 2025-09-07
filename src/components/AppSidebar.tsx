@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { ActionableIcon } from "./ActionableIcon";
-import { useProducts } from "@/hooks/useProducts";
+import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
@@ -87,7 +87,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const { stats } = useProducts();
+  const { stats } = useProductsSupabase();
   
   const getCategoryCount = (category: string) => {
     return stats.porCategoria[category] || 0;

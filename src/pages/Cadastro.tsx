@@ -2,13 +2,13 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProductForm } from "@/components/ProductForm";
-import { useProducts } from "@/hooks/useProducts";
+import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Package } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { ProductFormData } from "@/types/product";
 
 const Cadastro = () => {
-  const { addProduct } = useProducts();
+  const { addProduct } = useProductsSupabase();
 
   const handleAddProduct = (data: ProductFormData) => {
     try {

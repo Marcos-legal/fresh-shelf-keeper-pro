@@ -81,25 +81,25 @@ export type Database = {
           status: string
           storage: string
           use_by_date: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
-          brand: string
+          brand?: string
           created_at?: string | null
           days_valid: number
           expiry_date: string
           expiry_date_entered?: boolean | null
           id?: never
-          lot: string
+          lot?: string
           manufacture_date: string
           manufacture_date_entered?: boolean | null
-          name: string
+          name?: string
           opening_date: string
-          responsible: string
+          responsible?: string
           status?: string
-          storage: string
+          storage?: string
           use_by_date: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           brand?: string
@@ -117,7 +117,7 @@ export type Database = {
           status?: string
           storage?: string
           use_by_date?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
