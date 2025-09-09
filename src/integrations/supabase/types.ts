@@ -68,55 +68,55 @@ export type Database = {
         Row: {
           brand: string
           created_at: string | null
-          days_valid: number
-          expiry_date: string
+          days_valid: number | null
+          expiry_date: string | null
           expiry_date_entered: boolean | null
           id: number
           lot: string
-          manufacture_date: string
+          manufacture_date: string | null
           manufacture_date_entered: boolean | null
           name: string
-          opening_date: string
+          opening_date: string | null
           responsible: string
           status: string
           storage: string
-          use_by_date: string
+          use_by_date: string | null
           user_id: string
         }
         Insert: {
           brand?: string
           created_at?: string | null
-          days_valid: number
-          expiry_date: string
+          days_valid?: number | null
+          expiry_date?: string | null
           expiry_date_entered?: boolean | null
           id?: never
           lot?: string
-          manufacture_date: string
+          manufacture_date?: string | null
           manufacture_date_entered?: boolean | null
           name?: string
-          opening_date: string
+          opening_date?: string | null
           responsible?: string
           status?: string
           storage?: string
-          use_by_date: string
+          use_by_date?: string | null
           user_id: string
         }
         Update: {
           brand?: string
           created_at?: string | null
-          days_valid?: number
-          expiry_date?: string
+          days_valid?: number | null
+          expiry_date?: string | null
           expiry_date_entered?: boolean | null
           id?: never
           lot?: string
-          manufacture_date?: string
+          manufacture_date?: string | null
           manufacture_date_entered?: boolean | null
           name?: string
-          opening_date?: string
+          opening_date?: string | null
           responsible?: string
           status?: string
           storage?: string
-          use_by_date?: string
+          use_by_date?: string | null
           user_id?: string
         }
         Relationships: []
