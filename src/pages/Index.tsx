@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileDrawer } from "@/components/MobileDrawer";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Product, ProductFormData } from "@/types/product";
 import { ProductTable } from "@/components/ProductTable";
@@ -401,6 +402,7 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
+        <MobileDrawer />
         <AppSidebar />
         <main className="flex-1">
           <div className="p-6">
@@ -410,36 +412,38 @@ const Index = () => {
             </div>
 
             {/* Header Moderno */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 space-y-4 lg:space-y-0">
               <div className="flex items-center space-x-4">
-                <SidebarTrigger className="hover:bg-muted rounded-lg transition-colors p-2" />
+                <SidebarTrigger className="hover:bg-muted rounded-lg transition-colors p-2 hidden lg:flex" />
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 gradient-blue rounded-xl flex items-center justify-center shadow-lg">
-                    <Package className="w-7 h-7 text-white" />
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 gradient-blue rounded-xl flex items-center justify-center shadow-lg">
+                    <Package className="w-5 h-5 lg:w-7 lg:h-7 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                    <h1 className="text-xl lg:text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                       Dashboard Inteligente
                     </h1>
-                    <p className="text-muted-foreground mt-1 flex items-center space-x-2">
-                      <TrendingUp className="w-4 h-4" />
-                      <span>Controle total de validades em tempo real</span>
+                    <p className="text-sm lg:text-base text-muted-foreground mt-1 flex items-center space-x-2">
+                      <TrendingUp className="w-3 h-3 lg:w-4 lg:h-4" />
+                      <span className="hidden sm:block">Controle total de validades em tempo real</span>
+                      <span className="sm:hidden">Controle de validades</span>
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 lg:space-x-3">
                 <ThemeToggle />
                 <Button 
                   onClick={() => {
                     setEditingProduct(null);
                     setShowForm(!showForm);
                   }} 
-                  className="gradient-blue text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                  size="lg"
+                  className="gradient-blue text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm lg:text-base"
+                  size={window.innerWidth < 768 ? "default" : "lg"}
                 >
-                  <Plus className="w-5 h-5 mr-2" />
-                  {showForm ? 'Cancelar' : 'Novo Produto'}
+                  <Plus className="w-4 h-4 lg:w-5 lg:h-5 mr-1 lg:mr-2" />
+                  <span className="hidden sm:block">{showForm ? 'Cancelar' : 'Novo Produto'}</span>
+                  <span className="sm:hidden">Novo</span>
                 </Button>
               </div>
             </div>

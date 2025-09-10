@@ -1,6 +1,7 @@
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileDrawer } from "@/components/MobileDrawer";
 import { ProductForm } from "@/components/ProductForm";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Package } from "lucide-react";
@@ -28,12 +29,13 @@ const Cadastro = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen flex w-full bg-background">
+        <MobileDrawer />
         <AppSidebar />
         <main className="flex-1">
-          <div className="p-6">
+          <div className="p-4 lg:p-6">
             <div className="flex items-center space-x-4 mb-8">
-              <SidebarTrigger className="lg:hidden" />
+              <SidebarTrigger className="hidden lg:flex" />
               <div className="flex items-center space-x-3">
                 <Package className="w-8 h-8 text-blue-600" />
                 <div>

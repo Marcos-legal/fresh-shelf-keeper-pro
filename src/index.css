@@ -246,3 +246,53 @@
     grid-template-columns: repeat(auto-fit, minmax(70mm, 1fr)) !important;
   }
 }
+
+/* Mobile Responsive Utilities */
+@media (max-width: 768px) {
+  .mobile-padding {
+    padding: 1rem;
+  }
+  
+  .mobile-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .mobile-text-sm {
+    font-size: 0.875rem;
+  }
+  
+  .mobile-hidden {
+    display: none;
+  }
+  
+  .mobile-stack {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .mobile-full-width {
+    width: 100%;
+  }
+  
+  .mobile-compact {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Hide sidebar on mobile */
+  .sidebar-desktop {
+    display: none;
+  }
+}
+
+/* Desktop Responsive */
+@media (min-width: 769px) {
+  .mobile-drawer {
+    display: none;
+  }
+  
+  .sidebar-desktop {
+    display: flex;
+  }
+}
