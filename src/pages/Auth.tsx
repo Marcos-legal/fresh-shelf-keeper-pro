@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Package, Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
+import { Package, Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2, Shield, KeyRound } from 'lucide-react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { HCAPTCHA_ENABLED, HCAPTCHA_SITE_KEY } from '@/config/hcaptcha';
+import { supabase } from '@/integrations/supabase/client';
 export default function Auth() {
   // Separate states for login and signup
   const [loginData, setLoginData] = useState({
@@ -28,6 +29,8 @@ export default function Auth() {
     [key: string]: string;
   }>({});
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRef = useRef<HCaptcha>(null);
   const {
@@ -49,6 +52,7 @@ export default function Auth() {
     setActiveTab(value);
     setErrors({});
     setSignupSuccess(false);
+    setResetSuccess(false);
     setCaptchaToken(null);
     if (captchaRef.current) {
       captchaRef.current.resetCaptcha();
@@ -207,26 +211,65 @@ export default function Auth() {
     }
     setIsLoading(false);
   };
-  return <div className="min-h-screen bg-background flex items-center justify-center p-4 my-0 py-[16px] px-[300px]">
-      <div className="w-full max-w-md space-y-6">
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({});
+    setResetSuccess(false);
+
+    // Validate email
+    const newErrors: { [key: string]: string } = {};
+    if (!resetEmail) {
+      newErrors.resetEmail = 'Email é obrigatório';
+    } else if (!validateEmail(resetEmail)) {
+      newErrors.resetEmail = 'Email inválido';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setIsLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/auth?tab=reset`,
+    });
+
+    if (error) {
+      setErrors({ general: translateError(error) });
+    } else {
+      setResetSuccess(true);
+      setResetEmail('');
+    }
+
+    setIsLoading(false);
+  };
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg space-y-8">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="w-16 h-16 gradient-blue rounded-xl flex items-center justify-center mx-auto shadow-lg">
-            <Package className="w-8 h-8 text-white" />
+        <div className="text-center space-y-4">
+          <div className="relative">
+            <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/25 ring-4 ring-primary/10">
+              <Package className="w-10 h-10 text-primary-foreground" />
+            </div>
+            <div className="absolute inset-0 w-20 h-20 bg-gradient-to-br from-primary/20 to-transparent rounded-2xl mx-auto animate-pulse"></div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Sistema de Validade
-          </h1>
-          <p className="text-muted-foreground">
-            Controle inteligente de produtos
-          </p>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              Sistema de Validade
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Controle inteligente de produtos
+            </p>
+          </div>
         </div>
 
         {/* Auth Forms */}
-        <Card className="gradient-border">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl">Acesso ao Sistema</CardTitle>
-            <CardDescription>
+        <Card className="shadow-2xl border-0 bg-card/80 backdrop-blur-lg">
+          <CardHeader className="space-y-3 text-center pb-6">
+            <CardTitle className="text-2xl font-semibold">Acesso ao Sistema</CardTitle>
+            <CardDescription className="text-base">
               Entre com sua conta ou crie uma nova
             </CardDescription>
           </CardHeader>
@@ -239,7 +282,7 @@ export default function Auth() {
                 </AlertDescription>
               </Alert>}
             
-            {/* Success Message */}
+            {/* Success Messages */}
             {signupSuccess && <Alert className="mb-4 border-green-500/50 bg-green-50 dark:bg-green-950/50">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-700 dark:text-green-300">
@@ -247,15 +290,26 @@ export default function Auth() {
                 </AlertDescription>
               </Alert>}
             
+            {resetSuccess && <Alert className="mb-4 border-blue-500/50 bg-blue-50 dark:bg-blue-950/50">
+                <KeyRound className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-700 dark:text-blue-300">
+                  Email de redefinição enviado! Verifique sua caixa de entrada.
+                </AlertDescription>
+              </Alert>}
+            
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login" className="flex items-center space-x-2">
+              <TabsList className="grid w-full grid-cols-3 h-12">
+                <TabsTrigger value="login" className="flex items-center space-x-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <LogIn className="w-4 h-4" />
                   <span>Entrar</span>
                 </TabsTrigger>
-                <TabsTrigger value="register" className="flex items-center space-x-2">
+                <TabsTrigger value="register" className="flex items-center space-x-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <UserPlus className="w-4 h-4" />
                   <span>Cadastrar</span>
+                </TabsTrigger>
+                <TabsTrigger value="reset" className="flex items-center space-x-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <KeyRound className="w-4 h-4" />
+                  <span>Redefinir</span>
                 </TabsTrigger>
               </TabsList>
               
@@ -282,10 +336,20 @@ export default function Auth() {
                     </div>
                     {errors.loginPassword && <p className="text-sm text-destructive">{errors.loginPassword}</p>}
                   </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button type="submit" className="w-full h-11 text-base font-medium bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-200" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Entrar no Sistema
                   </Button>
+                  <div className="text-center mt-4">
+                    <Button 
+                      type="button" 
+                      variant="link" 
+                      className="text-sm text-primary hover:text-primary/80 p-0 h-auto"
+                      onClick={() => setActiveTab('reset')}
+                    >
+                      Esqueci minha senha
+                    </Button>
+                  </div>
                 </form>
               </TabsContent>
               
@@ -327,7 +391,7 @@ export default function Auth() {
                       {errors.captcha && <p className="text-sm text-destructive text-center">{errors.captcha}</p>}
                     </div>}
 
-                  <Button type="submit" className="w-full" disabled={isLoading || HCAPTCHA_ENABLED && !captchaToken}>
+                  <Button type="submit" className="w-full h-11 text-base font-medium bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-200" disabled={isLoading || HCAPTCHA_ENABLED && !captchaToken}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Criar Conta
                   </Button>
@@ -339,14 +403,61 @@ export default function Auth() {
                   <p className="text-xs">Para testes rápidos, você pode desabilitar a confirmação de email nas configurações do Supabase.</p>
                 </div>
               </TabsContent>
+              
+              <TabsContent value="reset" className="space-y-4 mt-4">
+                <form onSubmit={handlePasswordReset} className="space-y-4">
+                  <div className="text-center mb-6">
+                    <h3 className="text-lg font-semibold mb-2">Redefinir Senha</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Digite seu email para receber as instruções de redefinição
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email">Email</Label>
+                    <Input 
+                      id="reset-email" 
+                      type="email" 
+                      placeholder="seu@email.com" 
+                      value={resetEmail} 
+                      onChange={(e) => setResetEmail(e.target.value)} 
+                      required 
+                      disabled={isLoading} 
+                      className={errors.resetEmail ? 'border-destructive focus-visible:ring-destructive' : ''} 
+                    />
+                    {errors.resetEmail && <p className="text-sm text-destructive">{errors.resetEmail}</p>}
+                  </div>
+                  
+                  <Button type="submit" className="w-full h-11 text-base font-medium bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-200" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Enviar Email de Redefinição
+                  </Button>
+                  
+                  <div className="text-center mt-4">
+                    <Button 
+                      type="button" 
+                      variant="link" 
+                      className="text-sm text-muted-foreground hover:text-primary p-0 h-auto"
+                      onClick={() => setActiveTab('login')}
+                    >
+                      Voltar ao login
+                    </Button>
+                  </div>
+                </form>
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-sm text-muted-foreground">
-          © 2024 Sistema de Validade - Versão 2.0
-        </p>
+        <div className="text-center space-y-2">
+          <p className="text-sm text-muted-foreground/80">
+            © 2024 Sistema de Validade - Versão 2.0
+          </p>
+          <p className="text-xs text-muted-foreground/60">
+            Controle inteligente e eficiente de produtos
+          </p>
+        </div>
       </div>
     </div>;
 }
