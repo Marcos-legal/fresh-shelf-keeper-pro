@@ -264,7 +264,7 @@ export default function ContagemEstoque() {
                             </TableCell>
                             <TableCell>
                               <Badge variant="outline">
-                                {contagem.quantidade_total.toFixed(2)} {produto?.unidade_conteudo}
+                                {Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}
                               </Badge>
                             </TableCell>
                             <TableCell>{contagem.responsavel || '-'}</TableCell>
