@@ -245,31 +245,30 @@ export default function Auth() {
 
     setIsLoading(false);
   };
-  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg space-y-8">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-6">
+      <div className="w-full max-w-md mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="relative">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/25 ring-4 ring-primary/10">
-              <Package className="w-10 h-10 text-primary-foreground" />
+        <div className="text-center space-y-3">
+          <div className="relative flex justify-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-xl shadow-primary/20 ring-2 ring-primary/10">
+              <Package className="w-8 h-8 text-primary-foreground" />
             </div>
-            <div className="absolute inset-0 w-20 h-20 bg-gradient-to-br from-primary/20 to-transparent rounded-2xl mx-auto animate-pulse"></div>
           </div>
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               Sistema de Validade
             </h1>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground">
               Controle inteligente de produtos
             </p>
           </div>
         </div>
 
         {/* Auth Forms */}
-        <Card className="shadow-2xl border-0 bg-card/80 backdrop-blur-lg">
-          <CardHeader className="space-y-3 text-center pb-6">
-            <CardTitle className="text-2xl font-semibold">Acesso ao Sistema</CardTitle>
-            <CardDescription className="text-base">
+        <Card className="shadow-xl border-0 bg-card/90 backdrop-blur-sm">
+          <CardHeader className="space-y-2 text-center pb-4">
+            <CardTitle className="text-xl font-semibold">Acesso ao Sistema</CardTitle>
+            <CardDescription>
               Entre com sua conta ou crie uma nova
             </CardDescription>
           </CardHeader>
@@ -450,12 +449,9 @@ export default function Auth() {
         </Card>
 
         {/* Footer */}
-        <div className="text-center space-y-2">
-          <p className="text-sm text-muted-foreground/80">
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground/70">
             © 2024 Sistema de Validade - Versão 2.0
-          </p>
-          <p className="text-xs text-muted-foreground/60">
-            Controle inteligente e eficiente de produtos
           </p>
         </div>
       </div>
