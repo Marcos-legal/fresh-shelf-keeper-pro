@@ -29,7 +29,7 @@ export function TextInputField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={error ? 'border-red-500' : ''}
+        className={`touch-manipulation form-input ${error ? 'border-red-500' : ''}`}
       />
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>

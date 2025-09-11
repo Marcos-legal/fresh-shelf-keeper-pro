@@ -17,6 +17,8 @@ import { Calendar, Edit, Trash2, Printer, Search } from "lucide-react";
 import { Product, StorageLocation } from "@/types/product";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileProductList } from "@/components/mobile/MobileProductList";
 
 interface ProductTableProps {
   products: Product[];
@@ -53,6 +55,7 @@ export function ProductTable({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("nome");
+  const isMobile = useIsMobile();
 
   // Filtrar e ordenar produtos
   const filteredProducts = products
@@ -125,6 +128,69 @@ export function ProductTable({
     }
   };
 
+  // Mobile view
+  if (isMobile) {
+    return (
+      <Card className="animate-fade-in">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center justify-between">
+            <span className="text-lg">{title}</span>
+            <Badge variant="outline" className="text-sm">
+              {filteredProducts.length}
+            </Badge>
+          </CardTitle>
+          
+          {/* Mobile Filters */}
+          <div className="space-y-3 pt-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar produtos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-12 touch-manipulation"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-12 touch-manipulation">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="valido">Válidos</SelectItem>
+                  <SelectItem value="proximo-vencimento">Próx. Venc.</SelectItem>
+                  <SelectItem value="vencido">Vencidos</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="h-12 touch-manipulation">
+                  <SelectValue placeholder="Ordenar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nome">Nome</SelectItem>
+                  <SelectItem value="validade">Validade</SelectItem>
+                  <SelectItem value="status">Status</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardHeader>
+        
+        <MobileProductList
+          products={filteredProducts}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onPrintLabel={onPrintLabel}
+          category={category}
+        />
+      </Card>
+    );
+  }
+
+  // Desktop view
   return (
     <Card className="animate-fade-in">
       <CardHeader>

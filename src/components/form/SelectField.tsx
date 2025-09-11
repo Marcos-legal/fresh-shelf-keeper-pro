@@ -30,7 +30,7 @@ export function SelectField({
     <div className="space-y-2">
       <Label>{label} {required && '*'}</Label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className={error ? 'border-red-500' : ''}>
+        <SelectTrigger className={`touch-manipulation form-select ${error ? 'border-red-500' : ''}`}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

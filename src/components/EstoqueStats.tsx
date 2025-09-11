@@ -2,6 +2,8 @@ import { Package, TrendingUp, AlertTriangle, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ContagemEstoque, ProdutoEstoque } from "@/hooks/useEstoqueSupabase";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileStats } from "@/components/mobile/MobileStats";
 
 interface EstoqueStatsProps {
   produtos: ProdutoEstoque[];
@@ -10,6 +12,7 @@ interface EstoqueStatsProps {
 }
 
 export function EstoqueStats({ produtos, contagens, getEstoqueAtual }: EstoqueStatsProps) {
+  const isMobile = useIsMobile();
   // Calcular estatísticas
   const totalProdutos = produtos.length;
   const totalContagens = contagens.length;
@@ -61,6 +64,21 @@ export function EstoqueStats({ produtos, contagens, getEstoqueAtual }: EstoqueSt
     }
   ];
 
+  // Mobile view
+  if (isMobile) {
+    const mobileStats = estatisticas.map(stat => ({
+      title: stat.title,
+      value: stat.value,
+      subtitle: stat.description,
+      icon: <stat.icon className="h-5 w-5" />,
+      variant: stat.variant === "destructive" ? "destructive" as const : 
+               stat.variant === "secondary" ? "warning" as const : "default" as const,
+    }));
+
+    return <MobileStats stats={mobileStats} className="mb-6" />;
+  }
+
+  // Desktop view
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {estatisticas.map((stat) => (
