@@ -35,7 +35,7 @@ export function NumberInputField({
         min={min}
         value={value}
         onChange={handleChange}
-        className={`touch-manipulation form-input ${error ? 'border-red-500' : ''}`}
+        className={error ? 'border-red-500' : ''}
       />
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>

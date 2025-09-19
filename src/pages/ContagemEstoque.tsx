@@ -13,11 +13,8 @@ import { Package, Calculator, Plus, Trash2, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { MobileDrawer } from "@/components/MobileDrawer";
 
 export default function ContagemEstoque() {
-  const isMobile = useIsMobile();
   const {
     produtos,
     contagens,
@@ -56,9 +53,8 @@ export default function ContagemEstoque() {
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
-          {!isMobile && <AppSidebar />}
+          <AppSidebar />
           <main className="flex-1 p-6">
-            {isMobile && <MobileDrawer />}
             <div className="animate-pulse space-y-4">
               <div className="h-8 bg-gray-200 rounded w-1/4"></div>
               <div className="h-32 bg-gray-200 rounded"></div>
@@ -72,26 +68,19 @@ export default function ContagemEstoque() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        {!isMobile && <AppSidebar />}
-        <main className={`flex-1 ${isMobile ? 'p-0' : 'p-6'} space-y-6`}>
-          {isMobile && <MobileDrawer />}
-          
-          <div className={`${isMobile ? 'p-4' : ''} ${isMobile ? 'space-y-4' : 'flex justify-between items-center'}`}>
-            <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold gradient-text`}>
-              Contagem de Estoque
-            </h1>
-            
-            <div className={`${isMobile ? 'grid grid-cols-2 gap-2' : 'flex space-x-2'}`}>
-              {!isMobile && (
-                <Button 
-                  variant="secondary" 
-                  onClick={migrarDadosLocalStorage}
-                  className="text-sm"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Migrar dados locais
-                </Button>
-              )}
+        <AppSidebar />
+        <main className="flex-1 p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold gradient-text">Contagem de Estoque</h1>
+            <div className="flex space-x-2">
+              <Button 
+                variant="secondary" 
+                onClick={migrarDadosLocalStorage}
+                className="text-sm"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Migrar dados locais
+              </Button>
               
               <ExportarEstoque 
                 produtos={produtos}
@@ -101,12 +90,12 @@ export default function ContagemEstoque() {
               
               <Dialog open={showProdutoForm} onOpenChange={setShowProdutoForm}>
                 <DialogTrigger asChild>
-                  <Button className={`gradient-blue text-white ${isMobile ? 'h-12 touch-manipulation' : ''}`}>
+                  <Button className="gradient-blue text-white">
                     <Package className="w-4 h-4 mr-2" />
-                    {isMobile ? 'Produto' : 'Cadastrar Produto'}
+                    Cadastrar Produto
                   </Button>
                 </DialogTrigger>
-                <DialogContent className={`${isMobile ? 'w-[95vw] max-w-none h-[90vh]' : 'max-w-2xl'}`}>
+                <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Cadastrar Produto para Estoque</DialogTitle>
                   </DialogHeader>
@@ -122,12 +111,12 @@ export default function ContagemEstoque() {
               {produtos.length > 0 && (
                 <Dialog open={showContagemForm} onOpenChange={setShowContagemForm}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className={`border-blue-500 text-blue-600 hover:bg-blue-50 ${isMobile ? 'h-12 touch-manipulation' : ''}`}>
+                    <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50">
                       <Calculator className="w-4 h-4 mr-2" />
-                      {isMobile ? 'Contagem' : 'Nova Contagem'}
+                      Nova Contagem
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className={`${isMobile ? 'w-[95vw] max-w-none h-[90vh]' : 'max-w-2xl'}`}>
+                  <DialogContent className="max-w-2xl">
                     <DialogHeader>
                       <DialogTitle>Nova Contagem de Estoque</DialogTitle>
                     </DialogHeader>

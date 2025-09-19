@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts"
 import { TrendingUp, Package, AlertTriangle } from "lucide-react"
-import { useIsMobile } from "@/hooks/use-mobile"
 
 interface DashboardChartProps {
   categoryData: Record<string, number>
@@ -45,8 +44,6 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function DashboardChart({ categoryData, statusData }: DashboardChartProps) {
-  const isMobile = useIsMobile();
-  
   const barData = [
     { name: "Refrigerado", value: categoryData.refrigerado || 0, fill: "hsl(var(--chart-1))" },
     { name: "Congelado", value: categoryData.congelado || 0, fill: "hsl(var(--chart-2))" },
@@ -64,7 +61,7 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
   const totalStatus = statusData.validos + statusData.proximoVencimento + statusData.vencidos
 
   return (
-    <div className={`grid grid-cols-1 ${isMobile ? 'gap-4 mb-6' : 'lg:grid-cols-2 gap-6 mb-8'}`}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       <Card className="animate-fade-in hover-scale gradient-border">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between">
@@ -79,8 +76,8 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={isMobile ? 250 : 320}>
-              <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: isMobile ? 40 : 60 }}>
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8} />
@@ -101,10 +98,10 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
                 </defs>
                 <XAxis 
                   dataKey="name" 
-                  tick={{ fontSize: isMobile ? 9 : 11, fill: "hsl(var(--muted-foreground))" }}
-                  angle={isMobile ? 0 : -45}
-                  textAnchor={isMobile ? "middle" : "end"}
-                  height={isMobile ? 40 : 60}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
                   stroke="hsl(var(--border))"
                 />
                 <YAxis 
@@ -143,7 +140,7 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={isMobile ? 250 : 320}>
+            <ResponsiveContainer width="100%" height={320}>
               <PieChart>
                 <defs>
                   <linearGradient id="pieGradient1" x1="0" y1="0" x2="1" y2="1">
@@ -163,8 +160,8 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  outerRadius={isMobile ? 70 : 90}
-                  innerRadius={isMobile ? 30 : 40}
+                  outerRadius={90}
+                  innerRadius={40}
                   dataKey="value"
                   stroke="hsl(var(--background))"
                   strokeWidth={2}
