@@ -331,7 +331,7 @@ const VisualizarEtiquetas = () => {
                           )}>
                             <EtiquetaView 
                               product={product} 
-                              largura={viewMode === 'list' ? 80 : largura} 
+                              largura={viewMode === 'list' ? 90 : largura} 
                               altura={viewMode === 'list' ? 60 : altura} 
                             />
                           </div>
