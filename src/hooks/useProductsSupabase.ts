@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Product, ProductFormData, StorageLocation } from '@/types/product';
 import { toast } from '@/hooks/use-toast';
+import { parseValidadeDate } from '@/utils/productValidation';
 
 export function useProductsSupabase() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -86,12 +87,21 @@ export function useProductsSupabase() {
     }
 
     try {
+      // Parse validade date if provided
+      let expiryDate = null;
+      if (data.validade && data.validade.trim() !== '') {
+        const parsedDate = parseValidadeDate(data.validade);
+        if (parsedDate) {
+          expiryDate = parsedDate.toISOString().split('T')[0];
+        }
+      }
+
       const productData = {
         name: data.nome || '',
         lot: data.lote || '',
         brand: data.marca || '',
         manufacture_date: data.dataFabricacao || null,
-        expiry_date: data.validade || null,
+        expiry_date: expiryDate,
         opening_date: data.dataAbertura || null,
         days_valid: data.diasParaVencer || 0,
         use_by_date: data.dataAbertura && data.diasParaVencer 
@@ -145,7 +155,15 @@ export function useProductsSupabase() {
       if (data.lote !== undefined) updateData.lot = data.lote;
       if (data.marca !== undefined) updateData.brand = data.marca;
       if (data.dataFabricacao !== undefined) updateData.manufacture_date = data.dataFabricacao;
-      if (data.validade !== undefined) updateData.expiry_date = data.validade;
+      if (data.validade !== undefined) {
+        // Parse validade date if provided
+        if (data.validade && data.validade.trim() !== '') {
+          const parsedDate = parseValidadeDate(data.validade);
+          updateData.expiry_date = parsedDate ? parsedDate.toISOString().split('T')[0] : null;
+        } else {
+          updateData.expiry_date = null;
+        }
+      }
       if (data.dataAbertura !== undefined) {
         updateData.opening_date = data.dataAbertura;
         
