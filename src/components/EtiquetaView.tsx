@@ -59,12 +59,25 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
   const screenWidth = `${widthMm * 3.78}px`;
   const screenHeight = `${heightMm * 3.78}px`;
 
-  // Cálculo responsivo baseado no tamanho da etiqueta
+  // Cálculo responsivo MELHORADO baseado no tamanho da etiqueta
   const area = largura * altura;
-  const fontSize = Math.max(6, Math.min(16, Math.sqrt(area) * 0.25));
-  const spacing = Math.max(1, fontSize * 0.12);
-  const padding = Math.max(4, fontSize * 0.5);
-  const lineHeight = fontSize + 2;
+  
+  // Ajuste fino para manter proporções consistentes
+  let fontSize, spacing, padding, lineHeight;
+  
+  if (area < 2000) {
+    fontSize = Math.max(6, Math.min(9, Math.sqrt(area) * 0.22));
+  } else if (area < 4000) {
+    fontSize = Math.max(8, Math.min(11, Math.sqrt(area) * 0.23));
+  } else if (area < 8000) {
+    fontSize = Math.max(9, Math.min(13, Math.sqrt(area) * 0.24));
+  } else {
+    fontSize = Math.max(10, Math.min(15, Math.sqrt(area) * 0.25));
+  }
+  
+  spacing = Math.max(1, fontSize * 0.1);
+  padding = Math.max(3, fontSize * 0.45);
+  lineHeight = fontSize + 1.5;
 
   return (
     <Card 

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Printer, Package, Eye, FileText, Settings, Ruler } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +17,7 @@ import { escapeHtml } from "@/lib/security";
 const ImpressaoEtiquetas = () => {
   const { products } = useProductsSupabase();
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [productQuantities, setProductQuantities] = useState<Record<string, number>>({});
   
   // Configurações manuais de tamanho (em mm)
   const [largura, setLargura] = useState(() => {
@@ -24,15 +26,33 @@ const ImpressaoEtiquetas = () => {
   const [altura, setAltura] = useState(() => {
     return parseInt(localStorage.getItem('etiqueta-altura') || '50');
   });
+  const [settingsOpen, setSettingsOpen] = useState(false);
   
   const navigate = useNavigate();
 
   const handleSelectProduct = (productId: string) => {
-    setSelectedProducts(prev => 
-      prev.includes(productId) 
+    setSelectedProducts(prev => {
+      const newSelected = prev.includes(productId) 
         ? prev.filter(id => id !== productId)
-        : [...prev, productId]
-    );
+        : [...prev, productId];
+      
+      // Initialize quantity to 1 if selecting
+      if (!prev.includes(productId)) {
+        setProductQuantities(prevQty => ({
+          ...prevQty,
+          [productId]: prevQty[productId] || 1
+        }));
+      }
+      
+      return newSelected;
+    });
+  };
+
+  const handleQuantityChange = (productId: string, quantity: number) => {
+    setProductQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max(1, Math.min(99, quantity))
+    }));
   };
 
   const handleSelectAll = () => {
@@ -96,41 +116,41 @@ const ImpressaoEtiquetas = () => {
     const area = largura * altura;
     const aspectRatio = largura / altura;
     
-    // Configurações base para diferentes tamanhos
+    // Configurações base para diferentes tamanhos - AJUSTE MELHORADO
     let fontSize, labelSize, contentSize, padding, spacing;
     
     if (area < 2000) { // Muito pequena (ex: 40x30)
-      fontSize = Math.max(8, Math.min(10, area / 250));
-      labelSize = fontSize - 1;
+      fontSize = Math.max(7, Math.min(9, area / 280));
+      labelSize = Math.max(6, fontSize - 1);
       contentSize = fontSize;
-      padding = Math.max(4, largura * 0.08);
-      spacing = Math.max(2, altura * 0.04);
+      padding = Math.max(3, largura * 0.06);
+      spacing = Math.max(1.5, altura * 0.03);
     } else if (area < 4000) { // Pequena (ex: 50x40, 70x50)
-      fontSize = Math.max(10, Math.min(12, area / 300));
-      labelSize = fontSize - 1;
+      fontSize = Math.max(9, Math.min(11, area / 350));
+      labelSize = Math.max(7, fontSize - 1);
       contentSize = fontSize;
-      padding = Math.max(6, largura * 0.085);
-      spacing = Math.max(3, altura * 0.06);
+      padding = Math.max(5, largura * 0.07);
+      spacing = Math.max(2.5, altura * 0.05);
     } else if (area < 8000) { // Média (ex: 80x70, 100x60)
-      fontSize = Math.max(11, Math.min(14, area / 400));
-      labelSize = fontSize - 1;
+      fontSize = Math.max(10, Math.min(13, area / 450));
+      labelSize = Math.max(8, fontSize - 1);
       contentSize = fontSize;
-      padding = Math.max(8, largura * 0.09);
-      spacing = Math.max(4, altura * 0.08);
+      padding = Math.max(7, largura * 0.08);
+      spacing = Math.max(3.5, altura * 0.07);
     } else { // Grande (ex: 100x80+)
-      fontSize = Math.max(12, Math.min(16, area / 500));
-      labelSize = fontSize - 1;
+      fontSize = Math.max(11, Math.min(15, area / 550));
+      labelSize = Math.max(9, fontSize - 1);
       contentSize = fontSize;
-      padding = Math.max(10, largura * 0.1);
-      spacing = Math.max(5, altura * 0.1);
+      padding = Math.max(9, largura * 0.09);
+      spacing = Math.max(4.5, altura * 0.09);
     }
 
     return {
       width: `${largura * 3.78}px`, // Conversão mm para px (96 DPI)
       height: `${altura * 3.78}px`,
-      fontSize: `${fontSize}px`,
-      labelSize: `${labelSize}px`,
-      contentSize: `${contentSize}px`,
+      fontSize: `${fontSize.toFixed(1)}px`,
+      labelSize: `${labelSize.toFixed(1)}px`,
+      contentSize: `${contentSize.toFixed(1)}px`,
       padding: `${Math.round(padding)}px`,
       spacing: `${Math.round(spacing)}px`,
       showGrid: aspectRatio > 1.2, // Mostrar grid se for mais largo
@@ -154,12 +174,19 @@ const ImpressaoEtiquetas = () => {
       return;
     }
 
+    // Expandir produtos baseado nas quantidades
+    const expandedProducts = selectedProductsData.flatMap(product => {
+      const quantity = productQuantities[product.id] || 1;
+      return Array(quantity).fill(product);
+    });
+
     const printWindow = window.open('', '_blank');
     if (printWindow) {
+      const totalLabels = expandedProducts.length;
       printWindow.document.write(`
         <html>
           <head>
-            <title>Etiquetas Térmicas - ${escapeHtml(selectedProducts.length.toString())} produtos - ${escapeHtml(largura.toString())}x${escapeHtml(altura.toString())}mm</title>
+            <title>Etiquetas Térmicas - ${escapeHtml(totalLabels.toString())} etiquetas - ${escapeHtml(largura.toString())}x${escapeHtml(altura.toString())}mm</title>
             <style>
               @page {
                 size: A4;
@@ -268,7 +295,7 @@ const ImpressaoEtiquetas = () => {
           </head>
           <body>
             <div class="clearfix">
-              ${selectedProductsData.map(product => `
+              ${expandedProducts.map(product => `
                 <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
                   <div class="campo">
                     <div class="label">PRODUTO:</div>
@@ -355,9 +382,10 @@ const ImpressaoEtiquetas = () => {
       }, 500);
     }
 
+    const totalLabels = expandedProducts.length;
     toast({
       title: "Etiquetas enviadas para impressão",
-      description: `${selectedProducts.length} etiqueta(s) ${largura}x${altura}mm enviadas!`,
+      description: `${totalLabels} etiqueta(s) ${largura}x${altura}mm enviadas!`,
     });
   };
 
@@ -567,66 +595,6 @@ const ImpressaoEtiquetas = () => {
               </div>
             </div>
 
-            {/* Configurações de Tamanho Manual */}
-            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
-              <CardHeader className="bg-gradient-to-r from-green-800 to-green-900 text-white rounded-t-lg">
-                <CardTitle className="flex items-center space-x-2">
-                  <Ruler className="w-5 h-5" />
-                  <span>Ajuste Manual de Tamanho</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                  <div>
-                    <Label htmlFor="largura" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Largura (mm)
-                    </Label>
-                    <Input
-                      id="largura"
-                      type="number"
-                      min="30"
-                      max="150"
-                      value={largura}
-                      onChange={(e) => handleLarguraChange(e.target.value)}
-                      className="text-center"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="altura" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Altura (mm)
-                    </Label>
-                    <Input
-                      id="altura"
-                      type="number"
-                      min="20"
-                      max="100"
-                      value={altura}
-                      onChange={(e) => handleAlturaChange(e.target.value)}
-                      className="text-center"
-                    />
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="text-sm text-gray-600 mb-2">Preview:</div>
-                    <div 
-                      className="border-2 border-gray-400 bg-white flex items-center justify-center text-xs font-bold text-gray-700"
-                      style={{
-                        width: `${Math.min(80, largura * 0.8)}px`,
-                        height: `${Math.min(60, altura * 0.8)}px`
-                      }}
-                    >
-                      {largura}×{altura}mm
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                    <Settings className="w-4 h-4 inline mr-1" />
-                    Layout se adapta automaticamente ao tamanho • Configuração salva automaticamente
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Controles de Impressão */}
             <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
               <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg">
@@ -647,6 +615,73 @@ const ImpressaoEtiquetas = () => {
                     </span>
                   </div>
                   <div className="flex space-x-3">
+                    <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline"
+                          className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                        >
+                          <Settings className="w-4 h-4 mr-2" />
+                          Configurações
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center space-x-2">
+                            <Ruler className="w-5 h-5" />
+                            <span>Ajuste Manual de Tamanho</span>
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 pt-4">
+                          <div>
+                            <Label htmlFor="largura" className="text-sm font-medium text-gray-700 mb-2 block">
+                              Largura (mm)
+                            </Label>
+                            <Input
+                              id="largura"
+                              type="number"
+                              min="30"
+                              max="150"
+                              value={largura}
+                              onChange={(e) => handleLarguraChange(e.target.value)}
+                              className="text-center"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="altura" className="text-sm font-medium text-gray-700 mb-2 block">
+                              Altura (mm)
+                            </Label>
+                            <Input
+                              id="altura"
+                              type="number"
+                              min="20"
+                              max="100"
+                              value={altura}
+                              onChange={(e) => handleAlturaChange(e.target.value)}
+                              className="text-center"
+                            />
+                          </div>
+                          <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                            <div className="text-sm text-gray-600 mb-2">Preview:</div>
+                            <div 
+                              className="border-2 border-gray-400 bg-white flex items-center justify-center text-xs font-bold text-gray-700"
+                              style={{
+                                width: `${Math.min(80, largura * 0.8)}px`,
+                                height: `${Math.min(60, altura * 0.8)}px`
+                              }}
+                            >
+                              {largura}×{altura}mm
+                            </div>
+                          </div>
+                          <div className="p-3 bg-blue-50 rounded-lg">
+                            <p className="text-sm text-blue-700">
+                              <Settings className="w-4 h-4 inline mr-1" />
+                              Layout se adapta automaticamente • Salvo automaticamente
+                            </p>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     <Button 
                       onClick={() => navigate('/visualizar-etiquetas')}
                       variant="outline"
@@ -661,12 +696,8 @@ const ImpressaoEtiquetas = () => {
                       className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg"
                     >
                       <Printer className="w-4 h-4 mr-2" />
-                      Imprimir {largura}×{altura}mm ({selectedProducts.length})
-                      {selectedProducts.length > 0 && (
-                        <span className="ml-1">
-                          - {totalPaginas} pág{totalPaginas !== 1 ? 's' : ''}
-                        </span>
-                      )}
+                      Imprimir {largura}×{altura}mm
+                      {selectedProducts.length > 0 && ` (${Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)} etiquetas)`}
                     </Button>
                   </div>
                 </div>
@@ -680,9 +711,10 @@ const ImpressaoEtiquetas = () => {
                   <div className="flex items-center space-x-2 text-blue-700">
                     <FileText className="w-5 h-5" />
                     <span className="font-medium">
-                      {selectedProducts.length} etiqueta{selectedProducts.length !== 1 ? 's' : ''} 
+                      {selectedProducts.length} produto{selectedProducts.length !== 1 ? 's' : ''} selecionado{selectedProducts.length !== 1 ? 's' : ''}
+                      • {Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)} etiqueta(s) total
                       • Tamanho: {largura}×{altura}mm
-                      • Layout adaptativo otimizado para impressão térmica
+                      • Layout adaptativo
                     </span>
                   </div>
                 </CardContent>
@@ -754,13 +786,29 @@ const ImpressaoEtiquetas = () => {
                   {products.map((product) => (
                     <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow">
                       <CardHeader className="pb-3">
-                        <div className="flex items-center space-x-3">
-                          <Checkbox
-                            checked={selectedProducts.includes(product.id)}
-                            onCheckedChange={() => handleSelectProduct(product.id)}
-                          />
-                          <Package className="w-5 h-5 text-blue-600" />
-                          <CardTitle className="text-sm">{product.nome}</CardTitle>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3 flex-1">
+                            <Checkbox
+                              checked={selectedProducts.includes(product.id)}
+                              onCheckedChange={() => handleSelectProduct(product.id)}
+                            />
+                            <Package className="w-5 h-5 text-blue-600" />
+                            <CardTitle className="text-sm">{product.nome}</CardTitle>
+                          </div>
+                          {selectedProducts.includes(product.id) && (
+                            <div className="flex items-center space-x-2">
+                              <Label className="text-xs text-gray-600">Qtd:</Label>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="99"
+                                value={productQuantities[product.id] || 1}
+                                onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value) || 1)}
+                                className="w-16 h-8 text-center text-sm"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          )}
                         </div>
                       </CardHeader>
                       <CardContent className="text-sm">
