@@ -319,23 +319,27 @@ const ImpressaoEtiquetas = () => {
                     <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
                   </div>
                   ` : ''}
+                  ${product.dataFabricacao || product.validade ? `
                   <div class="grid">
+                    ${product.dataFabricacao ? `
                     <div class="campo">
                       <div class="label">FABRIC.:</div>
                       <div class="content">${escapeHtml(formatDateSafe(product.dataFabricacao))}</div>
                     </div>
-                    ${config.showGrid ? `
+                    ` : ''}
+                    ${product.validade && config.showGrid ? `
                     <div class="campo">
                       <div class="label">VALID.:</div>
                       <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
                     </div>
                     ` : ''}
                   </div>
-                  ${!config.showGrid ? `
+                  ${product.validade && !config.showGrid ? `
                   <div class="campo">
                     <div class="label">VALID.:</div>
                     <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
                   </div>
+                  ` : ''}
                   ` : ''}
                   <div class="grid">
                     <div class="campo">
@@ -511,23 +515,27 @@ const ImpressaoEtiquetas = () => {
                 <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
               </div>
               ` : ''}
+              ${product.dataFabricacao || product.validade ? `
               <div class="grid">
+                ${product.dataFabricacao ? `
                 <div class="campo">
                   <div class="label">FABRIC.:</div>
                   <div class="content">${escapeHtml(formatDateSafe(product.dataFabricacao))}</div>
                 </div>
-                ${config.showGrid ? `
+                ` : ''}
+                ${product.validade && config.showGrid ? `
                 <div class="campo">
                   <div class="label">VALID.:</div>
                   <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
                 </div>
                 ` : ''}
               </div>
-              ${!config.showGrid ? `
+              ${product.validade && !config.showGrid ? `
               <div class="campo">
                 <div class="label">VALID.:</div>
                 <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
               </div>
+              ` : ''}
               ` : ''}
               <div class="grid">
                 <div class="campo">
