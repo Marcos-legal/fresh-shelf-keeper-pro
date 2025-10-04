@@ -219,7 +219,7 @@ const ImpressaoEtiquetas = () => {
                 overflow: hidden;
               }
               .campo {
-                margin-bottom: ${config.spacing};
+                margin-bottom: ${Math.max(2, parseInt(config.spacing) * 0.4)}px;
                 border-bottom: 2px solid #333;
                 padding-bottom: 2px;
                 min-height: ${config.compactMode ? '12px' : '16px'};
@@ -319,16 +319,22 @@ const ImpressaoEtiquetas = () => {
                     <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
                   </div>
                   ` : ''}
-                  ${product.showOptionalDates && !config.compactMode ? `
                   <div class="grid">
                     <div class="campo">
                       <div class="label">FABRIC.:</div>
                       <div class="content">${escapeHtml(formatDateSafe(product.dataFabricacao))}</div>
                     </div>
+                    ${config.showGrid ? `
                     <div class="campo">
                       <div class="label">VALID.:</div>
                       <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
                     </div>
+                    ` : ''}
+                  </div>
+                  ${!config.showGrid ? `
+                  <div class="campo">
+                    <div class="label">VALID.:</div>
+                    <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
                   </div>
                   ` : ''}
                   <div class="grid">
@@ -426,7 +432,7 @@ const ImpressaoEtiquetas = () => {
                 overflow: hidden;
               }
               .campo {
-                margin-bottom: ${config.spacing};
+                margin-bottom: ${Math.max(2, parseInt(config.spacing) * 0.4)}px;
                 border-bottom: 2px solid #333;
                 padding-bottom: 2px;
                 min-height: ${config.compactMode ? '12px' : '16px'};
@@ -505,16 +511,22 @@ const ImpressaoEtiquetas = () => {
                 <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
               </div>
               ` : ''}
-              ${product.showOptionalDates && !config.compactMode ? `
               <div class="grid">
                 <div class="campo">
                   <div class="label">FABRIC.:</div>
                   <div class="content">${escapeHtml(formatDateSafe(product.dataFabricacao))}</div>
                 </div>
+                ${config.showGrid ? `
                 <div class="campo">
                   <div class="label">VALID.:</div>
                   <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
                 </div>
+                ` : ''}
+              </div>
+              ${!config.showGrid ? `
+              <div class="campo">
+                <div class="label">VALID.:</div>
+                <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
               </div>
               ` : ''}
               <div class="grid">
