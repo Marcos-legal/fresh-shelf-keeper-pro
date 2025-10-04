@@ -70,9 +70,9 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
   
   // Todos os tamanhos escalam proporcionalmente
   const fontSize = baseFontSize * scaleFactor;
-  const spacing = 1.5 * scaleFactor;
-  const padding = 4 * scaleFactor;
-  const lineHeight = fontSize + (2 * scaleFactor);
+  const spacing = 1.2 * scaleFactor; // Reduzido de 1.5 para 1.2
+  const padding = 3 * scaleFactor; // Reduzido de 4 para 3
+  const lineHeight = fontSize + (1.5 * scaleFactor); // Reduzido de 2 para 1.5
 
   return (
     <Card 
@@ -98,10 +98,10 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
           lineHeight: `${fontSize + 2}px`
         }}
       >
-        <div className="h-full flex flex-col" style={{ gap: `${spacing}px` }}>
+        <div className="h-full flex flex-col" style={{ gap: `${spacing * 0.5}px` }}>
           
           {/* Nome do Produto - 2 linhas */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.8}px` }}>
+          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
             <div className="flex items-center" style={{ marginBottom: `${spacing * 0.3}px` }}>
               <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Nome do Produto:</span>
               <div 
@@ -123,7 +123,7 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
           </div>
 
           {/* Lote e Marca - mesma linha */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.8}px` }}>
+          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
             <div className="flex items-center" style={{ gap: `${spacing * 2}px` }}>
               <div className="flex items-center flex-1">
                 <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Lote nº:</span>
@@ -157,7 +157,7 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
           </div>
 
           {/* Fab. e Val. - mesma linha */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.8}px` }}>
+          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
             <div className="flex items-center" style={{ gap: `${spacing * 2}px` }}>
               <div className="flex items-center flex-1">
                 <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Fab.:</span>
@@ -191,7 +191,7 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
           </div>
 
           {/* DT Abert. e Utilizar até - mesma linha */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.8}px` }}>
+          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
             <div className="flex items-center" style={{ gap: `${spacing * 2}px` }}>
               <div className="flex items-center flex-1">
                 <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>DT Abert:</span>
@@ -225,7 +225,7 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
           </div>
 
           {/* Checkboxes - Uma linha com 3 opções */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.8}px` }}>
+          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
             <div className="flex items-center justify-start" style={{ gap: `${spacing * 4}px` }}>
               <label className="flex items-center" style={{ gap: `${spacing * 0.8}px` }}>
                 <div 
