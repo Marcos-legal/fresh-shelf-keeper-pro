@@ -1,7 +1,7 @@
 
 import * as React from "react"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, X } from "lucide-react"
 import { ptBR } from "date-fns/locale"
 
 import { cn } from "@/lib/utils"
@@ -30,6 +30,11 @@ export function DatePicker({
   onChange,
   className,
 }: DatePickerProps) {
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange?.(undefined);
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -44,6 +49,12 @@ export function DatePicker({
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {selected ? format(selected, "dd/MM/yyyy", { locale: ptBR }) : <span>{placeholderText}</span>}
+          {selected && (
+            <X 
+              className="ml-auto h-4 w-4 opacity-50 hover:opacity-100" 
+              onClick={handleClear}
+            />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
