@@ -154,7 +154,14 @@ export function useProductsSupabase() {
       if (data.nome !== undefined) updateData.name = data.nome;
       if (data.lote !== undefined) updateData.lot = data.lote;
       if (data.marca !== undefined) updateData.brand = data.marca;
-      if (data.dataFabricacao !== undefined) updateData.manufacture_date = data.dataFabricacao;
+      
+      // Converter string vazia para null para datas
+      if (data.dataFabricacao !== undefined) {
+        updateData.manufacture_date = (data.dataFabricacao && data.dataFabricacao.trim() !== '') 
+          ? data.dataFabricacao 
+          : null;
+      }
+      
       if (data.validade !== undefined) {
         // Parse validade date if provided
         if (data.validade && data.validade.trim() !== '') {
@@ -164,18 +171,24 @@ export function useProductsSupabase() {
           updateData.expiry_date = null;
         }
       }
+      
       if (data.dataAbertura !== undefined) {
-        updateData.opening_date = data.dataAbertura;
+        updateData.opening_date = (data.dataAbertura && data.dataAbertura.trim() !== '') 
+          ? data.dataAbertura 
+          : null;
         
         // Calculate use_by_date if both opening date and days are available
         const product = products.find(p => p.id === id);
         const daysValid = data.diasParaVencer !== undefined ? data.diasParaVencer : product?.diasParaVencer;
         
-        if (data.dataAbertura && daysValid && daysValid > 0) {
+        if (data.dataAbertura && data.dataAbertura.trim() !== '' && daysValid && daysValid > 0) {
           const useByDate = new Date(new Date(data.dataAbertura).getTime() + daysValid * 24 * 60 * 60 * 1000);
           updateData.use_by_date = useByDate.toISOString().split('T')[0];
+        } else {
+          updateData.use_by_date = null;
         }
       }
+      
       if (data.diasParaVencer !== undefined) updateData.days_valid = data.diasParaVencer;
       if (data.localArmazenamento !== undefined) updateData.storage = data.localArmazenamento;
       if (data.responsavel !== undefined) updateData.responsible = data.responsavel;
