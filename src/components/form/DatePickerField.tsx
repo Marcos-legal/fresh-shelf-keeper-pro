@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -66,33 +66,50 @@ export function DatePickerField({
     }
   };
 
+  const handleClear = () => {
+    onChange('');
+    setCalendarOpen(false);
+  };
+
   return (
     <div className="space-y-2">
       <Label>{label} {required && '*'}</Label>
-      <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !value && "text-muted-foreground",
-              error && "border-red-500"
-            )}
+      <div className="relative w-full">
+        <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !value && "text-muted-foreground",
+                value && "pr-8",
+                error && "border-red-500"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {formatDateForDisplay(value)}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={getSelectedDate()}
+              onSelect={handleDateSelect}
+              initialFocus
+              className="pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+        {value && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 hover:opacity-100 flex items-center justify-center z-10"
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {formatDateForDisplay(value)}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={getSelectedDate()}
-            onSelect={handleDateSelect}
-            initialFocus
-            className="pointer-events-auto"
-          />
-        </PopoverContent>
-      </Popover>
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );
