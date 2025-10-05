@@ -36,36 +36,42 @@ export function DatePicker({
   };
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          id={id}
-          variant={"outline"}
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !selected && "text-muted-foreground",
-            className
-          )}
+    <div className="relative w-full">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            id={id}
+            variant={"outline"}
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !selected && "text-muted-foreground",
+              selected && "pr-8",
+              className
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {selected ? format(selected, "dd/MM/yyyy", { locale: ptBR }) : <span>{placeholderText}</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={selected}
+            onSelect={onChange}
+            initialFocus
+            className="p-3 pointer-events-auto"
+          />
+        </PopoverContent>
+      </Popover>
+      {selected && (
+        <button
+          type="button"
+          onClick={handleClear}
+          className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 hover:opacity-100 flex items-center justify-center z-10"
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {selected ? format(selected, "dd/MM/yyyy", { locale: ptBR }) : <span>{placeholderText}</span>}
-          {selected && (
-            <X 
-              className="ml-auto h-4 w-4 opacity-50 hover:opacity-100" 
-              onClick={handleClear}
-            />
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={selected}
-          onSelect={onChange}
-          initialFocus
-          className="p-3 pointer-events-auto"
-        />
-      </PopoverContent>
-    </Popover>
+          <X className="h-4 w-4" />
+        </button>
+      )}
+    </div>
   )
 }
