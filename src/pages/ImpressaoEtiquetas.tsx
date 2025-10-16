@@ -13,6 +13,7 @@ import { Printer, Package, Eye, FileText, Settings, Ruler } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { escapeHtml } from "@/lib/security";
+import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
 
 const ImpressaoEtiquetas = () => {
   const { products } = useProductsSupabase();
@@ -27,6 +28,10 @@ const ImpressaoEtiquetas = () => {
     return parseInt(localStorage.getItem('etiqueta-altura') || '50');
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [responsavel, setResponsavel] = useState('');
+  const [showResponsavelDialog, setShowResponsavelDialog] = useState(false);
+  const [printAction, setPrintAction] = useState<'batch' | 'single' | null>(null);
+  const [singleProductToPrint, setSingleProductToPrint] = useState<any>(null);
   
   const navigate = useNavigate();
 
@@ -162,7 +167,7 @@ const ImpressaoEtiquetas = () => {
   const totalPaginas = Math.ceil(selectedProducts.length / etiquetasPorPagina);
   const config = getResponsiveConfig();
 
-  const handlePrint = () => {
+  const handlePrintRequest = () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
     
     if (selectedProductsData.length === 0) {
@@ -173,6 +178,41 @@ const ImpressaoEtiquetas = () => {
       });
       return;
     }
+
+    setPrintAction('batch');
+    setShowResponsavelDialog(true);
+  };
+
+  const handlePrintSingleRequest = (product: any) => {
+    setSingleProductToPrint(product);
+    setPrintAction('single');
+    setShowResponsavelDialog(true);
+  };
+
+  const executePrint = () => {
+    if (!responsavel.trim()) {
+      toast({
+        title: "Responsável obrigatório",
+        description: "Por favor, selecione um responsável antes de imprimir.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (printAction === 'batch') {
+      handlePrint();
+    } else if (printAction === 'single' && singleProductToPrint) {
+      handlePrintSingle(singleProductToPrint);
+    }
+
+    setShowResponsavelDialog(false);
+    setResponsavel('');
+    setPrintAction(null);
+    setSingleProductToPrint(null);
+  };
+
+  const handlePrint = () => {
+    const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
 
     // Expandir produtos baseado nas quantidades
     const expandedProducts = selectedProductsData.flatMap(product => {
@@ -373,10 +413,10 @@ const ImpressaoEtiquetas = () => {
                       <span>AMB</span>
                     </div>
                   </div>
-                  ${!config.compactMode ? `
+                   ${!config.compactMode ? `
                   <div class="campo">
                     <div class="label">RESPONSÁVEL:</div>
-                    <div class="content">${escapeHtml((product.responsavel || '').toUpperCase())}</div>
+                    <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
                   </div>
                   ` : ''}
                 </div>
@@ -569,12 +609,12 @@ const ImpressaoEtiquetas = () => {
                   <span>AMB</span>
                 </div>
               </div>
-              ${!config.compactMode ? `
-              <div class="campo">
-                <div class="label">RESPONSÁVEL:</div>
-                <div class="content">${escapeHtml((product.responsavel || '').toUpperCase())}</div>
-              </div>
-              ` : ''}
+                   ${!config.compactMode ? `
+                  <div class="campo">
+                    <div class="label">RESPONSÁVEL:</div>
+                    <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
+                  </div>
+                  ` : ''}
             </div>
           </body>
         </html>
@@ -711,7 +751,7 @@ const ImpressaoEtiquetas = () => {
                       Visualizar Etiquetas
                     </Button>
                     <Button 
-                      onClick={handlePrint} 
+                      onClick={handlePrintRequest} 
                       disabled={selectedProducts.length === 0}
                       className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg"
                     >
@@ -759,7 +799,7 @@ const ImpressaoEtiquetas = () => {
                       key={product.id}
                       variant="outline"
                       className="h-auto p-4 text-left justify-start border-2 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
-                      onClick={() => handlePrintSingle(product)}
+                      onClick={() => handlePrintSingleRequest(product)}
                     >
                       <div className="flex items-center space-x-3 w-full">
                         <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
@@ -847,6 +887,43 @@ const ImpressaoEtiquetas = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Dialog para selecionar responsável */}
+            <Dialog open={showResponsavelDialog} onOpenChange={setShowResponsavelDialog}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Selecione o Responsável</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <ResponsavelSelectField
+                    label="Responsável"
+                    value={responsavel}
+                    onChange={setResponsavel}
+                    required={true}
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowResponsavelDialog(false);
+                        setResponsavel('');
+                        setPrintAction(null);
+                        setSingleProductToPrint(null);
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      onClick={executePrint}
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                    >
+                      <Printer className="w-4 h-4 mr-2" />
+                      Imprimir
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </main>
       </div>

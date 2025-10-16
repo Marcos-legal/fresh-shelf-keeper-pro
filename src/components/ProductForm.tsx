@@ -9,7 +9,7 @@ import { TextInputField } from "@/components/form/TextInputField";
 import { DatePickerField } from "@/components/form/DatePickerField";
 import { NumberInputField } from "@/components/form/NumberInputField";
 import { SelectField } from "@/components/form/SelectField";
-import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
+
 import { ValidadeField } from "@/components/form/ValidadeField";
 
 interface ProductFormProps {
@@ -41,7 +41,6 @@ export function ProductForm({
     dataAbertura: initialData?.dataAbertura || '',
     diasParaVencer: initialData?.diasParaVencer || undefined,
     localArmazenamento: initialData?.localArmazenamento || undefined,
-    responsavel: initialData?.responsavel || '',
     showOptionalDates: initialData?.showOptionalDates ?? false,
   });
 
@@ -153,14 +152,6 @@ export function ProductForm({
               onChange={(value) => handleInputChange('marca', value)}
               placeholder="Digite a marca"
               error={errors.marca}
-            />
-
-            <ResponsavelSelectField
-              label="Responsável (Opcional)"
-              value={formData.responsavel || ''}
-              onChange={(value) => handleInputChange('responsavel', value)}
-              error={errors.responsavel}
-              required={false}
             />
 
             {formData.showOptionalDates && (
