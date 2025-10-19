@@ -86,47 +86,52 @@ export function ProductForm({
 
   return (
     <Card className="animate-fade-in">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Package className="w-6 h-6" />
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+          <Package className="w-5 h-5 sm:w-6 sm:h-6" />
           <span>{title}</span>
         </CardTitle>
       </CardHeader>
       
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex justify-between items-center mb-4">
+      <CardContent className="p-4 sm:p-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 sm:justify-between items-stretch sm:items-center mb-4">
             <Button 
               type="button" 
               variant="outline" 
               onClick={handleUpdateDates}
-              className="text-blue-600"
+              className="text-primary w-full sm:w-auto text-sm"
+              size="sm"
             >
               <Calendar className="w-4 h-4 mr-2" />
-              Atualizar Datas (Hoje)
+              <span className="hidden sm:inline">Atualizar Datas (Hoje)</span>
+              <span className="sm:hidden">Datas (Hoje)</span>
             </Button>
             
             <Button
               type="button"
               variant="outline"
               onClick={() => handleToggleOptionalDates(!formData.showOptionalDates)}
-              className="text-gray-600"
+              className="text-muted-foreground w-full sm:w-auto text-sm"
+              size="sm"
             >
               {formData.showOptionalDates ? (
                 <>
                   <EyeOff className="w-4 h-4 mr-2" />
-                  Ocultar Datas Opcionais
+                  <span className="hidden sm:inline">Ocultar Datas Opcionais</span>
+                  <span className="sm:hidden">Ocultar Opcionais</span>
                 </>
               ) : (
                 <>
                   <Eye className="w-4 h-4 mr-2" />
-                  Mostrar Datas Opcionais
+                  <span className="hidden sm:inline">Mostrar Datas Opcionais</span>
+                  <span className="sm:hidden">Mostrar Opcionais</span>
                 </>
               )}
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <TextInputField
               id="nome"
               label="Nome do Produto (Opcional)"
@@ -204,8 +209,8 @@ export function ProductForm({
             />
           </div>
 
-          <div className="flex justify-end space-x-4 pt-6 border-t">
-            <Button type="submit" className="gradient-blue text-white">
+          <div className="flex justify-end pt-6 border-t">
+            <Button type="submit" className="gradient-blue text-white w-full sm:w-auto">
               <Save className="w-4 h-4 mr-2" />
               {submitLabel}
             </Button>

@@ -284,6 +284,27 @@
   .sidebar-desktop {
     display: none;
   }
+
+  /* Touch-friendly buttons */
+  button {
+    min-height: 44px;
+  }
+
+  /* Optimize scroll areas */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Tablet Responsive */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-compact {
+    padding: 1rem;
+  }
+  
+  .tablet-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Desktop Responsive */
@@ -294,5 +315,13 @@
   
   .sidebar-desktop {
     display: flex;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1440px) {
+  .container-wide {
+    max-width: 1400px;
+    margin: 0 auto;
   }
 }

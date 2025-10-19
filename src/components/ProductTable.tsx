@@ -127,28 +127,28 @@ export function ProductTable({
 
   return (
     <Card className="animate-fade-in">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>{title}</span>
-          <Badge variant="outline" className="text-sm">
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <span className="text-lg sm:text-xl">{title}</span>
+          <Badge variant="outline" className="text-xs sm:text-sm w-fit">
             {filteredProducts.length} produtos
           </Badge>
         </CardTitle>
         
         {/* Filtros */}
-        <div className="flex flex-wrap gap-4 pt-4">
-          <div className="flex items-center space-x-2">
-            <Search className="w-4 h-4 text-gray-500" />
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-4">
+          <div className="flex items-center space-x-2 flex-1 sm:flex-initial">
+            <Search className="w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar produtos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-64"
+              className="w-full sm:w-64"
             />
           </div>
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Filtrar por status" />
             </SelectTrigger>
             <SelectContent>
@@ -160,7 +160,7 @@ export function ProductTable({
           </Select>
           
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Ordenar por" />
             </SelectTrigger>
             <SelectContent>
@@ -172,8 +172,9 @@ export function ProductTable({
         </div>
       </CardHeader>
       
-      <CardContent>
-        <div className="overflow-x-auto">
+      <CardContent className="p-0 sm:p-6">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -192,7 +193,7 @@ export function ProductTable({
             </TableHeader>
             <TableBody>
               {filteredProducts.map((product) => (
-                <TableRow key={product.id} className="hover:bg-gray-50">
+                <TableRow key={product.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{product.nome}</TableCell>
                   <TableCell>{product.lote}</TableCell>
                   <TableCell>{product.marca}</TableCell>
@@ -241,7 +242,7 @@ export function ProductTable({
                           variant="outline" 
                           size="sm"
                           onClick={() => onDelete(product.id)}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -252,13 +253,106 @@ export function ProductTable({
               ))}
             </TableBody>
           </Table>
-          
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>Nenhum produto encontrado</p>
-            </div>
-          )}
         </div>
+
+        {/* Mobile/Tablet Card View */}
+        <div className="lg:hidden space-y-4 p-4">
+          {filteredProducts.map((product) => (
+            <Card key={product.id} className="border-l-4" style={{
+              borderLeftColor: product.status === 'vencido' ? 'hsl(var(--destructive))' : 
+                               product.status === 'proximo-vencimento' ? 'hsl(var(--warning))' : 
+                               'hsl(var(--success))'
+            }}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <h3 className="font-bold text-base mb-1">{product.nome}</h3>
+                    <p className="text-sm text-muted-foreground">Lote: {product.lote}</p>
+                  </div>
+                  <Badge 
+                    variant={statusConfig[product.status].variant}
+                    className={statusConfig[product.status].color + " text-xs"}
+                  >
+                    {statusConfig[product.status].label}
+                  </Badge>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                  <div>
+                    <span className="text-muted-foreground">Marca:</span>
+                    <p className="font-medium">{product.marca}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Validade:</span>
+                    <p className="font-medium">{formatDate(product.validade)}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Abertura:</span>
+                    <p className="font-medium">{formatDate(product.dataAbertura)}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Usar até:</span>
+                    <p className="font-medium">{formatDate(product.utilizarAte)}</p>
+                  </div>
+                  {!category && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Local: </span>
+                      <Badge variant="outline" className="text-xs">
+                        {categoryLabels[product.localArmazenamento]}
+                      </Badge>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="text-muted-foreground">Responsável:</span>
+                    <p className="font-medium">{product.responsavel}</p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2 pt-3 border-t">
+                  {onEdit && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => onEdit(product)}
+                      className="flex-1"
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Editar
+                    </Button>
+                  )}
+                  {onPrintLabel && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => onPrintLabel(product)}
+                      className="flex-1"
+                    >
+                      <Printer className="w-4 h-4 mr-1" />
+                      Imprimir
+                    </Button>
+                  )}
+                  {onDelete && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => onDelete(product.id)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+          
+        
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground p-4">
+            <p>Nenhum produto encontrado</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
