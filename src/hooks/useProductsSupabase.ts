@@ -96,6 +96,15 @@ export function useProductsSupabase() {
         }
       }
 
+      // Calculate use_by_date if both opening date and days are available
+      let useByDate = null;
+      if (data.dataAbertura && data.dataAbertura.trim() !== '' && data.diasParaVencer && data.diasParaVencer > 0) {
+        const [year, month, day] = data.dataAbertura.split('-').map(Number);
+        const openingDate = new Date(year, month - 1, day);
+        const useBy = new Date(year, month - 1, day + data.diasParaVencer);
+        useByDate = `${useBy.getFullYear()}-${String(useBy.getMonth() + 1).padStart(2, '0')}-${String(useBy.getDate()).padStart(2, '0')}`;
+      }
+
       const productData = {
         name: data.nome || '',
         lot: data.lote || '',
@@ -104,9 +113,7 @@ export function useProductsSupabase() {
         expiry_date: expiryDate,
         opening_date: data.dataAbertura || null,
         days_valid: data.diasParaVencer || 0,
-        use_by_date: data.dataAbertura && data.diasParaVencer 
-          ? new Date(new Date(data.dataAbertura).getTime() + data.diasParaVencer * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-          : null,
+        use_by_date: useByDate,
         storage: data.localArmazenamento || 'ambiente',
         responsible: data.responsavel || '',
         status: 'active',
@@ -182,8 +189,9 @@ export function useProductsSupabase() {
         const daysValid = data.diasParaVencer !== undefined ? data.diasParaVencer : product?.diasParaVencer;
         
         if (data.dataAbertura && data.dataAbertura.trim() !== '' && daysValid && daysValid > 0) {
-          const useByDate = new Date(new Date(data.dataAbertura).getTime() + daysValid * 24 * 60 * 60 * 1000);
-          updateData.use_by_date = useByDate.toISOString().split('T')[0];
+          const [year, month, day] = data.dataAbertura.split('-').map(Number);
+          const useBy = new Date(year, month - 1, day + daysValid);
+          updateData.use_by_date = `${useBy.getFullYear()}-${String(useBy.getMonth() + 1).padStart(2, '0')}-${String(useBy.getDate()).padStart(2, '0')}`;
         } else {
           updateData.use_by_date = null;
         }
@@ -336,17 +344,21 @@ export function useProductsSupabase() {
 
       // Calcular nova data de uso baseada nos dias para vencer
       let useByDate = null;
+      const dateStr = `${novaData.getFullYear()}-${String(novaData.getMonth() + 1).padStart(2, '0')}-${String(novaData.getDate()).padStart(2, '0')}`;
+      
       if (product.diasParaVencer && product.diasParaVencer > 0) {
-        const utilizarAte = new Date(novaData);
-        utilizarAte.setDate(utilizarAte.getDate() + product.diasParaVencer);
-        useByDate = utilizarAte.toISOString().split('T')[0];
+        const year = novaData.getFullYear();
+        const month = novaData.getMonth();
+        const day = novaData.getDate();
+        const useBy = new Date(year, month, day + product.diasParaVencer);
+        useByDate = `${useBy.getFullYear()}-${String(useBy.getMonth() + 1).padStart(2, '0')}-${String(useBy.getDate()).padStart(2, '0')}`;
       }
 
       // Atualizar no banco
       const { error } = await supabase
         .from('products')
         .update({
-          opening_date: novaData.toISOString().split('T')[0],
+          opening_date: dateStr,
           use_by_date: useByDate,
         })
         .eq('id', parseInt(id));
