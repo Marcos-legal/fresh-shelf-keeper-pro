@@ -12,16 +12,23 @@ export function useProductsSupabase() {
 
   // Convert database row to Product interface
   const mapDbRowToProduct = (row: any): Product => {
+    // Helper to convert YYYY-MM-DD string to Date without timezone issues
+    const parseDate = (dateStr: string | null): Date | undefined => {
+      if (!dateStr) return undefined;
+      const [year, month, day] = dateStr.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    };
+
     return {
       id: row.id.toString(),
       nome: row.name || '',
       lote: row.lot || '',
       marca: row.brand || '',
-      dataFabricacao: row.manufacture_date ? new Date(row.manufacture_date) : undefined,
-      validade: row.expiry_date ? new Date(row.expiry_date) : undefined,
-      dataAbertura: row.opening_date ? new Date(row.opening_date) : undefined,
+      dataFabricacao: parseDate(row.manufacture_date),
+      validade: parseDate(row.expiry_date),
+      dataAbertura: parseDate(row.opening_date),
       diasParaVencer: row.days_valid || 0,
-      utilizarAte: row.use_by_date ? new Date(row.use_by_date) : undefined,
+      utilizarAte: parseDate(row.use_by_date),
       localArmazenamento: row.storage as StorageLocation || 'ambiente',
       responsavel: row.responsible || '',
       status: 'valido',
