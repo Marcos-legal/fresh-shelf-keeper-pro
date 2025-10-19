@@ -60,19 +60,20 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
   const screenHeight = `${heightMm * 3.78}px`;
 
   // Cálculo responsivo PROPORCIONAL - mantém layout idêntico independente do tamanho
-  // Base: etiqueta 70x50mm
+  // Base: etiqueta 70x50mm (proporção 7:5)
   const baseWidth = 70;
   const baseHeight = 50;
   const baseFontSize = 10;
   
-  // Escala proporcional baseada na menor dimensão para manter o layout
-  const scaleFactor = Math.min(largura / baseWidth, altura / baseHeight);
+  // Escala proporcional uniforme baseada APENAS na largura para manter proporções exatas
+  // Isso garante que o layout permaneça idêntico, apenas maior ou menor
+  const scaleFactor = largura / baseWidth;
   
-  // Todos os tamanhos escalam proporcionalmente
+  // Todos os tamanhos escalam proporcionalmente com o mesmo fator
   const fontSize = baseFontSize * scaleFactor;
-  const spacing = 1.2 * scaleFactor; // Reduzido de 1.5 para 1.2
-  const padding = 3 * scaleFactor; // Reduzido de 4 para 3
-  const lineHeight = fontSize + (1.5 * scaleFactor); // Reduzido de 2 para 1.5
+  const spacing = 1.2 * scaleFactor;
+  const padding = 3 * scaleFactor;
+  const lineHeight = fontSize + (1.5 * scaleFactor);
 
   return (
     <Card 
