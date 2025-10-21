@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileDrawer } from "@/components/MobileDrawer";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -634,21 +635,22 @@ const ImpressaoEtiquetas = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen flex w-full bg-background">
+        <MobileDrawer />
         <AppSidebar />
-        <main className="flex-1">
-          <div className="p-6">
-            <div className="flex items-center space-x-4 mb-8">
-              <SidebarTrigger className="lg:hidden" />
-              <div className="flex items-center space-x-4">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
-                  <Printer className="w-8 h-8 text-white" />
+        <main className="flex-1 overflow-x-hidden">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
+              <SidebarTrigger className="hidden lg:flex" />
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Printer className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
-                    🖨️ Impressão Térmica
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
+                    Impressão Térmica
                   </h1>
-                  <p className="text-gray-600 mt-1 text-lg">
+                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1">
                     Impressão otimizada para impressoras térmicas
                   </p>
                 </div>
@@ -656,33 +658,36 @@ const ImpressaoEtiquetas = () => {
             </div>
 
             {/* Controles de Impressão */}
-            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
-              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg">
-                <CardTitle className="flex items-center space-x-2">
-                  <Printer className="w-5 h-5" />
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+                  <Printer className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>Controles de Impressão</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-4">
+              <CardContent className="pt-4 sm:pt-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <Checkbox
                       checked={selectedProducts.length === products.length}
                       onCheckedChange={handleSelectAll}
                     />
-                    <span className="text-sm text-gray-600 font-medium">
-                      Selecionar todos ({products.length} produtos)
+                    <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+                      <span className="hidden sm:inline">Selecionar todos</span>
+                      <span className="sm:hidden">Todos</span> ({products.length})
                     </span>
                   </div>
-                  <div className="flex space-x-3">
+                  <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
                     <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
                       <DialogTrigger asChild>
                         <Button 
                           variant="outline"
-                          className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                          className="flex-1 sm:flex-none text-sm"
+                          size="sm"
                         >
                           <Settings className="w-4 h-4 mr-2" />
-                          Configurações
+                          <span className="hidden sm:inline">Configurações</span>
+                          <span className="sm:hidden">Config</span>
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-md">
@@ -745,19 +750,23 @@ const ImpressaoEtiquetas = () => {
                     <Button 
                       onClick={() => navigate('/visualizar-etiquetas')}
                       variant="outline"
-                      className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                      className="flex-1 sm:flex-none text-sm"
+                      size="sm"
                     >
                       <Eye className="w-4 h-4 mr-2" />
-                      Visualizar Etiquetas
+                      <span className="hidden sm:inline">Visualizar Etiquetas</span>
+                      <span className="sm:hidden">Visualizar</span>
                     </Button>
                     <Button 
                       onClick={handlePrintRequest} 
                       disabled={selectedProducts.length === 0}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg"
+                      className="flex-1 sm:flex-none gradient-blue text-white text-sm"
+                      size="sm"
                     >
                       <Printer className="w-4 h-4 mr-2" />
-                      Imprimir {largura}×{altura}mm
-                      {selectedProducts.length > 0 && ` (${Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)} etiquetas)`}
+                      <span className="hidden sm:inline">Imprimir {largura}×{altura}mm</span>
+                      <span className="sm:hidden">Imprimir</span>
+                      {selectedProducts.length > 0 && ` (${Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)})`}
                     </Button>
                   </div>
                 </div>
@@ -766,15 +775,12 @@ const ImpressaoEtiquetas = () => {
 
             {/* Informações de Impressão */}
             {selectedProducts.length > 0 && (
-              <Card className="mb-6 bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 shadow-lg">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-2 text-blue-700">
-                    <FileText className="w-5 h-5" />
+              <Card className="mb-6 bg-primary/5 border-primary/20">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-start sm:items-center space-x-2 text-primary text-xs sm:text-sm">
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0" />
                     <span className="font-medium">
-                      {selectedProducts.length} produto{selectedProducts.length !== 1 ? 's' : ''} selecionado{selectedProducts.length !== 1 ? 's' : ''}
-                      • {Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)} etiqueta(s) total
-                      • Tamanho: {largura}×{altura}mm
-                      • Layout adaptativo
+                      {selectedProducts.length} produto{selectedProducts.length !== 1 ? 's' : ''} • {Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)} etiqueta(s) • {largura}×{altura}mm
                     </span>
                   </div>
                 </CardContent>
@@ -782,41 +788,36 @@ const ImpressaoEtiquetas = () => {
             )}
 
             {/* Botões de Impressão Rápida */}
-            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
-              <CardHeader className="bg-gradient-to-r from-purple-800 to-purple-900 text-white rounded-t-lg">
-                <CardTitle className="flex items-center space-x-2">
-                  <Printer className="w-5 h-5" />
-                  <span>Impressão Rápida - Produtos Cadastrados</span>
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+                  <Printer className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Impressão Rápida - Produtos Cadastrados</span>
+                  <span className="sm:hidden">Impressão Rápida</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6">
-                <div className="text-sm text-gray-600 mb-4">
+              <CardContent className="pt-4 sm:pt-6">
+                <div className="text-xs sm:text-sm text-muted-foreground mb-4">
                   Clique em qualquer produto para imprimir sua etiqueta instantaneamente
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {products.map(product => (
                     <Button
                       key={product.id}
                       variant="outline"
-                      className="h-auto p-4 text-left justify-start border-2 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
+                      className="h-auto p-3 sm:p-4 text-left justify-start hover:border-primary transition-all"
                       onClick={() => handlePrintSingleRequest(product)}
                     >
-                      <div className="flex items-center space-x-3 w-full">
-                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
-                          <Printer className="w-5 h-5 text-white" />
+                      <div className="flex items-center space-x-2 sm:space-x-3 w-full">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Printer className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-gray-900 truncate">
+                          <div className="font-semibold text-foreground truncate text-sm sm:text-base">
                             {product.nome}
                           </div>
-                          <div className="text-sm text-gray-600 truncate">
+                          <div className="text-xs sm:text-sm text-muted-foreground truncate">
                             Lote: {product.lote || 'N/A'} | {product.marca || 'N/A'}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {product.localArmazenamento === 'refrigerado' && '❄️ Refrigerado'}
-                            {product.localArmazenamento === 'congelado' && '🧊 Congelado'}
-                            {product.localArmazenamento === 'ambiente' && '🌡️ Ambiente'}
-                            {product.localArmazenamento === 'camara-fria' && '🏢 Câmara Fria'}
                           </div>
                         </div>
                       </div>
@@ -834,11 +835,12 @@ const ImpressaoEtiquetas = () => {
             </Card>
 
             {/* Seleção Multiple Tradicional */}
-            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
-              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg">
-                <CardTitle className="flex items-center space-x-2">
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
                   <Checkbox className="mr-2" />
-                  <span>Seleção Múltipla - Para Impressão em Lote</span>
+                  <span className="hidden sm:inline">Seleção Múltipla - Para Impressão em Lote</span>
+                  <span className="sm:hidden">Seleção Múltipla</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">

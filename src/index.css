@@ -247,8 +247,13 @@
   }
 }
 
-/* Mobile Responsive Utilities */
+/* Mobile Responsive Utilities - Melhorado */
 @media (max-width: 768px) {
+  /* Garantir padding seguro para áreas de toque */
+  body {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
   .mobile-padding {
     padding: 1rem;
   }
@@ -261,8 +266,12 @@
     font-size: 0.875rem;
   }
   
+  .mobile-text-xs {
+    font-size: 0.75rem;
+  }
+  
   .mobile-hidden {
-    display: none;
+    display: none !important;
   }
   
   .mobile-stack {
@@ -285,14 +294,36 @@
     display: none;
   }
 
-  /* Touch-friendly buttons */
+  /* Touch-friendly buttons - Melhorado */
   button {
     min-height: 44px;
+    min-width: 44px;
   }
 
   /* Optimize scroll areas */
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Headers responsivos */
+  h1 {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
+
+  /* Cards responsivos */
+  .card-mobile-compact {
+    padding: 0.75rem !important;
+  }
+
+  /* Spacing mobile */
+  .space-mobile-compact > * + * {
+    margin-top: 0.75rem !important;
   }
 }
 

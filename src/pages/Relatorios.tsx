@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileDrawer } from "@/components/MobileDrawer";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -242,21 +243,22 @@ const Relatorios = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen flex w-full bg-background">
+        <MobileDrawer />
         <AppSidebar />
-        <main className="flex-1">
-          <div className="p-6">
-            <div className="flex items-center space-x-4 mb-8">
-              <SidebarTrigger className="lg:hidden" />
-              <div className="flex items-center space-x-4">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
-                  <PackageSearch className="w-8 h-8 text-white" />
+        <main className="flex-1 overflow-x-hidden">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
+              <SidebarTrigger className="hidden lg:flex" />
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <PackageSearch className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
-                    📊 Relatórios
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
+                    Relatórios
                   </h1>
-                  <p className="text-gray-600 mt-1 text-lg">
+                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1">
                     Visualize e exporte os dados dos seus produtos
                   </p>
                 </div>
@@ -264,15 +266,15 @@ const Relatorios = () => {
             </div>
 
             {/* Filtros e Exportação */}
-            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
-              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg">
-                <CardTitle className="flex items-center space-x-2">
-                  <PackageSearch className="w-5 h-5" />
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+                  <PackageSearch className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>Filtros e Exportação</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <CardContent className="pt-4 sm:pt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="search" className="text-sm text-gray-600">
                       Pesquisar Produto
@@ -326,21 +328,22 @@ const Relatorios = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center mt-4">
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4 mt-4">
                   <Button
                     onClick={clearFilters}
                     variant="ghost"
-                    className="text-gray-600 hover:bg-gray-100"
+                    className="w-full sm:w-auto text-sm"
                   >
                     <XCircle className="w-4 h-4 mr-2" />
                     Limpar Filtros
                   </Button>
                   <Button
                     onClick={exportToExcel}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg"
+                    className="w-full sm:w-auto gradient-blue text-white text-sm"
                   >
                     <FileDown className="w-4 h-4 mr-2" />
-                    📊 Exportar Excel Moderno ({filteredProducts.length})
+                    <span className="hidden sm:inline">Exportar Excel ({filteredProducts.length})</span>
+                    <span className="sm:hidden">Exportar ({filteredProducts.length})</span>
                   </Button>
                 </div>
               </CardContent>
@@ -348,7 +351,7 @@ const Relatorios = () => {
 
             {/* Lista de Produtos Filtrados */}
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {filteredProducts.map((product) => (
                   <Card key={product.id} className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
