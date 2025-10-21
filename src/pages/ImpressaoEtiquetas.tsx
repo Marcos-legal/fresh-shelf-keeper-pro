@@ -800,23 +800,23 @@ const ImpressaoEtiquetas = () => {
                 <div className="text-xs sm:text-sm text-muted-foreground mb-4">
                   Clique em qualquer produto para imprimir sua etiqueta instantaneamente
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {products.map(product => (
                     <Button
                       key={product.id}
                       variant="outline"
-                      className="h-auto p-3 sm:p-4 text-left justify-start hover:border-primary transition-all"
+                      className="h-auto p-4 sm:p-5 text-left justify-start hover:border-primary hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-2 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20"
                       onClick={() => handlePrintSingleRequest(product)}
                     >
-                      <div className="flex items-center space-x-2 sm:space-x-3 w-full">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Printer className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                      <div className="flex items-center space-x-3 sm:space-x-4 w-full">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                          <Printer className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-foreground truncate text-sm sm:text-base">
+                          <div className="font-bold text-foreground truncate text-base sm:text-lg">
                             {product.nome}
                           </div>
-                          <div className="text-xs sm:text-sm text-muted-foreground truncate">
+                          <div className="text-xs sm:text-sm text-muted-foreground truncate mt-1">
                             Lote: {product.lote || 'N/A'} | {product.marca || 'N/A'}
                           </div>
                         </div>
@@ -846,7 +846,7 @@ const ImpressaoEtiquetas = () => {
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {products.map((product) => (
-                    <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                    <Card key={product.id} className="cursor-pointer hover:shadow-xl transition-all duration-200 border-2 hover:border-primary hover:scale-[1.02] bg-gradient-to-br from-card to-primary/5">
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3 flex-1">
@@ -854,8 +854,10 @@ const ImpressaoEtiquetas = () => {
                               checked={selectedProducts.includes(product.id)}
                               onCheckedChange={() => handleSelectProduct(product.id)}
                             />
-                            <Package className="w-5 h-5 text-blue-600" />
-                            <CardTitle className="text-sm">{product.nome}</CardTitle>
+                            <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <Package className="w-5 h-5 text-primary" />
+                            </div>
+                            <CardTitle className="text-sm font-bold">{product.nome}</CardTitle>
                           </div>
                           {selectedProducts.includes(product.id) && (
                             <div className="flex items-center space-x-2">
