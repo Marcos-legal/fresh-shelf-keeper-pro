@@ -96,7 +96,7 @@ export function AppSidebar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <Sidebar className="border-r border-sidebar-border bg-sidebar sidebar-desktop">
+    <Sidebar className="hidden lg:block border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="p-6">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 gradient-blue rounded-lg flex items-center justify-center shadow-lg">

@@ -404,27 +404,27 @@ const Index = () => {
       <div className="min-h-screen flex w-full bg-background">
         <MobileDrawer />
         <AppSidebar />
-        <main className="flex-1">
-          <div className="p-6">
+        <main className="flex-1 w-full">
+          <div className="p-3 sm:p-4 md:p-6">
             {/* Breadcrumbs */}
             <div className="mb-6">
               <Breadcrumbs />
             </div>
 
             {/* Header Moderno */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 space-y-4 lg:space-y-0">
-              <div className="flex items-center space-x-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 sm:mb-6 lg:mb-8 space-y-3 sm:space-y-4 lg:space-y-0">
+              <div className="flex items-center space-x-2 sm:space-x-4">
                 <SidebarTrigger className="hover:bg-muted rounded-lg transition-colors p-2 hidden lg:flex" />
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 lg:w-12 lg:h-12 gradient-blue rounded-xl flex items-center justify-center shadow-lg">
-                    <Package className="w-5 h-5 lg:w-7 lg:h-7 text-white" />
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 gradient-blue rounded-xl flex items-center justify-center shadow-lg">
+                    <Package className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-xl lg:text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                    <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                       Dashboard Inteligente
                     </h1>
-                    <p className="text-sm lg:text-base text-muted-foreground mt-1 flex items-center space-x-2">
-                      <TrendingUp className="w-3 h-3 lg:w-4 lg:h-4" />
+                    <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1 flex items-center space-x-1 sm:space-x-2">
+                      <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4" />
                       <span className="hidden sm:block">Controle total de validades em tempo real</span>
                       <span className="sm:hidden">Controle de validades</span>
                     </p>
