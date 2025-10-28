@@ -20,6 +20,7 @@ const ImpressaoEtiquetas = () => {
   const { products } = useProductsSupabase();
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [productQuantities, setProductQuantities] = useState<Record<string, number>>({});
+  const [quickPrintQuantities, setQuickPrintQuantities] = useState<Record<string, number>>({});
   
   // Configurações manuais de tamanho (em mm)
   const [largura, setLargura] = useState(() => {
@@ -184,10 +185,17 @@ const ImpressaoEtiquetas = () => {
     setShowResponsavelDialog(true);
   };
 
-  const handlePrintSingleRequest = (product: any) => {
-    setSingleProductToPrint(product);
+  const handlePrintSingleRequest = (product: any, quantity: number = 1) => {
+    setSingleProductToPrint({ ...product, quickPrintQuantity: quantity });
     setPrintAction('single');
     setShowResponsavelDialog(true);
+  };
+
+  const handleQuickPrintQuantityChange = (productId: string, quantity: number) => {
+    setQuickPrintQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max(1, Math.min(99, quantity))
+    }));
   };
 
   const executePrint = () => {
@@ -441,12 +449,15 @@ const ImpressaoEtiquetas = () => {
   };
 
   const handlePrintSingle = (product: any) => {
+    const quantity = product.quickPrintQuantity || 1;
+    const expandedProducts = Array(quantity).fill(product);
+    
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Etiqueta - ${escapeHtml(product.nome || '')} - ${escapeHtml(largura.toString())}x${escapeHtml(altura.toString())}mm</title>
+            <title>Etiquetas - ${escapeHtml(product.nome || '')} (${quantity}x) - ${escapeHtml(largura.toString())}x${escapeHtml(altura.toString())}mm</title>
             <style>
               @page {
                 size: A4;
@@ -460,13 +471,15 @@ const ImpressaoEtiquetas = () => {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
               }
-              .etiqueta { 
+              .etiqueta {
                 border: 3px solid #000;
                 width: ${config.width};
                 height: ${config.height};
                 margin: 8px;
                 padding: ${config.padding};
+                float: left;
                 font-size: ${config.fontSize};
+                page-break-inside: avoid;
                 background: white;
                 font-weight: 600;
                 color: #000;
@@ -530,92 +543,112 @@ const ImpressaoEtiquetas = () => {
                 font-weight: 900;
                 margin-right: 2px;
               }
+              .clearfix::after {
+                content: "";
+                display: table;
+                clear: both;
+              }
+              @media print {
+                .etiqueta {
+                  page-break-inside: avoid;
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
+                }
+                body {
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
+                }
+              }
             </style>
           </head>
           <body>
-            <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
-              <div class="campo">
-                <div class="label">PRODUTO:</div>
-                <div class="content">${escapeHtml((product.nome || '').toUpperCase())}</div>
-              </div>
-              <div class="grid">
-                <div class="campo">
-                  <div class="label">LOTE:</div>
-                  <div class="content">${escapeHtml((product.lote || '').toUpperCase())}</div>
-                </div>
-                ${config.showGrid ? `
-                <div class="campo">
-                  <div class="label">MARCA:</div>
-                  <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
-                </div>
-                ` : ''}
-              </div>
-              ${!config.showGrid ? `
-              <div class="campo">
-                <div class="label">MARCA:</div>
-                <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
-              </div>
-              ` : ''}
-              ${product.dataFabricacao || product.validade ? `
-              <div class="grid">
-                ${product.dataFabricacao ? `
-                <div class="campo">
-                  <div class="label">FABRIC.:</div>
-                  <div class="content">${escapeHtml(formatDateSafe(product.dataFabricacao))}</div>
-                </div>
-                ` : ''}
-                ${product.validade && config.showGrid ? `
-                <div class="campo">
-                  <div class="label">VALID.:</div>
-                  <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
-                </div>
-                ` : ''}
-              </div>
-              ${product.validade && !config.showGrid ? `
-              <div class="campo">
-                <div class="label">VALID.:</div>
-                <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
-              </div>
-              ` : ''}
-              ` : ''}
-              <div class="grid">
-                <div class="campo">
-                  <div class="label">ABERTURA:</div>
-                  <div class="content">${escapeHtml(formatDateSafe(product.dataAbertura))}</div>
-                </div>
-                ${config.showGrid ? `
-                <div class="campo">
-                  <div class="label">USAR ATÉ:</div>
-                  <div class="content">${escapeHtml(formatDateSafe(product.utilizarAte))}</div>
-                </div>
-                ` : ''}
-              </div>
-              ${!config.showGrid ? `
-              <div class="campo">
-                <div class="label">USAR ATÉ:</div>
-                <div class="content">${escapeHtml(formatDateSafe(product.utilizarAte))}</div>
-              </div>
-              ` : ''}
-              <div class="checkbox-row">
-                <div class="checkbox-item">
-                  <span class="checkbox-mark">${product.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
-                  <span>REF</span>
-                </div>
-                <div class="checkbox-item">
-                  <span class="checkbox-mark">${product.localArmazenamento === 'congelado' ? '■' : '□'}</span>
-                  <span>CON</span>
-                </div>
-                <div class="checkbox-item">
-                  <span class="checkbox-mark">${product.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
-                  <span>AMB</span>
-                </div>
-              </div>
-                   ${!config.compactMode ? `
+            <div class="clearfix">
+              ${expandedProducts.map(prod => `
+                <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
                   <div class="campo">
-                    <div class="label">RESPONSÁVEL:</div>
-                    <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
+                    <div class="label">PRODUTO:</div>
+                    <div class="content">${escapeHtml((prod.nome || '').toUpperCase())}</div>
+                  </div>
+                  <div class="grid">
+                    <div class="campo">
+                      <div class="label">LOTE:</div>
+                      <div class="content">${escapeHtml((prod.lote || '').toUpperCase())}</div>
+                    </div>
+                    ${config.showGrid ? `
+                    <div class="campo">
+                      <div class="label">MARCA:</div>
+                      <div class="content">${escapeHtml((prod.marca || '').toUpperCase())}</div>
+                    </div>
+                    ` : ''}
+                  </div>
+                  ${!config.showGrid ? `
+                  <div class="campo">
+                    <div class="label">MARCA:</div>
+                    <div class="content">${escapeHtml((prod.marca || '').toUpperCase())}</div>
                   </div>
                   ` : ''}
+                  ${prod.dataFabricacao || prod.validade ? `
+                  <div class="grid">
+                    ${prod.dataFabricacao ? `
+                    <div class="campo">
+                      <div class="label">FABRIC.:</div>
+                      <div class="content">${escapeHtml(formatDateSafe(prod.dataFabricacao))}</div>
+                    </div>
+                    ` : ''}
+                    ${prod.validade && config.showGrid ? `
+                    <div class="campo">
+                      <div class="label">VALID.:</div>
+                      <div class="content">${escapeHtml(formatDateSafe(prod.validade))}</div>
+                    </div>
+                    ` : ''}
+                  </div>
+                  ${prod.validade && !config.showGrid ? `
+                  <div class="campo">
+                    <div class="label">VALID.:</div>
+                    <div class="content">${escapeHtml(formatDateSafe(prod.validade))}</div>
+                  </div>
+                  ` : ''}
+                  ` : ''}
+                  <div class="grid">
+                    <div class="campo">
+                      <div class="label">ABERTURA:</div>
+                      <div class="content">${escapeHtml(formatDateSafe(prod.dataAbertura))}</div>
+                    </div>
+                    ${config.showGrid ? `
+                    <div class="campo">
+                      <div class="label">USAR ATÉ:</div>
+                      <div class="content">${escapeHtml(formatDateSafe(prod.utilizarAte))}</div>
+                    </div>
+                    ` : ''}
+                  </div>
+                  ${!config.showGrid ? `
+                  <div class="campo">
+                    <div class="label">USAR ATÉ:</div>
+                    <div class="content">${escapeHtml(formatDateSafe(prod.utilizarAte))}</div>
+                  </div>
+                  ` : ''}
+                  <div class="checkbox-row">
+                    <div class="checkbox-item">
+                      <span class="checkbox-mark">${prod.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
+                      <span>REF</span>
+                    </div>
+                    <div class="checkbox-item">
+                      <span class="checkbox-mark">${prod.localArmazenamento === 'congelado' ? '■' : '□'}</span>
+                      <span>CON</span>
+                    </div>
+                    <div class="checkbox-item">
+                      <span class="checkbox-mark">${prod.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
+                      <span>AMB</span>
+                    </div>
+                  </div>
+                       ${!config.compactMode ? `
+                      <div class="campo">
+                        <div class="label">RESPONSÁVEL:</div>
+                        <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
+                      </div>
+                      ` : ''}
+                </div>
+              `).join('')}
             </div>
           </body>
         </html>
@@ -628,8 +661,8 @@ const ImpressaoEtiquetas = () => {
     }
 
     toast({
-      title: "Etiqueta enviada para impressão",
-      description: `Etiqueta de ${product.nome} ${largura}x${altura}mm enviada!`,
+      title: "Etiquetas enviadas para impressão",
+      description: `${quantity} etiqueta(s) de ${product.nome} (${largura}x${altura}mm) enviadas!`,
     });
   };
 
@@ -801,28 +834,53 @@ const ImpressaoEtiquetas = () => {
                   Clique em qualquer produto para imprimir sua etiqueta instantaneamente
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {products.map(product => (
-                    <Button
-                      key={product.id}
-                      variant="outline"
-                      className="h-auto p-4 sm:p-5 text-left justify-start hover:border-primary hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-2 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20"
-                      onClick={() => handlePrintSingleRequest(product)}
-                    >
-                      <div className="flex items-center space-x-3 sm:space-x-4 w-full">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                          <Printer className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                  {products.map(product => {
+                    const currentQuantity = quickPrintQuantities[product.id] || 1;
+                    return (
+                      <div key={product.id} className="relative border-2 rounded-lg p-4 sm:p-5 hover:border-primary hover:shadow-lg hover:scale-[1.02] transition-all duration-200 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20">
+                        <div className="flex items-start space-x-3 sm:space-x-4 mb-3">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                            <Printer className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-bold text-foreground truncate text-base sm:text-lg">
+                              {product.nome}
+                            </div>
+                            <div className="text-xs sm:text-sm text-muted-foreground truncate mt-1">
+                              Lote: {product.lote || 'N/A'} | {product.marca || 'N/A'}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-foreground truncate text-base sm:text-lg">
-                            {product.nome}
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-1">
+                            <Label htmlFor={`qty-${product.id}`} className="text-xs sm:text-sm whitespace-nowrap">
+                              Qtd:
+                            </Label>
+                            <Input
+                              id={`qty-${product.id}`}
+                              type="number"
+                              min="1"
+                              max="99"
+                              value={currentQuantity}
+                              onChange={(e) => handleQuickPrintQuantityChange(product.id, parseInt(e.target.value) || 1)}
+                              className="w-16 sm:w-20 h-9 text-center"
+                              onClick={(e) => e.stopPropagation()}
+                            />
                           </div>
-                          <div className="text-xs sm:text-sm text-muted-foreground truncate mt-1">
-                            Lote: {product.lote || 'N/A'} | {product.marca || 'N/A'}
-                          </div>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handlePrintSingleRequest(product, currentQuantity)}
+                          >
+                            <Printer className="w-4 h-4 mr-1" />
+                            <span className="hidden sm:inline">Imprimir</span>
+                            <span className="sm:hidden">Print</span>
+                          </Button>
                         </div>
                       </div>
-                    </Button>
-                  ))}
+                    );
+                  })}
                 </div>
                 {products.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
