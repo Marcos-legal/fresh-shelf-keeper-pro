@@ -405,9 +405,9 @@ const Index = () => {
         <MobileDrawer />
         <AppSidebar />
         <main className="flex-1 w-full">
-          <div className="p-3 sm:p-4 md:p-6">
+          <div className="p-3 sm:p-4 md:p-6 pt-14 sm:pt-4">
             {/* Breadcrumbs */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <Breadcrumbs />
             </div>
 
@@ -479,7 +479,7 @@ const Index = () => {
             />
 
             {/* Cards de Estatísticas Principais */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
               <StatsCard
                 title="Total de Produtos"
                 value={stats.total}
@@ -523,22 +523,22 @@ const Index = () => {
             </div>
 
             {/* Cards de Locais de Armazenamento - Clicáveis */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
               <Card 
                 className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-primary/10 to-primary/20 border-primary/20"
                 onClick={() => navigate('/refrigerado')}
               >
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-6">
                   <CardTitle className="flex items-center justify-between text-primary">
-                    <span className="text-lg font-semibold">Refrigerado</span>
-                    <Thermometer className="w-6 h-6" />
+                    <span className="text-sm sm:text-lg font-semibold truncate">Refrigerado</span>
+                    <Thermometer className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground mb-1">
+                <CardContent className="p-3 sm:p-6 pt-0">
+                  <div className="text-2xl sm:text-3xl font-bold text-foreground mb-0.5 sm:mb-1">
                     {stats.porCategoria.refrigerado}
                   </div>
-                  <p className="text-sm text-muted-foreground">produtos refrigerados</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">produtos refrigerados</p>
                 </CardContent>
               </Card>
 
@@ -546,17 +546,17 @@ const Index = () => {
                 className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-secondary/10 to-secondary/20 border-secondary/20"
                 onClick={() => navigate('/congelado')}
               >
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-6">
                   <CardTitle className="flex items-center justify-between text-secondary">
-                    <span className="text-lg font-semibold">Congelado</span>
-                    <Snowflake className="w-6 h-6" />
+                    <span className="text-sm sm:text-lg font-semibold truncate">Congelado</span>
+                    <Snowflake className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground mb-1">
+                <CardContent className="p-3 sm:p-6 pt-0">
+                  <div className="text-2xl sm:text-3xl font-bold text-foreground mb-0.5 sm:mb-1">
                     {stats.porCategoria.congelado}
                   </div>
-                  <p className="text-sm text-muted-foreground">produtos congelados</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">produtos congelados</p>
                 </CardContent>
               </Card>
 
@@ -564,17 +564,17 @@ const Index = () => {
                 className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-accent/10 to-accent/20 border-accent/20"
                 onClick={() => navigate('/ambiente')}
               >
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-6">
                   <CardTitle className="flex items-center justify-between text-accent-foreground">
-                    <span className="text-lg font-semibold">Ambiente</span>
-                    <Home className="w-6 h-6" />
+                    <span className="text-sm sm:text-lg font-semibold truncate">Ambiente</span>
+                    <Home className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground mb-1">
+                <CardContent className="p-3 sm:p-6 pt-0">
+                  <div className="text-2xl sm:text-3xl font-bold text-foreground mb-0.5 sm:mb-1">
                     {stats.porCategoria.ambiente}
                   </div>
-                  <p className="text-sm text-muted-foreground">temperatura ambiente</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">temperatura ambiente</p>
                 </CardContent>
               </Card>
 
@@ -582,41 +582,41 @@ const Index = () => {
                 className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-muted/30 to-muted/50 border-muted"
                 onClick={() => navigate('/camara-fria')}
               >
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-6">
                   <CardTitle className="flex items-center justify-between text-muted-foreground">
-                    <span className="text-lg font-semibold">Câmara Fria</span>
-                    <Refrigerator className="w-6 h-6" />
+                    <span className="text-sm sm:text-lg font-semibold truncate">Câmara Fria</span>
+                    <Refrigerator className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground mb-1">
+                <CardContent className="p-3 sm:p-6 pt-0">
+                  <div className="text-2xl sm:text-3xl font-bold text-foreground mb-0.5 sm:mb-1">
                     {stats.porCategoria['camara-fria']}
                   </div>
-                  <p className="text-sm text-muted-foreground">câmara refrigerada</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">câmara refrigerada</p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Alertas Inteligentes */}
             {(proximosVencimento.length > 0 || produtosVencidos.length > 0) && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6 lg:mb-8">
                 {proximosVencimento.length > 0 && (
                   <Card className="border-warning/50 bg-gradient-to-br from-warning/10 to-warning/20 animate-fade-in">
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2 text-warning">
-                        <Clock className="w-5 h-5" />
+                    <CardHeader className="p-3 sm:p-6">
+                      <CardTitle className="flex items-center space-x-2 text-warning text-sm sm:text-base">
+                        <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span>Atenção Requerida</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-warning mb-4">
+                    <CardContent className="p-3 sm:p-6 pt-0">
+                      <p className="text-warning text-xs sm:text-sm mb-3 sm:mb-4">
                         {proximosVencimento.length} produto(s) vencendo em breve
                       </p>
                       <div className="space-y-2">
                         {proximosVencimento.slice(0, 3).map(product => (
                           <div key={product.id} className="flex justify-between items-center p-2 bg-background rounded-lg shadow-sm">
-                            <span className="font-medium text-foreground">{product.nome}</span>
-                            <span className="text-sm text-warning">{product.lote}</span>
+                            <span className="font-medium text-foreground text-xs sm:text-sm truncate flex-1 mr-2">{product.nome}</span>
+                            <span className="text-xs text-warning flex-shrink-0">{product.lote}</span>
                           </div>
                         ))}
                       </div>
@@ -625,22 +625,22 @@ const Index = () => {
                 )}
 
                 {produtosVencidos.length > 0 && (
-                  <Card className="border-red-200 bg-gradient-to-br from-red-50 to-pink-50">
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2 text-red-700">
-                        <XCircle className="w-5 h-5" />
+                  <Card className="border-red-200 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20">
+                    <CardHeader className="p-3 sm:p-6">
+                      <CardTitle className="flex items-center space-x-2 text-red-700 dark:text-red-400 text-sm sm:text-base">
+                        <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span>Ação Urgente</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-red-700 mb-4">
+                    <CardContent className="p-3 sm:p-6 pt-0">
+                      <p className="text-red-700 dark:text-red-400 text-xs sm:text-sm mb-3 sm:mb-4">
                         {produtosVencidos.length} produto(s) vencidos
                       </p>
                       <div className="space-y-2">
                         {produtosVencidos.slice(0, 3).map(product => (
-                          <div key={product.id} className="flex justify-between items-center p-2 bg-white rounded-lg">
-                            <span className="font-medium text-gray-900">{product.nome}</span>
-                            <span className="text-sm text-red-600">{product.lote}</span>
+                          <div key={product.id} className="flex justify-between items-center p-2 bg-background rounded-lg">
+                            <span className="font-medium text-foreground text-xs sm:text-sm truncate flex-1 mr-2">{product.nome}</span>
+                            <span className="text-xs text-red-600 dark:text-red-400 flex-shrink-0">{product.lote}</span>
                           </div>
                         ))}
                       </div>

@@ -38,10 +38,10 @@ export function FloatingActionButton({
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
       {/* Menu de ações */}
       <div className={cn(
-        "flex flex-col-reverse space-y-reverse space-y-3 mb-4 transition-all duration-300",
+        "flex flex-col-reverse space-y-reverse space-y-2 sm:space-y-3 mb-3 sm:mb-4 transition-all duration-300",
         isOpen ? "opacity-100 scale-100" : "opacity-0 scale-0"
       )}>
         {actions.map((action, index) => (
@@ -59,16 +59,16 @@ export function FloatingActionButton({
               size="lg"
               onClick={() => handleActionClick(action)}
               className={cn(
-                "w-14 h-14 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 group",
+                "w-11 h-11 sm:w-14 sm:h-14 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 group",
                 action.color,
                 "text-white border-2 border-white/20"
               )}
             >
-              <action.icon className="w-6 h-6" />
+              <action.icon className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="sr-only">{action.label}</span>
               
-              {/* Tooltip */}
-              <div className="absolute right-full mr-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+              {/* Tooltip - hidden on mobile */}
+              <div className="hidden sm:block absolute right-full mr-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                 <div className="bg-black/80 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap">
                   {action.label}
                   <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-black/80"></div>
@@ -84,7 +84,7 @@ export function FloatingActionButton({
         size="lg"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-16 h-16 rounded-full shadow-2xl transition-all duration-300",
+          "w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl transition-all duration-300",
           "bg-gradient-to-r from-primary via-primary/90 to-primary/80",
           "hover:shadow-3xl hover:scale-110 active:scale-95",
           "border-4 border-white/20 text-white",
@@ -92,9 +92,9 @@ export function FloatingActionButton({
         )}
       >
         {isOpen ? (
-          <X className="w-8 h-8 transition-transform duration-300" />
+          <X className="w-6 h-6 sm:w-8 sm:h-8 transition-transform duration-300" />
         ) : (
-          <Plus className="w-8 h-8 transition-transform duration-300" />
+          <Plus className="w-6 h-6 sm:w-8 sm:h-8 transition-transform duration-300" />
         )}
       </Button>
 

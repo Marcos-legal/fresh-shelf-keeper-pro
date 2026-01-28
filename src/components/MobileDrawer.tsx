@@ -65,7 +65,7 @@ export function MobileDrawer() {
         <Button 
           variant="ghost" 
           size="icon"
-          className="fixed top-4 left-4 z-40 lg:hidden bg-background/80 backdrop-blur-sm shadow-lg border"
+          className="fixed top-3 left-3 z-40 lg:hidden bg-background/90 backdrop-blur-sm shadow-lg border h-10 w-10"
         >
           <Menu className="h-5 w-5" />
         </Button>
