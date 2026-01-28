@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileDrawer } from "@/components/MobileDrawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProdutoEstoqueForm } from "@/components/ProdutoEstoqueForm";
@@ -67,12 +68,14 @@ export default function ContagemEstoque() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background">
+        <MobileDrawer />
         <AppSidebar />
-        <main className="flex-1 p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold gradient-text">Contagem de Estoque</h1>
-            <div className="flex space-x-2">
+        <main className="flex-1 overflow-x-hidden w-full">
+          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-14 sm:pt-4 md:pt-6 lg:pt-8 space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
+              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold gradient-text">Contagem de Estoque</h1>
+              <div className="flex flex-wrap gap-2">
               <Button 
                 variant="secondary" 
                 onClick={migrarDadosLocalStorage}
@@ -128,29 +131,28 @@ export default function ContagemEstoque() {
                   </DialogContent>
                 </Dialog>
               )}
+              </div>
             </div>
-          </div>
+            {/* Estatísticas */}
+            <EstoqueStats 
+              produtos={produtos}
+              contagens={contagens}
+              getEstoqueAtual={getEstoqueAtual}
+            />
 
-          {/* Estatísticas */}
-          <EstoqueStats 
-            produtos={produtos}
-            contagens={contagens}
-            getEstoqueAtual={getEstoqueAtual}
-          />
+            {/* Filtros de Busca */}
+            <EstoqueSearchFilter
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              filterResponsavel={filterResponsavel}
+              onFilterResponsavelChange={setFilterResponsavel}
+              responsaveis={responsaveis}
+              onRefresh={refreshData}
+              isLoading={loading}
+            />
 
-          {/* Filtros de Busca */}
-          <EstoqueSearchFilter
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            filterResponsavel={filterResponsavel}
-            onFilterResponsavelChange={setFilterResponsavel}
-            responsaveis={responsaveis}
-            onRefresh={refreshData}
-            isLoading={loading}
-          />
-
-          {/* Produtos Cadastrados */}
-          <Card>
+            {/* Produtos Cadastrados */}
+            <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Package className="w-5 h-5" />
@@ -210,10 +212,10 @@ export default function ContagemEstoque() {
                 </Table>
               )}
             </CardContent>
-          </Card>
+            </Card>
 
-          {/* Histórico de Contagens */}
-          <Card>
+            {/* Histórico de Contagens */}
+            <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Calculator className="w-5 h-5" />
@@ -293,7 +295,8 @@ export default function ContagemEstoque() {
                 </Table>
               )}
             </CardContent>
-          </Card>
+            </Card>
+          </div>
         </main>
       </div>
     </SidebarProvider>

@@ -27,13 +27,13 @@ export function Breadcrumbs() {
   const pathSegments = location.pathname.split("/").filter(Boolean)
   
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
+    <Breadcrumb className="text-xs sm:text-sm">
+      <BreadcrumbList className="flex-wrap">
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link to="/" className="flex items-center">
-              <Home className="w-4 h-4 mr-1" />
-              Home
+              <Home className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              <span className="hidden sm:inline">Home</span>
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
@@ -46,14 +46,14 @@ export function Breadcrumbs() {
           return (
             <div key={path} className="flex items-center">
               <BreadcrumbSeparator>
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
               </BreadcrumbSeparator>
               <BreadcrumbItem>
                 {isLast ? (
-                  <BreadcrumbPage>{label}</BreadcrumbPage>
+                  <BreadcrumbPage className="truncate max-w-[120px] sm:max-w-none">{label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
-                    <Link to={path}>{label}</Link>
+                    <Link to={path} className="truncate max-w-[80px] sm:max-w-none">{label}</Link>
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>

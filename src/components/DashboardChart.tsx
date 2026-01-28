@@ -61,23 +61,23 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
   const totalStatus = statusData.validos + statusData.proximoVencimento + statusData.vencidos
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-8">
       <Card className="animate-fade-in hover-scale gradient-border">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between">
+        <CardHeader className="pb-2 p-3 sm:p-6">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Package className="w-5 h-5 text-primary" />
-              <span className="gradient-text">Distribuição por Local</span>
+              <Package className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <span className="gradient-text text-sm sm:text-base">Distribuição por Local</span>
             </div>
-            <div className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full">
+            <div className="text-xs sm:text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full w-fit">
               Total: {totalProducts}
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2 sm:p-6">
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={barData} margin={{ top: 10, right: 10, left: 0, bottom: 50 }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8} />
@@ -98,15 +98,17 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
                 </defs>
                 <XAxis 
                   dataKey="name" 
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
                   angle={-45}
                   textAnchor="end"
-                  height={60}
+                  height={50}
                   stroke="hsl(var(--border))"
+                  interval={0}
                 />
                 <YAxis 
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
                   stroke="hsl(var(--border))"
+                  width={30}
                 />
                 <ChartTooltip 
                   content={<ChartTooltipContent />}
@@ -114,7 +116,7 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
                 />
                 <Bar 
                   dataKey="value" 
-                  radius={[6, 6, 0, 0]}
+                  radius={[4, 4, 0, 0]}
                 >
                   {barData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={`url(#barGradient${(index % 4) + 1})`} />
@@ -127,20 +129,20 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
       </Card>
 
       <Card className="animate-fade-in hover-scale gradient-border">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between">
+        <CardHeader className="pb-2 p-3 sm:p-6">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-warning" />
-              <span className="gradient-text">Status de Validade</span>
+              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
+              <span className="gradient-text text-sm sm:text-base">Status de Validade</span>
             </div>
-            <div className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full">
+            <div className="text-xs sm:text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full w-fit">
               Total: {totalStatus}
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2 sm:p-6">
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={320}>
+            <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <defs>
                   <linearGradient id="pieGradient1" x1="0" y1="0" x2="1" y2="1">
@@ -159,9 +161,9 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
                 <Pie
                   data={pieData}
                   cx="50%"
-                  cy="50%"
-                  outerRadius={90}
-                  innerRadius={40}
+                  cy="45%"
+                  outerRadius={70}
+                  innerRadius={30}
                   dataKey="value"
                   stroke="hsl(var(--background))"
                   strokeWidth={2}
@@ -177,8 +179,9 @@ export function DashboardChart({ categoryData, statusData }: DashboardChartProps
                 <Legend 
                   verticalAlign="bottom" 
                   height={36}
+                  wrapperStyle={{ fontSize: '11px' }}
                   formatter={(value, entry) => (
-                    <span style={{ color: entry.color, fontWeight: 500 }}>
+                    <span style={{ color: entry.color, fontWeight: 500, fontSize: '11px' }}>
                       {value}: {entry.payload.value}
                     </span>
                   )}

@@ -40,27 +40,27 @@ export function StatsCard({
       onClick && "cursor-pointer hover:scale-105"
     )}>
       <CardHeader 
-        className={`${bgClass} pb-3 transition-all duration-300 group-hover:shadow-lg`}
+        className={`${bgClass} pb-2 sm:pb-3 p-3 sm:p-6 transition-all duration-300 group-hover:shadow-lg`}
         onClick={onClick}
       >
-        <CardTitle className="flex items-center justify-between text-lg font-semibold">
-          <span>{title}</span>
-          <div className="flex items-center space-x-2">
-            <Icon className="w-6 h-6 transition-transform duration-300 group-hover:scale-110" />
+        <CardTitle className="flex items-center justify-between text-sm sm:text-lg font-semibold">
+          <span className="truncate">{title}</span>
+          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:scale-110" />
             {onClick && (
-              <div className="w-2 h-2 bg-white/50 rounded-full animate-pulse" />
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/50 rounded-full animate-pulse" />
             )}
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-6">
+      <CardContent className="pt-3 sm:pt-6 p-3 sm:p-6">
         <div className="flex items-start justify-between">
-          <div>
-            <div className="text-3xl font-bold text-foreground mb-1 transition-colors duration-300">
+          <div className="min-w-0">
+            <div className="text-2xl sm:text-3xl font-bold text-foreground mb-0.5 sm:mb-1 transition-colors duration-300">
               {value.toLocaleString()}
             </div>
             {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">{description}</p>
             )}
           </div>
           {ActionIcon && actionLabel && (
@@ -71,7 +71,7 @@ export function StatsCard({
                 e.stopPropagation();
                 onClick?.();
               }}
-              className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-accent"
+              className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-accent hidden sm:flex"
             >
               <ActionIcon className="w-4 h-4 mr-1" />
               {actionLabel}

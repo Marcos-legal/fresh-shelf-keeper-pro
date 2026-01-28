@@ -246,8 +246,8 @@ const Relatorios = () => {
       <div className="min-h-screen flex w-full bg-background">
         <MobileDrawer />
         <AppSidebar />
-        <main className="flex-1 overflow-x-hidden">
-          <div className="p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-x-hidden w-full">
+          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-14 sm:pt-4 md:pt-6 lg:pt-8">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
               <SidebarTrigger className="hidden lg:flex" />
               <div className="flex items-center space-x-3">

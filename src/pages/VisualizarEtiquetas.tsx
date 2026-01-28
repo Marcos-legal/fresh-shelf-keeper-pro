@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileDrawer } from "@/components/MobileDrawer";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Pagination } from "@/components/ui/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -129,22 +130,23 @@ const VisualizarEtiquetas = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen flex w-full bg-background">
+        <MobileDrawer />
         <AppSidebar />
-        <main className="flex-1">
-          <div className="p-6">
-            <div className="flex items-center space-x-4 mb-8">
-              <SidebarTrigger className="lg:hidden" />
-              <div className="flex items-center space-x-4">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
-                  <Eye className="w-8 h-8 text-white" />
+        <main className="flex-1 overflow-x-hidden w-full">
+          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-14 sm:pt-4 md:pt-6 lg:pt-8">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-6 lg:mb-8">
+              <SidebarTrigger className="hidden lg:flex" />
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg flex items-center justify-center flex-shrink-0">
+                  <Eye className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
+                  <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
                     👁️ Visualizar Etiquetas
                   </h1>
-                  <p className="text-gray-600 mt-1 text-lg">
-                    Visualize todas as etiquetas geradas ({products.length} produtos) - Tamanho: {largura}×{altura}mm
+                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1">
+                    Visualize todas as etiquetas ({products.length} produtos) - {largura}×{altura}mm
                   </p>
                 </div>
               </div>

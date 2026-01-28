@@ -76,8 +76,9 @@ export function QuickActionBar({
   };
 
   return (
-    <Card className="p-4 mb-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <Card className="p-3 sm:p-4 mb-4 sm:mb-6 animate-fade-in">
+      {/* Desktop Layout */}
+      <div className="hidden md:flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <h3 className="font-semibold text-foreground">Ações Rápidas</h3>
           <div className="flex items-center space-x-1">
@@ -167,6 +168,68 @@ export function QuickActionBar({
               variant="ghost"
             />
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="md:hidden space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-foreground text-sm">Ações Rápidas</h3>
+          <div className="flex items-center gap-1">
+            {expiredCount > 0 && (
+              <ActionableIcon
+                icon={AlertTriangle}
+                label={`${expiredCount} vencidos`}
+                onClick={() => navigate('/relatorios')}
+                variant="ghost"
+                badge={expiredCount}
+                pulse
+                className="text-destructive hover:text-destructive h-8 w-8"
+              />
+            )}
+            {expiringCount > 0 && (
+              <ActionableIcon
+                icon={CheckCircle}
+                label={`${expiringCount} próx. venc.`}
+                onClick={() => navigate('/relatorios')}
+                variant="ghost"
+                badge={expiringCount}
+                pulse
+                className="text-warning hover:text-warning h-8 w-8"
+              />
+            )}
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-4 gap-2">
+          <ActionableIcon
+            icon={Plus}
+            label="Novo"
+            onClick={onNewProduct}
+            variant="default"
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 h-10 w-full"
+          />
+          <ActionableIcon
+            icon={Printer}
+            label="Imprimir"
+            onClick={handleQuickPrint}
+            variant="outline"
+            className="h-10 w-full"
+          />
+          <ActionableIcon
+            icon={FileText}
+            label="Relatórios"
+            onClick={handleQuickReport}
+            variant="outline"
+            className="h-10 w-full"
+          />
+          <ActionableIcon
+            icon={RefreshCw}
+            label="Atualizar"
+            onClick={onRefresh}
+            variant="outline"
+            className="h-10 w-full"
+          />
         </div>
       </div>
     </Card>
