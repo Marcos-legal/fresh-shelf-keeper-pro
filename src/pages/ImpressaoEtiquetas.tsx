@@ -10,11 +10,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Printer, Package, Eye, FileText, Settings, Ruler } from "lucide-react";
+import { Printer, Package, Eye, FileText, Settings, Ruler, Edit } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { escapeHtml } from "@/lib/security";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
+import { EtiquetaEditor } from "@/components/EtiquetaEditor";
+import { Product } from "@/types/product";
 
 const ImpressaoEtiquetas = () => {
   const { products } = useProductsSupabase();
@@ -34,6 +36,8 @@ const ImpressaoEtiquetas = () => {
   const [showResponsavelDialog, setShowResponsavelDialog] = useState(false);
   const [printAction, setPrintAction] = useState<'batch' | 'single' | null>(null);
   const [singleProductToPrint, setSingleProductToPrint] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
   
   const navigate = useNavigate();
 
@@ -196,6 +200,227 @@ const ImpressaoEtiquetas = () => {
       ...prev,
       [productId]: Math.max(1, Math.min(99, quantity))
     }));
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product as Product);
+    setShowEditor(true);
+  };
+
+  const handleEditorPrint = (editedProduct: Product, editedResponsavel: string, quantity: number) => {
+    const expandedProducts = Array(quantity).fill(editedProduct);
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Etiquetas - ${escapeHtml(editedProduct.nome || '')} (${quantity}x) - ${escapeHtml(largura.toString())}x${escapeHtml(altura.toString())}mm</title>
+            <style>
+              @page {
+                size: A4;
+                margin: 0.5cm;
+              }
+              body { 
+                font-family: 'Courier New', 'Liberation Mono', monospace; 
+                margin: 0; 
+                padding: 0;
+                line-height: 1.1;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              .etiqueta {
+                border: 3px solid #000;
+                width: ${config.width};
+                height: ${config.height};
+                margin: 8px;
+                padding: ${config.padding};
+                float: left;
+                font-size: ${config.fontSize};
+                page-break-inside: avoid;
+                background: white;
+                font-weight: 600;
+                color: #000;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                overflow: hidden;
+              }
+              .campo {
+                margin-bottom: ${Math.max(2, parseInt(config.spacing) * 0.4)}px;
+                border-bottom: 2px solid #333;
+                padding-bottom: 2px;
+                min-height: ${config.compactMode ? '12px' : '16px'};
+                font-weight: bold;
+                flex-shrink: 0;
+                overflow: hidden;
+              }
+              .label {
+                font-weight: 900;
+                font-size: ${config.labelSize};
+                color: #000;
+                text-transform: uppercase;
+                line-height: 1;
+              }
+              .content {
+                font-weight: 800;
+                font-size: ${config.contentSize};
+                color: #000;
+                text-transform: uppercase;
+                margin-top: 2px;
+                word-wrap: break-word;
+                overflow: hidden;
+                line-height: 1.1;
+                max-height: ${config.compactMode ? '24px' : '32px'};
+              }
+              .grid {
+                display: ${config.showGrid ? 'grid' : 'block'};
+                grid-template-columns: ${config.showGrid ? '1fr 1fr' : '1fr'};
+                gap: ${config.showGrid ? '4px' : '0'};
+                margin-bottom: ${config.spacing};
+              }
+              .checkbox-row {
+                display: ${config.compactMode ? 'flex' : 'grid'};
+                ${config.compactMode ? 'justify-content: space-between' : 'grid-template-columns: 1fr 1fr 1fr'};
+                gap: ${config.compactMode ? '2px' : '4px'};
+                font-size: ${config.labelSize};
+                margin-bottom: ${config.spacing};
+                font-weight: 900;
+                flex-wrap: wrap;
+              }
+              .checkbox-item {
+                display: flex;
+                align-items: center;
+                font-weight: 900;
+                color: #000;
+                ${config.compactMode ? 'font-size: ' + (parseInt(config.labelSize) - 1) + 'px' : ''};
+              }
+              .checkbox-mark {
+                font-size: ${config.compactMode ? '10px' : '12px'};
+                font-weight: 900;
+                margin-right: 2px;
+              }
+              .clearfix::after {
+                content: "";
+                display: table;
+                clear: both;
+              }
+              @media print {
+                .etiqueta {
+                  page-break-inside: avoid;
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="clearfix">
+              ${expandedProducts.map(prod => `
+                <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
+                  <div class="campo">
+                    <div class="label">PRODUTO:</div>
+                    <div class="content">${escapeHtml((prod.nome || '').toUpperCase())}</div>
+                  </div>
+                  <div class="grid">
+                    <div class="campo">
+                      <div class="label">LOTE:</div>
+                      <div class="content">${escapeHtml((prod.lote || '').toUpperCase())}</div>
+                    </div>
+                    ${config.showGrid ? `
+                    <div class="campo">
+                      <div class="label">MARCA:</div>
+                      <div class="content">${escapeHtml((prod.marca || '').toUpperCase())}</div>
+                    </div>
+                    ` : ''}
+                  </div>
+                  ${!config.showGrid ? `
+                  <div class="campo">
+                    <div class="label">MARCA:</div>
+                    <div class="content">${escapeHtml((prod.marca || '').toUpperCase())}</div>
+                  </div>
+                  ` : ''}
+                  ${prod.dataFabricacao || prod.validade ? `
+                  <div class="grid">
+                    ${prod.dataFabricacao ? `
+                    <div class="campo">
+                      <div class="label">FABRIC.:</div>
+                      <div class="content">${escapeHtml(formatDateSafe(prod.dataFabricacao))}</div>
+                    </div>
+                    ` : ''}
+                    ${prod.validade && config.showGrid ? `
+                    <div class="campo">
+                      <div class="label">VALID.:</div>
+                      <div class="content">${escapeHtml(formatDateSafe(prod.validade))}</div>
+                    </div>
+                    ` : ''}
+                  </div>
+                  ${prod.validade && !config.showGrid ? `
+                  <div class="campo">
+                    <div class="label">VALID.:</div>
+                    <div class="content">${escapeHtml(formatDateSafe(prod.validade))}</div>
+                  </div>
+                  ` : ''}
+                  ` : ''}
+                  <div class="grid">
+                    <div class="campo">
+                      <div class="label">ABERTURA:</div>
+                      <div class="content">${escapeHtml(formatDateSafe(prod.dataAbertura))}</div>
+                    </div>
+                    ${config.showGrid ? `
+                    <div class="campo">
+                      <div class="label">USAR ATÉ:</div>
+                      <div class="content">${escapeHtml(formatDateSafe(prod.utilizarAte))}</div>
+                    </div>
+                    ` : ''}
+                  </div>
+                  ${!config.showGrid ? `
+                  <div class="campo">
+                    <div class="label">USAR ATÉ:</div>
+                    <div class="content">${escapeHtml(formatDateSafe(prod.utilizarAte))}</div>
+                  </div>
+                  ` : ''}
+                  <div class="checkbox-row">
+                    <div class="checkbox-item">
+                      <span class="checkbox-mark">${prod.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
+                      <span>REF</span>
+                    </div>
+                    <div class="checkbox-item">
+                      <span class="checkbox-mark">${prod.localArmazenamento === 'congelado' ? '■' : '□'}</span>
+                      <span>CON</span>
+                    </div>
+                    <div class="checkbox-item">
+                      <span class="checkbox-mark">${prod.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
+                      <span>AMB</span>
+                    </div>
+                  </div>
+                  ${!config.compactMode ? `
+                  <div class="campo">
+                    <div class="label">RESPONSÁVEL:</div>
+                    <div class="content">${escapeHtml(editedResponsavel.toUpperCase())}</div>
+                  </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+    }
+
+    toast({
+      title: "Etiquetas enviadas para impressão",
+      description: `${quantity} etiqueta(s) de ${editedProduct.nome} (${largura}x${altura}mm) enviadas!`,
+    });
+
+    setShowEditor(false);
+    setEditingProduct(null);
   };
 
   const executePrint = () => {
@@ -820,6 +1045,24 @@ const ImpressaoEtiquetas = () => {
               </Card>
             )}
 
+            {/* Editor de Etiqueta com Preview */}
+            {showEditor && editingProduct && (
+              <Card className="mb-6 border-primary/30">
+                <CardContent className="pt-6">
+                  <EtiquetaEditor
+                    product={editingProduct}
+                    largura={largura}
+                    altura={altura}
+                    onPrint={handleEditorPrint}
+                    onClose={() => {
+                      setShowEditor(false);
+                      setEditingProduct(null);
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
             {/* Botões de Impressão Rápida */}
             <Card className="mb-6">
               <CardHeader>
@@ -831,7 +1074,7 @@ const ImpressaoEtiquetas = () => {
               </CardHeader>
               <CardContent className="pt-4 sm:pt-6">
                 <div className="text-xs sm:text-sm text-muted-foreground mb-4">
-                  Clique em qualquer produto para imprimir sua etiqueta instantaneamente
+                  Clique em Editar para personalizar a etiqueta antes de imprimir
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {products.map(product => {
@@ -851,31 +1094,42 @@ const ImpressaoEtiquetas = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-2 flex-1">
-                            <Label htmlFor={`qty-${product.id}`} className="text-xs sm:text-sm whitespace-nowrap">
-                              Qtd:
-                            </Label>
-                            <Input
-                              id={`qty-${product.id}`}
-                              type="number"
-                              min="1"
-                              max="99"
-                              value={currentQuantity}
-                              onChange={(e) => handleQuickPrintQuantityChange(product.id, parseInt(e.target.value) || 1)}
-                              className="w-16 sm:w-20 h-9 text-center"
-                              onClick={(e) => e.stopPropagation()}
-                            />
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-1">
+                              <Label htmlFor={`qty-${product.id}`} className="text-xs sm:text-sm whitespace-nowrap">
+                                Qtd:
+                              </Label>
+                              <Input
+                                id={`qty-${product.id}`}
+                                type="number"
+                                min="1"
+                                max="99"
+                                value={currentQuantity}
+                                onChange={(e) => handleQuickPrintQuantityChange(product.id, parseInt(e.target.value) || 1)}
+                                className="w-16 sm:w-20 h-9 text-center"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => handlePrintSingleRequest(product, currentQuantity)}
+                            >
+                              <Printer className="w-4 h-4 mr-1" />
+                              <span className="hidden sm:inline">Imprimir</span>
+                              <span className="sm:hidden">Print</span>
+                            </Button>
                           </div>
                           <Button
-                            variant="default"
+                            variant="outline"
                             size="sm"
-                            className="flex-1"
-                            onClick={() => handlePrintSingleRequest(product, currentQuantity)}
+                            className="w-full"
+                            onClick={() => handleEditProduct(product)}
                           >
-                            <Printer className="w-4 h-4 mr-1" />
-                            <span className="hidden sm:inline">Imprimir</span>
-                            <span className="sm:hidden">Print</span>
+                            <Edit className="w-4 h-4 mr-1" />
+                            <span>Editar e Preview</span>
                           </Button>
                         </div>
                       </div>
@@ -883,8 +1137,8 @@ const ImpressaoEtiquetas = () => {
                   })}
                 </div>
                 {products.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Package className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                     <p>Nenhum produto cadastrado ainda.</p>
                     <p className="text-sm">Cadastre produtos para usar a impressão rápida.</p>
                   </div>
