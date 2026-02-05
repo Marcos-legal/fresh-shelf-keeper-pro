@@ -58,10 +58,49 @@ const formatDateToString = (date: Date | string | undefined): string => {
 // Helper to parse string to Date
 const parseStringToDate = (dateStr: string): Date | undefined => {
   if (!dateStr) return undefined;
-  const [year, month, day] = dateStr.split('-').map(Number);
-  if (year && month && day) {
-    return new Date(year, month - 1, day);
+  
+  // Handle ISO format YYYY-MM-DD
+  if (dateStr.includes('-')) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    if (year && month && day) {
+      return new Date(year, month - 1, day);
+    }
   }
+  
+  // Handle DD/MM/YYYY or MM/YYYY or DD/MM/YY
+  if (dateStr.includes('/')) {
+    const parts = dateStr.split('/');
+    
+    // Case MES/ANO (e.g., NOVEMBRO/2025)
+    if (isNaN(Number(parts[0]))) {
+      const meses = [
+        'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
+        'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
+      ];
+      const mesIndex = meses.indexOf(parts[0].toUpperCase());
+      const year = Number(parts[1]);
+      if (mesIndex !== -1 && year) {
+        return new Date(year, mesIndex, 1);
+      }
+      return undefined;
+    }
+
+    if (parts.length === 3) {
+      // DD/MM/YYYY
+      const day = Number(parts[0]);
+      const month = Number(parts[1]);
+      let year = Number(parts[2]);
+      if (year < 100) year += 2000;
+      return new Date(year, month - 1, day);
+    } else if (parts.length === 2) {
+      // MM/YYYY
+      const month = Number(parts[0]);
+      let year = Number(parts[1]);
+      if (year < 100) year += 2000;
+      return new Date(year, month - 1, 1);
+    }
+  }
+  
   return undefined;
 };
 
