@@ -1,17 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Edit, Eye, Printer, X } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Edit, Eye, Printer, X, Calendar, EyeOff } from "lucide-react";
 import { Product, StorageLocation } from "@/types/product";
 import { EtiquetaPreview } from "./EtiquetaPreview";
+import { TextInputField } from "@/components/form/TextInputField";
+import { DatePickerField } from "@/components/form/DatePickerField";
+import { NumberInputField } from "@/components/form/NumberInputField";
+import { SelectField } from "@/components/form/SelectField";
+import { ValidadeField } from "@/components/form/ValidadeField";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
 
 interface EtiquetaEditorProps {
@@ -26,34 +25,128 @@ interface EditableProduct {
   nome: string;
   lote: string;
   marca: string;
-  dataFabricacao: Date | undefined;
-  validade: Date | undefined;
-  dataAbertura: Date | undefined;
+  dataFabricacao: string;
+  validade: string;
+  dataAbertura: string;
+  diasParaVencer: number;
   utilizarAte: Date | undefined;
-  localArmazenamento: StorageLocation;
+  localArmazenamento: StorageLocation | '';
   responsavel: string;
+  showOptionalDates: boolean;
 }
+
+const storageOptions: { value: StorageLocation; label: string }[] = [
+  { value: 'refrigerado', label: 'Refrigerado' },
+  { value: 'congelado', label: 'Congelado' },
+  { value: 'ambiente', label: 'Ambiente' },
+  { value: 'camara-fria', label: 'Câmara Fria' },
+];
+
+// Helper to format Date to string (YYYY-MM-DD)
+const formatDateToString = (date: Date | string | undefined): string => {
+  if (!date) return '';
+  if (typeof date === 'string') {
+    if (date.includes('/')) return date;
+    return date;
+  }
+  if (date instanceof Date && !isNaN(date.getTime())) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+  return '';
+};
+
+// Helper to parse string to Date
+const parseStringToDate = (dateStr: string): Date | undefined => {
+  if (!dateStr) return undefined;
+  const [year, month, day] = dateStr.split('-').map(Number);
+  if (year && month && day) {
+    return new Date(year, month - 1, day);
+  }
+  return undefined;
+};
 
 export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: EtiquetaEditorProps) {
   const [editedProduct, setEditedProduct] = useState<EditableProduct>({
     nome: product.nome || '',
     lote: product.lote || '',
     marca: product.marca || '',
-    dataFabricacao: product.dataFabricacao ? new Date(product.dataFabricacao) : undefined,
-    validade: product.validade ? (typeof product.validade === 'string' ? new Date(product.validade) : product.validade) : undefined,
-    dataAbertura: product.dataAbertura ? new Date(product.dataAbertura) : undefined,
-    utilizarAte: product.utilizarAte ? new Date(product.utilizarAte) : undefined,
-    localArmazenamento: product.localArmazenamento || 'ambiente',
-    responsavel: ''
+    dataFabricacao: formatDateToString(product.dataFabricacao),
+    validade: formatDateToString(product.validade),
+    dataAbertura: formatDateToString(product.dataAbertura),
+    diasParaVencer: product.diasParaVencer || 0,
+    utilizarAte: product.utilizarAte,
+    localArmazenamento: product.localArmazenamento || '',
+    responsavel: '',
+    showOptionalDates: false
   });
   
   const [quantity, setQuantity] = useState(1);
 
-  const handleFieldChange = (field: keyof EditableProduct, value: any) => {
-    setEditedProduct(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleInputChange = (field: keyof EditableProduct, value: string) => {
+    setEditedProduct(prev => {
+      const updated = { ...prev, [field]: value };
+      
+      // Recalculate utilizarAte when dataAbertura or diasParaVencer changes
+      if (field === 'dataAbertura' || field === 'diasParaVencer') {
+        const abertura = field === 'dataAbertura' ? value : prev.dataAbertura;
+        const dias = field === 'diasParaVencer' ? parseInt(value) || 0 : prev.diasParaVencer;
+        
+        if (abertura && dias > 0) {
+          const [year, month, day] = abertura.split('-').map(Number);
+          if (year && month && day) {
+            const useBy = new Date(year, month - 1, day + dias);
+            updated.utilizarAte = useBy;
+          }
+        } else {
+          updated.utilizarAte = undefined;
+        }
+      }
+      
+      return updated;
+    });
+  };
+
+  const handleNumberInputChange = (field: keyof EditableProduct, value: number) => {
+    setEditedProduct(prev => {
+      const updated = { ...prev, [field]: value };
+      
+      // Recalculate utilizarAte when diasParaVencer changes
+      if (field === 'diasParaVencer' && prev.dataAbertura && value > 0) {
+        const [year, month, day] = prev.dataAbertura.split('-').map(Number);
+        if (year && month && day) {
+          const useBy = new Date(year, month - 1, day + value);
+          updated.utilizarAte = useBy;
+        }
+      } else if (field === 'diasParaVencer') {
+        updated.utilizarAte = undefined;
+      }
+      
+      return updated;
+    });
+  };
+
+  const handleToggleOptionalDates = (show: boolean) => {
+    setEditedProduct(prev => ({ ...prev, showOptionalDates: show }));
+  };
+
+  const handleUpdateDates = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setEditedProduct(prev => {
+      const updated = {
+        ...prev,
+        dataFabricacao: today,
+        dataAbertura: today
+      };
+      
+      // Recalculate utilizarAte
+      if (prev.diasParaVencer > 0) {
+        const [year, month, day] = today.split('-').map(Number);
+        const useBy = new Date(year, month - 1, day + prev.diasParaVencer);
+        updated.utilizarAte = useBy;
+      }
+      
+      return updated;
+    });
   };
 
   const handlePrint = () => {
@@ -66,27 +159,30 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
       nome: editedProduct.nome,
       lote: editedProduct.lote,
       marca: editedProduct.marca,
-      dataFabricacao: editedProduct.dataFabricacao,
-      validade: editedProduct.validade,
-      dataAbertura: editedProduct.dataAbertura,
+      dataFabricacao: parseStringToDate(editedProduct.dataFabricacao),
+      validade: parseStringToDate(editedProduct.validade),
+      dataAbertura: parseStringToDate(editedProduct.dataAbertura),
+      diasParaVencer: editedProduct.diasParaVencer,
       utilizarAte: editedProduct.utilizarAte,
-      localArmazenamento: editedProduct.localArmazenamento,
+      localArmazenamento: editedProduct.localArmazenamento as StorageLocation || 'ambiente',
       responsavel: editedProduct.responsavel
     };
 
     onPrint(productToPrint, editedProduct.responsavel, quantity);
   };
 
+  // Build preview product
   const previewProduct: Product = {
     ...product,
     nome: editedProduct.nome,
     lote: editedProduct.lote,
     marca: editedProduct.marca,
-    dataFabricacao: editedProduct.dataFabricacao,
-    validade: editedProduct.validade,
-    dataAbertura: editedProduct.dataAbertura,
+    dataFabricacao: parseStringToDate(editedProduct.dataFabricacao),
+    validade: parseStringToDate(editedProduct.validade),
+    dataAbertura: parseStringToDate(editedProduct.dataAbertura),
+    diasParaVencer: editedProduct.diasParaVencer,
     utilizarAte: editedProduct.utilizarAte,
-    localArmazenamento: editedProduct.localArmazenamento,
+    localArmazenamento: editedProduct.localArmazenamento as StorageLocation || 'ambiente',
     responsavel: editedProduct.responsavel
   };
 
@@ -104,7 +200,7 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Formulário de Edição */}
+        {/* Formulário de Edição - Seguindo o padrão do ProductForm */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -113,221 +209,147 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Nome do Produto */}
-            <div className="space-y-2">
-              <Label htmlFor="nome">Nome do Produto</Label>
-              <Input
-                id="nome"
-                value={editedProduct.nome}
-                onChange={(e) => handleFieldChange('nome', e.target.value)}
-                placeholder="Nome do produto"
-              />
-            </div>
-
-            {/* Lote e Marca */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="lote">Lote</Label>
-                <Input
-                  id="lote"
-                  value={editedProduct.lote}
-                  onChange={(e) => handleFieldChange('lote', e.target.value)}
-                  placeholder="Nº do lote"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="marca">Marca</Label>
-                <Input
-                  id="marca"
-                  value={editedProduct.marca}
-                  onChange={(e) => handleFieldChange('marca', e.target.value)}
-                  placeholder="Marca"
-                />
-              </div>
-            </div>
-
-            {/* Data de Fabricação e Validade */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Data de Fabricação</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !editedProduct.dataFabricacao && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {editedProduct.dataFabricacao ? (
-                        format(editedProduct.dataFabricacao, "dd/MM/yyyy", { locale: ptBR })
-                      ) : (
-                        <span>Selecionar</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={editedProduct.dataFabricacao}
-                      onSelect={(date) => handleFieldChange('dataFabricacao', date)}
-                      initialFocus
-                      className="pointer-events-auto"
-                      locale={ptBR}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="space-y-2">
-                <Label>Validade</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !editedProduct.validade && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {editedProduct.validade ? (
-                        format(editedProduct.validade, "dd/MM/yyyy", { locale: ptBR })
-                      ) : (
-                        <span>Selecionar</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={editedProduct.validade}
-                      onSelect={(date) => handleFieldChange('validade', date)}
-                      initialFocus
-                      className="pointer-events-auto"
-                      locale={ptBR}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-
-            {/* Data de Abertura e Utilizar Até */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Data de Abertura</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !editedProduct.dataAbertura && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {editedProduct.dataAbertura ? (
-                        format(editedProduct.dataAbertura, "dd/MM/yyyy", { locale: ptBR })
-                      ) : (
-                        <span>Selecionar</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={editedProduct.dataAbertura}
-                      onSelect={(date) => handleFieldChange('dataAbertura', date)}
-                      initialFocus
-                      className="pointer-events-auto"
-                      locale={ptBR}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="space-y-2">
-                <Label>Utilizar Até</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !editedProduct.utilizarAte && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {editedProduct.utilizarAte ? (
-                        format(editedProduct.utilizarAte, "dd/MM/yyyy", { locale: ptBR })
-                      ) : (
-                        <span>Selecionar</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={editedProduct.utilizarAte}
-                      onSelect={(date) => handleFieldChange('utilizarAte', date)}
-                      initialFocus
-                      className="pointer-events-auto"
-                      locale={ptBR}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-
-            {/* Local de Armazenamento */}
-            <div className="space-y-2">
-              <Label>Local de Armazenamento</Label>
-              <Select
-                value={editedProduct.localArmazenamento}
-                onValueChange={(value: StorageLocation) => handleFieldChange('localArmazenamento', value)}
+            {/* Botões de ação */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 sm:justify-between items-stretch sm:items-center mb-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleUpdateDates}
+                className="text-primary w-full sm:w-auto text-sm"
+                size="sm"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o local" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="refrigerado">Refrigerado</SelectItem>
-                  <SelectItem value="congelado">Congelado</SelectItem>
-                  <SelectItem value="ambiente">Ambiente</SelectItem>
-                  <SelectItem value="camara-fria">Câmara Fria</SelectItem>
-                </SelectContent>
-              </Select>
+                <Calendar className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Atualizar Datas (Hoje)</span>
+                <span className="sm:hidden">Datas (Hoje)</span>
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleToggleOptionalDates(!editedProduct.showOptionalDates)}
+                className="text-muted-foreground w-full sm:w-auto text-sm"
+                size="sm"
+              >
+                {editedProduct.showOptionalDates ? (
+                  <>
+                    <EyeOff className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Ocultar Datas Opcionais</span>
+                    <span className="sm:hidden">Ocultar Opcionais</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Mostrar Datas Opcionais</span>
+                    <span className="sm:hidden">Mostrar Opcionais</span>
+                  </>
+                )}
+              </Button>
             </div>
 
-            {/* Responsável */}
-            <ResponsavelSelectField
-              label="Responsável"
-              value={editedProduct.responsavel}
-              onChange={(value) => handleFieldChange('responsavel', value)}
-              required={true}
-            />
+            {/* Campos do formulário - Layout igual ao ProductForm */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <TextInputField
+                id="nome"
+                label="Nome do Produto (Opcional)"
+                value={editedProduct.nome}
+                onChange={(value) => handleInputChange('nome', value)}
+                placeholder="Digite o nome do produto"
+              />
 
-            {/* Quantidade */}
-            <div className="space-y-2">
-              <Label htmlFor="quantity">Quantidade de Etiquetas</Label>
-              <Input
-                id="quantity"
-                type="number"
-                min="1"
-                max="99"
-                value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, Math.min(99, parseInt(e.target.value) || 1)))}
-                className="w-24"
+              <TextInputField
+                id="lote"
+                label="Lote (Opcional)"
+                value={editedProduct.lote}
+                onChange={(value) => handleInputChange('lote', value)}
+                placeholder="Digite o lote"
+              />
+
+              <TextInputField
+                id="marca"
+                label="Marca (Opcional)"
+                value={editedProduct.marca}
+                onChange={(value) => handleInputChange('marca', value)}
+                placeholder="Digite a marca"
+              />
+
+              {editedProduct.showOptionalDates && (
+                <>
+                  <DatePickerField
+                    id="dataFabricacao"
+                    label="Data de Fabricação (Opcional)"
+                    value={editedProduct.dataFabricacao}
+                    onChange={(value) => handleInputChange('dataFabricacao', value)}
+                    required={false}
+                  />
+
+                  <ValidadeField
+                    label="Data de Validade (Opcional)"
+                    value={editedProduct.validade}
+                    onChange={(value) => handleInputChange('validade', value)}
+                    required={false}
+                  />
+                </>
+              )}
+
+              <DatePickerField
+                id="dataAbertura"
+                label="Data de Abertura (Opcional)"
+                value={editedProduct.dataAbertura}
+                onChange={(value) => handleInputChange('dataAbertura', value)}
+                required={false}
+              />
+
+              <NumberInputField
+                id="diasParaVencer"
+                label="Dias para Vencer após Abertura (Opcional)"
+                value={editedProduct.diasParaVencer}
+                onChange={(value) => handleNumberInputChange('diasParaVencer', value)}
+                min={0}
+                required={false}
+              />
+
+              <SelectField
+                label="Local de Armazenamento (Opcional)"
+                value={editedProduct.localArmazenamento}
+                onChange={(value: StorageLocation) => handleInputChange('localArmazenamento', value)}
+                options={storageOptions}
+                placeholder="Selecione o local"
+                required={false}
               />
             </div>
 
-            {/* Botão de Imprimir */}
-            <Button 
-              onClick={handlePrint} 
-              className="w-full gradient-blue text-white"
-              disabled={!editedProduct.responsavel.trim()}
-            >
-              <Printer className="w-4 h-4 mr-2" />
-              Imprimir {quantity} Etiqueta{quantity > 1 ? 's' : ''}
-            </Button>
+            {/* Responsável e Quantidade */}
+            <div className="pt-4 border-t space-y-4">
+              <ResponsavelSelectField
+                label="Responsável"
+                value={editedProduct.responsavel}
+                onChange={(value) => handleInputChange('responsavel', value)}
+                required={true}
+              />
+
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantidade de Etiquetas</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min="1"
+                  max="99"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, Math.min(99, parseInt(e.target.value) || 1)))}
+                  className="w-24"
+                />
+              </div>
+
+              {/* Botão de Imprimir */}
+              <Button 
+                onClick={handlePrint} 
+                className="w-full gradient-blue text-white"
+                disabled={!editedProduct.responsavel.trim()}
+              >
+                <Printer className="w-4 h-4 mr-2" />
+                Imprimir {quantity} Etiqueta{quantity > 1 ? 's' : ''}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
