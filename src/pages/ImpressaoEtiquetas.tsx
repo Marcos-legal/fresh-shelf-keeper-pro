@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileDrawer } from "@/components/MobileDrawer";
@@ -38,8 +38,18 @@ const ImpressaoEtiquetas = () => {
   const [singleProductToPrint, setSingleProductToPrint] = useState<any>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+  const editorRef = useRef<HTMLDivElement>(null);
   
   const navigate = useNavigate();
+  
+  // Scroll to editor when it opens
+  useEffect(() => {
+    if (showEditor && editorRef.current) {
+      setTimeout(() => {
+        editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [showEditor]);
 
   const handleSelectProduct = (productId: string) => {
     setSelectedProducts(prev => {
@@ -1047,20 +1057,22 @@ const ImpressaoEtiquetas = () => {
 
             {/* Editor de Etiqueta com Preview */}
             {showEditor && editingProduct && (
-              <Card className="mb-6 border-primary/30">
-                <CardContent className="pt-6">
-                  <EtiquetaEditor
-                    product={editingProduct}
-                    largura={largura}
-                    altura={altura}
-                    onPrint={handleEditorPrint}
-                    onClose={() => {
-                      setShowEditor(false);
-                      setEditingProduct(null);
-                    }}
-                  />
-                </CardContent>
-              </Card>
+              <div ref={editorRef}>
+                <Card className="mb-6 border-2 border-primary shadow-lg">
+                  <CardContent className="pt-6">
+                    <EtiquetaEditor
+                      product={editingProduct}
+                      largura={largura}
+                      altura={altura}
+                      onPrint={handleEditorPrint}
+                      onClose={() => {
+                        setShowEditor(false);
+                        setEditingProduct(null);
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
             )}
 
             {/* Botões de Impressão Rápida */}
