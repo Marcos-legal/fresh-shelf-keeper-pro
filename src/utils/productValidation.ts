@@ -5,19 +5,30 @@ const parseValidadeDate = (validade: string): Date | undefined => {
   if (!validade || validade.trim() === '') return undefined;
 
   try {
-    // Formato DD/MM/AA
-    if (/^\d{2}\/\d{2}\/\d{2}$/.test(validade)) {
-      const [day, month, year] = validade.split('/').map(Number);
-      const fullYear = year < 50 ? 2000 + year : 1900 + year; // Assume 2000+ para anos < 50
-      return new Date(fullYear, month - 1, day);
+    // Formato DD/MM/AAAA ou DD/MM/AA
+    if (/^\d{2}\/\d{2}\/\d{2,4}$/.test(validade)) {
+      const parts = validade.split('/');
+      const day = Number(parts[0]);
+      const month = Number(parts[1]);
+      let year = Number(parts[2]);
+      
+      if (year < 100) {
+        year = year < 50 ? 2000 + year : 1900 + year;
+      }
+      return new Date(year, month - 1, day);
     }
 
-    // Formato MM/AA
-    if (/^\d{2}\/\d{2}$/.test(validade)) {
-      const [month, year] = validade.split('/').map(Number);
-      const fullYear = year < 50 ? 2000 + year : 1900 + year;
+    // Formato MM/AAAA ou MM/AA
+    if (/^\d{2}\/\d{2,4}$/.test(validade)) {
+      const parts = validade.split('/');
+      const month = Number(parts[0]);
+      let year = Number(parts[1]);
+      
+      if (year < 100) {
+        year = year < 50 ? 2000 + year : 1900 + year;
+      }
       // Último dia do mês
-      return new Date(fullYear, month, 0);
+      return new Date(year, month, 0);
     }
 
     // Formato MES/ANO (ex: NOVEMBRO/2025)

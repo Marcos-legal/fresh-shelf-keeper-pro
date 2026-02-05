@@ -149,12 +149,20 @@ export function ValidadeField({
   const getDisplayValue = () => {
     if (!value) return '';
     
-    // If it's already in MES/ANO format, return as is
-    if (formato === 'MES/ANO' && /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+\/\d{4}$/.test(value)) {
-      return value;
+    // If value is ISO (YYYY-MM-DD) and we are not in that mode, try to convert it for display
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [y, m, d] = value.split('-').map(Number);
+      const date = new Date(y, m - 1, d);
+      
+      if (formato === 'DD/MM/AAAA') {
+        return format(date, "dd/MM/yyyy");
+      } else if (formato === 'MM/AAAA') {
+        return format(date, "MM/yyyy");
+      } else if (formato === 'MES/ANO') {
+        return `${meses[date.getMonth()]}/${date.getFullYear()}`;
+      }
     }
     
-    // For other formats, return the value as is
     return value;
   };
 
@@ -178,7 +186,7 @@ export function ValidadeField({
           value={getDisplayValue()}
           onChange={(e) => handleInputChange(e.target.value)}
           placeholder={getPlaceholder()}
-          className={error ? 'border-red-500 flex-1' : 'flex-1'}
+          className={error ? 'border-destructive flex-1' : 'flex-1'}
           maxLength={getMaxLength()}
         />
         
@@ -188,7 +196,7 @@ export function ValidadeField({
               variant="outline"
               className={cn(
                 "px-3",
-                error && "border-red-500"
+                error && "border-destructive"
               )}
             >
               <CalendarIcon className="h-4 w-4" />
@@ -221,16 +229,16 @@ export function ValidadeField({
       </div>
       
       {formato === 'MES/ANO' && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           Exemplo: NOVEMBRO/2025, DEZEMBRO/2024, etc.
         </p>
       )}
       
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         Digite manualmente ou use o calendário para selecionar a data
       </p>
       
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }
