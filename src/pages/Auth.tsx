@@ -219,7 +219,7 @@ export default function Auth() {
     setResetSuccess(false);
 
     // Validate email
-    const newErrors: { [key: string]: string } = {};
+    const newErrors: {[key: string]: string;} = {};
     if (!resetEmail) {
       newErrors.resetEmail = 'Email é obrigatório';
     } else if (!validateEmail(resetEmail)) {
@@ -233,7 +233,7 @@ export default function Auth() {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/auth?tab=reset`,
+      redirectTo: `${window.location.origin}/auth?tab=reset`
     });
 
     if (error) {
@@ -256,8 +256,8 @@ export default function Auth() {
           </div>
           <div className="space-y-1">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Sistema de Validade
-            </h1>
+
+          </h1>
             <p className="text-muted-foreground">
               Controle inteligente de produtos
             </p>
@@ -316,7 +316,7 @@ export default function Auth() {
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
-                    <Input id="login-email" type="email" placeholder="seu@email.com" value={loginData.email} onChange={e => setLoginData({
+                    <Input id="login-email" type="email" placeholder="seu@email.com" value={loginData.email} onChange={(e) => setLoginData({
                     ...loginData,
                     email: e.target.value
                   })} required disabled={isLoading} className={errors.loginEmail ? 'border-destructive focus-visible:ring-destructive' : ''} />
@@ -325,7 +325,7 @@ export default function Auth() {
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Senha</Label>
                     <div className="relative">
-                      <Input id="login-password" type={showLoginPassword ? "text" : "password"} placeholder="Digite sua senha" value={loginData.password} onChange={e => setLoginData({
+                      <Input id="login-password" type={showLoginPassword ? "text" : "password"} placeholder="Digite sua senha" value={loginData.password} onChange={(e) => setLoginData({
                       ...loginData,
                       password: e.target.value
                     })} required disabled={isLoading} className={`pr-10 ${errors.loginPassword ? 'border-destructive focus-visible:ring-destructive' : ''}`} />
@@ -340,12 +340,12 @@ export default function Auth() {
                     Entrar no Sistema
                   </Button>
                   <div className="text-center mt-4">
-                    <Button 
-                      type="button" 
-                      variant="link" 
-                      className="text-sm text-primary hover:text-primary/80 p-0 h-auto"
-                      onClick={() => setActiveTab('reset')}
-                    >
+                    <Button
+                    type="button"
+                    variant="link"
+                    className="text-sm text-primary hover:text-primary/80 p-0 h-auto"
+                    onClick={() => setActiveTab('reset')}>
+                    
                       Esqueci minha senha
                     </Button>
                   </div>
@@ -356,7 +356,7 @@ export default function Auth() {
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="register-email">Email</Label>
-                    <Input id="register-email" type="email" placeholder="seu@email.com" value={signupData.email} onChange={e => setSignupData({
+                    <Input id="register-email" type="email" placeholder="seu@email.com" value={signupData.email} onChange={(e) => setSignupData({
                     ...signupData,
                     email: e.target.value
                   })} required disabled={isLoading} className={errors.signupEmail ? 'border-destructive focus-visible:ring-destructive' : ''} />
@@ -365,7 +365,7 @@ export default function Auth() {
                   <div className="space-y-2">
                     <Label htmlFor="register-password">Senha</Label>
                     <div className="relative">
-                      <Input id="register-password" type={showSignupPassword ? "text" : "password"} placeholder="Crie uma senha segura" value={signupData.password} onChange={e => setSignupData({
+                      <Input id="register-password" type={showSignupPassword ? "text" : "password"} placeholder="Crie uma senha segura" value={signupData.password} onChange={(e) => setSignupData({
                       ...signupData,
                       password: e.target.value
                     })} required disabled={isLoading} minLength={6} className={`pr-10 ${errors.signupPassword ? 'border-destructive focus-visible:ring-destructive' : ''}`} />
@@ -385,7 +385,7 @@ export default function Auth() {
                         <span>Verificação de Segurança</span>
                       </Label>
                       <div className="flex justify-center">
-                        <HCaptcha ref={captchaRef} sitekey={HCAPTCHA_SITE_KEY} onVerify={token => setCaptchaToken(token)} onExpire={() => setCaptchaToken(null)} onError={() => setCaptchaToken(null)} />
+                        <HCaptcha ref={captchaRef} sitekey={HCAPTCHA_SITE_KEY} onVerify={(token) => setCaptchaToken(token)} onExpire={() => setCaptchaToken(null)} onError={() => setCaptchaToken(null)} />
                       </div>
                       {errors.captcha && <p className="text-sm text-destructive text-center">{errors.captcha}</p>}
                     </div>}
@@ -414,16 +414,16 @@ export default function Auth() {
                   
                   <div className="space-y-2">
                     <Label htmlFor="reset-email">Email</Label>
-                    <Input 
-                      id="reset-email" 
-                      type="email" 
-                      placeholder="seu@email.com" 
-                      value={resetEmail} 
-                      onChange={(e) => setResetEmail(e.target.value)} 
-                      required 
-                      disabled={isLoading} 
-                      className={errors.resetEmail ? 'border-destructive focus-visible:ring-destructive' : ''} 
-                    />
+                    <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                    disabled={isLoading}
+                    className={errors.resetEmail ? 'border-destructive focus-visible:ring-destructive' : ''} />
+                  
                     {errors.resetEmail && <p className="text-sm text-destructive">{errors.resetEmail}</p>}
                   </div>
                   
@@ -433,12 +433,12 @@ export default function Auth() {
                   </Button>
                   
                   <div className="text-center mt-4">
-                    <Button 
-                      type="button" 
-                      variant="link" 
-                      className="text-sm text-muted-foreground hover:text-primary p-0 h-auto"
-                      onClick={() => setActiveTab('login')}
-                    >
+                    <Button
+                    type="button"
+                    variant="link"
+                    className="text-sm text-muted-foreground hover:text-primary p-0 h-auto"
+                    onClick={() => setActiveTab('login')}>
+                    
                       Voltar ao login
                     </Button>
                   </div>
