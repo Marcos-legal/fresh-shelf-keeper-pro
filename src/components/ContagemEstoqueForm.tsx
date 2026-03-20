@@ -222,7 +222,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                   <div className="border-t pt-2 flex justify-between font-bold text-blue-900">
                     <span>Total no Estoque:</span>
                     <span className="text-lg">
-                      {quantidadeTotal.toFixed(2)} {produtoSelecionado.unidade_conteudo}
+                      {Number.isInteger(quantidadeTotal) ? quantidadeTotal : quantidadeTotal.toFixed(2)} {produtoSelecionado.unidade_conteudo}
                     </span>
                   </div>
                 </div>
