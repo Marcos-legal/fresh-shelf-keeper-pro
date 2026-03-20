@@ -2,12 +2,16 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, Save } from "lucide-react";
+import { Calculator, Save, Check, ChevronsUpDown } from "lucide-react";
 import { ContagemFormData, ProdutoEstoque } from "@/types/estoque";
 import { SelectField } from "@/components/form/SelectField";
 import { NumberInputField } from "@/components/form/NumberInputField";
 import { TextInputField } from "@/components/form/TextInputField";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 interface ContagemEstoqueFormProps {
   onSubmit: (data: ContagemFormData) => void;
