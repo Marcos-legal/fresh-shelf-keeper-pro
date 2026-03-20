@@ -256,8 +256,8 @@ export default function Auth() {
           </div>
           <div className="space-y-1">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-
-          </h1>
+              ValiControl
+            </h1>
             <p className="text-muted-foreground">
               Controle inteligente de produtos
             </p>
