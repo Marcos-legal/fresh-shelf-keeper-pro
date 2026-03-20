@@ -2,12 +2,16 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, Save } from "lucide-react";
+import { Calculator, Save, Check, ChevronsUpDown } from "lucide-react";
 import { ContagemFormData, ProdutoEstoque } from "@/types/estoque";
 import { SelectField } from "@/components/form/SelectField";
 import { NumberInputField } from "@/components/form/NumberInputField";
 import { TextInputField } from "@/components/form/TextInputField";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 interface ContagemEstoqueFormProps {
   onSubmit: (data: ContagemFormData) => void;
@@ -16,6 +20,7 @@ interface ContagemEstoqueFormProps {
 }
 
 export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEstoqueFormProps) {
+  const [produtoOpen, setProdutoOpen] = useState(false);
   const [formData, setFormData] = useState<ContagemFormData>({
     produto_id: '',
     quantidade: 0,
@@ -110,15 +115,57 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-6">
-            <SelectField
-              label="Produto"
-              value={formData.produto_id}
-              onChange={(value: string) => handleInputChange('produto_id', value)}
-              options={produtoOptions}
-              placeholder="Selecione um produto"
-              error={errors.produto_id}
-              required
-            />
+            <div className="space-y-2">
+              <Label>Produto *</Label>
+              <Popover open={produtoOpen} onOpenChange={setProdutoOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={produtoOpen}
+                    className={cn(
+                      "w-full justify-between font-normal",
+                      !formData.produto_id && "text-muted-foreground",
+                      errors.produto_id && "border-destructive"
+                    )}
+                  >
+                    {formData.produto_id
+                      ? produtoOptions.find(o => o.value === formData.produto_id)?.label
+                      : "Selecione ou digite o nome do produto"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                  <Command>
+                    <CommandInput placeholder="Buscar produto..." />
+                    <CommandList>
+                      <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        {produtoOptions.map((option) => (
+                          <CommandItem
+                            key={option.value}
+                            value={option.label}
+                            onSelect={() => {
+                              handleInputChange('produto_id', option.value);
+                              setProdutoOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                formData.produto_id === option.value ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {errors.produto_id && <p className="text-sm text-destructive">{errors.produto_id}</p>}
+            </div>
 
             <NumberInputField
               id="quantidade"
