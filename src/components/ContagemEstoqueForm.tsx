@@ -20,6 +20,7 @@ interface ContagemEstoqueFormProps {
 }
 
 export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEstoqueFormProps) {
+  const [produtoOpen, setProdutoOpen] = useState(false);
   const [formData, setFormData] = useState<ContagemFormData>({
     produto_id: '',
     quantidade: 0,
