@@ -350,7 +350,7 @@ const Index = () => {
     });
   };
 
-  // Produtos próximos do vencimento (7 dias)
+  // Produtos próximos do vencimento (2 dias)
   const proximosVencimento = products.filter(product => {
     const now = new Date();
     let targetDate: Date | undefined;
@@ -364,11 +364,32 @@ const Index = () => {
     if (!targetDate) return false;
     
     const daysToExpire = Math.ceil((targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return daysToExpire <= 7 && daysToExpire > 0;
+    return daysToExpire <= 2 && daysToExpire > 0;
   });
 
   // Produtos vencidos
   const produtosVencidos = products.filter(product => product.status === 'vencido');
+
+  // Filtered products based on active filter
+  const filteredProducts = (() => {
+    switch (activeFilter) {
+      case 'validos':
+        return products.filter(p => p.status === 'valido');
+      case 'proximo-vencimento':
+        return proximosVencimento;
+      case 'vencidos':
+        return produtosVencidos;
+      default:
+        return products;
+    }
+  })();
+
+  const filterTitles: Record<string, string> = {
+    'todos': 'Todos os Produtos',
+    'validos': 'Produtos Válidos',
+    'proximo-vencimento': 'Produtos Próximos do Vencimento',
+    'vencidos': 'Produtos Vencidos',
+  };
 
   if (loading) {
     return (
