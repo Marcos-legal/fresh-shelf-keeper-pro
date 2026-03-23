@@ -703,13 +703,24 @@ const Index = () => {
               </div>
             )}
 
+            {/* Filtro ativo indicator */}
+            {activeFilter !== 'todos' && (
+              <div className="mb-4 flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Filtrando por:</span>
+                <span className="text-sm font-semibold text-primary">{filterTitles[activeFilter]}</span>
+                <Button variant="ghost" size="sm" onClick={() => setActiveFilter('todos')} className="text-xs">
+                  ✕ Limpar filtro
+                </Button>
+              </div>
+            )}
+
             {/* Tabela de produtos */}
             <ProductTable
-              products={products}
+              products={filteredProducts}
               onEdit={handleEditClick}
               onDelete={handleDeleteProduct}
               onPrintLabel={handlePrintLabel}
-              title="Todos os Produtos"
+              title={filterTitles[activeFilter]}
             />
           </div>
         </main>
