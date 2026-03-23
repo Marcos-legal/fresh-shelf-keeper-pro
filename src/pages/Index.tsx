@@ -508,7 +508,7 @@ const Index = () => {
                 icon={Package}
                 variant="default"
                 description="Produtos cadastrados"
-                onClick={() => navigate('/')}
+                onClick={() => setActiveFilter(activeFilter === 'todos' ? 'todos' : 'todos')}
                 actionIcon={Eye}
                 actionLabel="Ver"
               />
@@ -518,7 +518,7 @@ const Index = () => {
                 icon={CheckCircle}
                 variant="success"
                 description="Em condições ideais"
-                onClick={() => navigate('/relatorios')}
+                onClick={() => setActiveFilter(activeFilter === 'validos' ? 'todos' : 'validos')}
                 actionIcon={FileText}
                 actionLabel="Relatório"
               />
@@ -528,7 +528,7 @@ const Index = () => {
                 icon={AlertTriangle}
                 variant="warning"
                 description="Atenção necessária"
-                onClick={() => navigate('/relatorios')}
+                onClick={() => setActiveFilter(activeFilter === 'proximo-vencimento' ? 'todos' : 'proximo-vencimento')}
                 actionIcon={Clock}
                 actionLabel="Ver Lista"
               />
@@ -538,7 +538,7 @@ const Index = () => {
                 icon={XCircle}
                 variant="danger"
                 description="Requer ação imediata"
-                onClick={() => navigate('/relatorios')}
+                onClick={() => setActiveFilter(activeFilter === 'vencidos' ? 'todos' : 'vencidos')}
                 actionIcon={AlertTriangle}
                 actionLabel="Urgente"
               />
