@@ -26,6 +26,7 @@ const Index = () => {
   const { products, loading, addProduct, updateProduct, deleteProduct, stats, getProductsByCategory } = useProductsSupabase();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<'todos' | 'validos' | 'proximo-vencimento' | 'vencidos'>('todos');
 
   console.log('Produtos carregados no Index:', products);
 
