@@ -26,6 +26,7 @@ const Index = () => {
   const { products, loading, addProduct, updateProduct, deleteProduct, stats, getProductsByCategory } = useProductsSupabase();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<'todos' | 'validos' | 'proximo-vencimento' | 'vencidos'>('todos');
 
   console.log('Produtos carregados no Index:', products);
 
@@ -349,7 +350,7 @@ const Index = () => {
     });
   };
 
-  // Produtos próximos do vencimento (7 dias)
+  // Produtos próximos do vencimento (2 dias)
   const proximosVencimento = products.filter(product => {
     const now = new Date();
     let targetDate: Date | undefined;
@@ -363,11 +364,32 @@ const Index = () => {
     if (!targetDate) return false;
     
     const daysToExpire = Math.ceil((targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return daysToExpire <= 7 && daysToExpire > 0;
+    return daysToExpire <= 2 && daysToExpire > 0;
   });
 
   // Produtos vencidos
   const produtosVencidos = products.filter(product => product.status === 'vencido');
+
+  // Filtered products based on active filter
+  const filteredProducts = (() => {
+    switch (activeFilter) {
+      case 'validos':
+        return products.filter(p => p.status === 'valido');
+      case 'proximo-vencimento':
+        return proximosVencimento;
+      case 'vencidos':
+        return produtosVencidos;
+      default:
+        return products;
+    }
+  })();
+
+  const filterTitles: Record<string, string> = {
+    'todos': 'Todos os Produtos',
+    'validos': 'Produtos Válidos',
+    'proximo-vencimento': 'Produtos Próximos do Vencimento',
+    'vencidos': 'Produtos Vencidos',
+  };
 
   if (loading) {
     return (
@@ -486,7 +508,7 @@ const Index = () => {
                 icon={Package}
                 variant="default"
                 description="Produtos cadastrados"
-                onClick={() => navigate('/')}
+                onClick={() => setActiveFilter(activeFilter === 'todos' ? 'todos' : 'todos')}
                 actionIcon={Eye}
                 actionLabel="Ver"
               />
@@ -496,7 +518,7 @@ const Index = () => {
                 icon={CheckCircle}
                 variant="success"
                 description="Em condições ideais"
-                onClick={() => navigate('/relatorios')}
+                onClick={() => setActiveFilter(activeFilter === 'validos' ? 'todos' : 'validos')}
                 actionIcon={FileText}
                 actionLabel="Relatório"
               />
@@ -506,7 +528,7 @@ const Index = () => {
                 icon={AlertTriangle}
                 variant="warning"
                 description="Atenção necessária"
-                onClick={() => navigate('/relatorios')}
+                onClick={() => setActiveFilter(activeFilter === 'proximo-vencimento' ? 'todos' : 'proximo-vencimento')}
                 actionIcon={Clock}
                 actionLabel="Ver Lista"
               />
@@ -516,7 +538,7 @@ const Index = () => {
                 icon={XCircle}
                 variant="danger"
                 description="Requer ação imediata"
-                onClick={() => navigate('/relatorios')}
+                onClick={() => setActiveFilter(activeFilter === 'vencidos' ? 'todos' : 'vencidos')}
                 actionIcon={AlertTriangle}
                 actionLabel="Urgente"
               />
@@ -681,13 +703,24 @@ const Index = () => {
               </div>
             )}
 
+            {/* Filtro ativo indicator */}
+            {activeFilter !== 'todos' && (
+              <div className="mb-4 flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Filtrando por:</span>
+                <span className="text-sm font-semibold text-primary">{filterTitles[activeFilter]}</span>
+                <Button variant="ghost" size="sm" onClick={() => setActiveFilter('todos')} className="text-xs">
+                  ✕ Limpar filtro
+                </Button>
+              </div>
+            )}
+
             {/* Tabela de produtos */}
             <ProductTable
-              products={products}
+              products={filteredProducts}
               onEdit={handleEditClick}
               onDelete={handleDeleteProduct}
               onPrintLabel={handlePrintLabel}
-              title="Todos os Produtos"
+              title={filterTitles[activeFilter]}
             />
           </div>
         </main>
