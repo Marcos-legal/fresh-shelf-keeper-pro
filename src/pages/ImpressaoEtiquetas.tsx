@@ -962,35 +962,19 @@ const ImpressaoEtiquetas = () => {
                         </DialogHeader>
                         <div className="space-y-4 pt-4">
                           <div>
-                            <Label htmlFor="largura" className="text-sm font-medium text-gray-700 mb-2 block">
+                        <Label htmlFor="largura" className="text-sm font-medium text-foreground mb-2 block">
                               Largura (mm)
                             </Label>
-                            <Input
-                              id="largura"
-                              type="number"
-                              min="30"
-                              max="150"
-                              value={largura}
-                              onChange={(e) => handleLarguraChange(e.target.value)}
-                              className="text-center"
-                            />
+                            <Input id="largura" type="number" min="30" max="150" value={largura} onChange={(e) => handleLarguraChange(e.target.value)} className="text-center" />
                           </div>
                           <div>
-                            <Label htmlFor="altura" className="text-sm font-medium text-gray-700 mb-2 block">
+                            <Label htmlFor="altura" className="text-sm font-medium text-foreground mb-2 block">
                               Altura (mm)
                             </Label>
-                            <Input
-                              id="altura"
-                              type="number"
-                              min="20"
-                              max="100"
-                              value={altura}
-                              onChange={(e) => handleAlturaChange(e.target.value)}
-                              className="text-center"
-                            />
+                            <Input id="altura" type="number" min="20" max="100" value={altura} onChange={(e) => handleAlturaChange(e.target.value)} className="text-center" />
                           </div>
-                          <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
-                            <div className="text-sm text-gray-600 mb-2">Preview:</div>
+                          <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
+                            <div className="text-sm text-muted-foreground mb-2">Preview:</div>
                             <div 
                               className="border-2 border-gray-400 bg-white flex items-center justify-center text-xs font-bold text-gray-700"
                               style={{
