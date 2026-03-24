@@ -262,39 +262,32 @@ const VisualizarEtiquetas = () => {
                 {/* Produtos Válidos */}
                 {validProducts.length > 0 && (
                   <div>
-                    <div className="flex items-center space-x-3 mb-6">
-                      <Eye className="w-6 h-6 text-green-600" />
-                      <h2 className="text-2xl font-bold text-green-700">✅ Produtos Válidos ({validProducts.length})</h2>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Eye className="w-4 h-4 text-success" />
+                      <h2 className="text-sm font-semibold text-success">Produtos Válidos ({validProducts.length})</h2>
                     </div>
                     <div className={cn(
                       viewMode === 'grid' 
-                        ? "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        : "space-y-4"
+                        ? "grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        : "space-y-3"
                     )}>
                       {validProducts.map((product) => (
                         <div key={product.id} className={cn(
                           "print:break-inside-avoid",
-                          viewMode === 'list' && "flex items-center space-x-4 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                          viewMode === 'list' && "flex items-center gap-3 p-3 bg-card border border-border/60 rounded-xl hover:shadow-sm transition-shadow"
                         )}>
                           <div className={cn(
-                            "flex items-center space-x-2 print:hidden",
-                            viewMode === 'list' ? "flex-shrink-0" : "mb-3"
+                            "flex items-center gap-2 print:hidden",
+                            viewMode === 'list' ? "flex-shrink-0" : "mb-2"
                           )}>
-                            <Checkbox
-                              checked={selectedProducts.includes(product.id)}
-                              onCheckedChange={() => handleSelectProduct(product.id)}
-                            />
-                            <span className="text-sm text-green-600 whitespace-nowrap">✓ Válido</span>
+                            <Checkbox checked={selectedProducts.includes(product.id)} onCheckedChange={() => handleSelectProduct(product.id)} />
+                            <span className="text-[11px] text-success font-medium">Válido</span>
                           </div>
                           <div className={cn(
-                            "hover:shadow-lg transition-shadow duration-200 border border-gray-200 rounded-lg p-3 bg-white",
+                            "hover:shadow-sm transition-shadow duration-200 border border-border/60 rounded-xl p-3 bg-card",
                             viewMode === 'list' && "flex-1"
                           )}>
-                            <EtiquetaView 
-                              product={product} 
-                              largura={viewMode === 'list' ? 50 : largura} 
-                              altura={viewMode === 'list' ? 35 : altura} 
-                            />
+                            <EtiquetaView product={product} largura={viewMode === 'list' ? 50 : largura} altura={viewMode === 'list' ? 35 : altura} />
                           </div>
                         </div>
                       ))}
@@ -304,19 +297,10 @@ const VisualizarEtiquetas = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Eye className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Nenhuma etiqueta encontrada
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Cadastre produtos para visualizar as etiquetas aqui.
-                </p>
-                <Button 
-                  onClick={() => window.location.href = '/cadastro'}
-                  className="gradient-blue text-white"
-                >
-                  Cadastrar Produto
-                </Button>
+                <Eye className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-1">Nenhuma etiqueta encontrada</h3>
+                <p className="text-sm text-muted-foreground mb-4">Cadastre produtos para visualizar as etiquetas aqui.</p>
+                <Button onClick={() => window.location.href = '/cadastro'} size="sm">Cadastrar Produto</Button>
               </div>
             )}
           </div>
