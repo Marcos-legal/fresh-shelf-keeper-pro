@@ -134,21 +134,16 @@ const VisualizarEtiquetas = () => {
         <MobileDrawer />
         <AppSidebar />
         <main className="flex-1 overflow-x-hidden w-full">
-          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-14 sm:pt-4 md:pt-6 lg:pt-8">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-6 lg:mb-8">
-              <SidebarTrigger className="hidden lg:flex" />
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg flex items-center justify-center flex-shrink-0">
-                  <Eye className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
-                    👁️ Visualizar Etiquetas
-                  </h1>
-                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1">
-                    Visualize todas as etiquetas ({products.length} produtos) - {largura}×{altura}mm
-                  </p>
-                </div>
+          <div className="p-4 sm:p-6 lg:p-8 pt-14 sm:pt-6 max-w-7xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <SidebarTrigger className="hidden lg:flex text-muted-foreground" />
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+                  Visualizar Etiquetas
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  {products.length} produtos · {largura}×{altura}mm
+                </p>
               </div>
             </div>
 
