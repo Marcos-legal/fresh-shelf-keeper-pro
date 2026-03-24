@@ -979,17 +979,12 @@ const ImpressaoEtiquetas = () => {
                               className="border-2 border-border bg-card flex items-center justify-center text-xs font-bold text-muted-foreground"
                               style={{ width: `${Math.min(80, largura * 0.8)}px`, height: `${Math.min(60, altura * 0.8)}px` }}
                             >
-                                height: `${Math.min(60, altura * 0.8)}px`
-                              }}
-                            >
                               {largura}×{altura}mm
                             </div>
                           </div>
-                          <div className="p-3 bg-blue-50 rounded-lg">
-                            <p className="text-sm text-blue-700">
-                              <Settings className="w-4 h-4 inline mr-1" />
-                              Layout se adapta automaticamente • Salvo automaticamente
-                            </p>
+                          <div className="alert-banner-info">
+                            <Settings className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-sm">Layout se adapta automaticamente · Salvo automaticamente</span>
                           </div>
                         </div>
                       </DialogContent>
