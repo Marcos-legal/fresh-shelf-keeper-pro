@@ -226,39 +226,32 @@ const VisualizarEtiquetas = () => {
                 {/* Produtos Vencidos - Destaque Especial */}
                 {expiredProducts.length > 0 && (
                   <div>
-                    <div className="flex items-center space-x-3 mb-6">
-                      <AlertTriangle className="w-6 h-6 text-red-600" />
-                      <h2 className="text-2xl font-bold text-red-700">🚨 Produtos Vencidos ({expiredProducts.length})</h2>
+                    <div className="flex items-center gap-2 mb-4">
+                      <AlertTriangle className="w-4 h-4 text-destructive" />
+                      <h2 className="text-sm font-semibold text-destructive">Produtos Vencidos ({expiredProducts.length})</h2>
                     </div>
                     <div className={cn(
                       viewMode === 'grid' 
-                        ? "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        : "space-y-4"
+                        ? "grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        : "space-y-3"
                     )}>
                       {expiredProducts.map((product) => (
                         <div key={product.id} className={cn(
                           "print:break-inside-avoid",
-                          viewMode === 'list' && "flex items-center space-x-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg"
+                          viewMode === 'list' && "flex items-center gap-3 p-3 bg-destructive/5 border border-destructive/15 rounded-xl"
                         )}>
                           <div className={cn(
-                            "flex items-center space-x-2 print:hidden",
-                            viewMode === 'list' ? "flex-shrink-0" : "mb-3"
+                            "flex items-center gap-2 print:hidden",
+                            viewMode === 'list' ? "flex-shrink-0" : "mb-2"
                           )}>
-                            <Checkbox
-                              checked={selectedProducts.includes(product.id)}
-                              onCheckedChange={() => handleSelectProduct(product.id)}
-                            />
-                            <span className="text-sm text-red-600 font-bold whitespace-nowrap">⚠️ VENCIDO</span>
+                            <Checkbox checked={selectedProducts.includes(product.id)} onCheckedChange={() => handleSelectProduct(product.id)} />
+                            <span className="text-[11px] text-destructive font-semibold">VENCIDO</span>
                           </div>
                           <div className={cn(
-                            "border-4 border-red-500 rounded-lg p-3 bg-red-50 shadow-lg hover:shadow-xl transition-all duration-200",
+                            "border border-destructive/20 rounded-xl p-3 bg-destructive/5 hover:shadow-sm transition-all duration-200",
                             viewMode === 'list' && "flex-1"
                           )}>
-                            <EtiquetaView 
-                              product={product} 
-                              largura={viewMode === 'list' ? 90 : largura} 
-                              altura={viewMode === 'list' ? 60 : altura} 
-                            />
+                            <EtiquetaView product={product} largura={viewMode === 'list' ? 90 : largura} altura={viewMode === 'list' ? 60 : altura} />
                           </div>
                         </div>
                       ))}
