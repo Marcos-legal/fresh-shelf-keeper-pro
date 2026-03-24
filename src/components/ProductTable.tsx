@@ -1,22 +1,17 @@
 
 import { useState } from "react";
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Edit, Trash2, Printer, Search } from "lucide-react";
+import { Edit, Trash2, Printer, Search } from "lucide-react";
 import { Product, StorageLocation } from "@/types/product";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface ProductTableProps {
   products: Product[];
@@ -29,9 +24,9 @@ interface ProductTableProps {
 }
 
 const statusConfig = {
-  'valido': { label: 'Válido', variant: 'default' as const, color: 'bg-green-100 text-green-800' },
-  'proximo-vencimento': { label: 'Próximo Venc.', variant: 'secondary' as const, color: 'bg-yellow-100 text-yellow-800' },
-  'vencido': { label: 'Vencido', variant: 'destructive' as const, color: 'bg-red-100 text-red-800' },
+  'valido': { label: 'Válido', className: 'bg-success/10 text-success border-success/20' },
+  'proximo-vencimento': { label: 'Próx. Venc.', className: 'bg-warning/10 text-warning border-warning/20' },
+  'vencido': { label: 'Vencido', className: 'bg-destructive/10 text-destructive border-destructive/20' },
 };
 
 const categoryLabels = {
@@ -42,126 +37,95 @@ const categoryLabels = {
 };
 
 export function ProductTable({ 
-  products, 
-  onEdit, 
-  onDelete, 
-  onUpdateAbertura, 
-  onPrintLabel,
-  title = "Produtos",
-  category 
+  products, onEdit, onDelete, onUpdateAbertura, onPrintLabel,
+  title = "Produtos", category 
 }: ProductTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("nome");
 
-  // Filtrar e ordenar produtos
-  const filteredProducts = products
-    .filter(product => {
-      const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.lote.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.marca.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = statusFilter === "all" || product.status === statusFilter;
-      
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'nome':
-          return a.nome.localeCompare(b.nome);
-        case 'validade':
-          const aDate = safeGetDate(a.validade);
-          const bDate = safeGetDate(b.validade);
-          if (!aDate && !bDate) return 0;
-          if (!aDate) return 1;
-          if (!bDate) return -1;
-          return aDate.getTime() - bDate.getTime();
-        case 'status':
-          return a.status.localeCompare(b.status);
-        default:
-          return 0;
-      }
-    });
-
   const safeGetDate = (dateValue: any): Date | null => {
     if (!dateValue) return null;
-    
     try {
-      // Handle complex date structure from localStorage
       if (typeof dateValue === 'object' && dateValue._type === 'Date') {
-        if (dateValue.value && dateValue.value.iso) {
+        if (dateValue.value?.iso) {
           const date = new Date(dateValue.value.iso);
           return isNaN(date.getTime()) ? null : date;
         }
       }
-      
-      // Handle direct Date objects
-      if (dateValue instanceof Date) {
-        return isNaN(dateValue.getTime()) ? null : dateValue;
-      }
-      
-      // Handle string dates
+      if (dateValue instanceof Date) return isNaN(dateValue.getTime()) ? null : dateValue;
       if (typeof dateValue === 'string') {
         const date = new Date(dateValue);
         return isNaN(date.getTime()) ? null : date;
       }
-      
       return null;
-    } catch (error) {
-      console.warn('Error parsing date:', dateValue, error);
-      return null;
-    }
+    } catch { return null; }
   };
 
   const formatDate = (dateValue: any): string => {
     const date = safeGetDate(dateValue);
     if (!date) return '-';
-    
-    try {
-      return format(date, "dd/MM/yyyy", { locale: ptBR });
-    } catch (error) {
-      console.warn('Error formatting date:', dateValue, error);
-      return '-';
-    }
+    try { return format(date, "dd/MM/yyyy", { locale: ptBR }); } catch { return '-'; }
   };
 
+  const filteredProducts = products
+    .filter(product => {
+      const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           product.lote.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           product.marca.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === "all" || product.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'nome': return a.nome.localeCompare(b.nome);
+        case 'validade':
+          const aD = safeGetDate(a.validade), bD = safeGetDate(b.validade);
+          if (!aD && !bD) return 0;
+          if (!aD) return 1;
+          if (!bD) return -1;
+          return aD.getTime() - bD.getTime();
+        case 'status': return a.status.localeCompare(b.status);
+        default: return 0;
+      }
+    });
+
   return (
-    <Card className="animate-fade-in">
-      <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <span className="text-lg sm:text-xl">{title}</span>
-          <Badge variant="outline" className="text-xs sm:text-sm w-fit">
+    <div className="bg-card rounded-xl border border-border/60 animate-fade-in">
+      {/* Header */}
+      <div className="p-4 sm:p-5 border-b border-border/60">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
             {filteredProducts.length} produtos
-          </Badge>
-        </CardTitle>
+          </span>
+        </div>
         
-        {/* Filtros */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-4">
-          <div className="flex items-center space-x-2 flex-1 sm:flex-initial">
-            <Search className="w-4 h-4 text-muted-foreground" />
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input
               placeholder="Buscar produtos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-64"
+              className="pl-8 h-9 text-sm"
             />
           </div>
-          
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Filtrar por status" />
+            <SelectTrigger className="w-full sm:w-40 h-9 text-sm">
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="valido">Válidos</SelectItem>
-              <SelectItem value="proximo-vencimento">Próximo vencimento</SelectItem>
+              <SelectItem value="proximo-vencimento">Próx. vencimento</SelectItem>
               <SelectItem value="vencido">Vencidos</SelectItem>
             </SelectContent>
           </Select>
-          
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Ordenar por" />
+            <SelectTrigger className="w-full sm:w-36 h-9 text-sm">
+              <SelectValue placeholder="Ordenar" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="nome">Nome</SelectItem>
@@ -170,190 +134,120 @@ export function ProductTable({
             </SelectContent>
           </Select>
         </div>
-      </CardHeader>
+      </div>
       
-      <CardContent className="p-0 sm:p-6">
-        {/* Desktop Table View */}
-        <div className="hidden lg:block overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Produto</TableHead>
-                <TableHead>Lote</TableHead>
-                <TableHead>Marca</TableHead>
-                <TableHead>Fabricação</TableHead>
-                <TableHead>Validade</TableHead>
-                <TableHead>Abertura</TableHead>
-                <TableHead>Utilizar Até</TableHead>
-                {!category && <TableHead>Local</TableHead>}
-                <TableHead>Responsável</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts.map((product) => (
-                <TableRow key={product.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">{product.nome}</TableCell>
-                  <TableCell>{product.lote}</TableCell>
-                  <TableCell>{product.marca}</TableCell>
-                  <TableCell>{formatDate(product.dataFabricacao)}</TableCell>
-                  <TableCell>{formatDate(product.validade)}</TableCell>
-                  <TableCell>{formatDate(product.dataAbertura)}</TableCell>
-                  <TableCell>{formatDate(product.utilizarAte)}</TableCell>
-                  {!category && (
-                    <TableCell>
-                      <Badge variant="outline">
-                        {categoryLabels[product.localArmazenamento]}
-                      </Badge>
-                    </TableCell>
-                  )}
-                  <TableCell>{product.responsavel}</TableCell>
+      {/* Desktop Table */}
+      <div className="hidden lg:block overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-border/40 hover:bg-transparent">
+              <TableHead className="text-xs font-medium text-muted-foreground">Produto</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">Lote</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">Marca</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">Fabricação</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">Validade</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">Abertura</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">Usar Até</TableHead>
+              {!category && <TableHead className="text-xs font-medium text-muted-foreground">Local</TableHead>}
+              <TableHead className="text-xs font-medium text-muted-foreground">Responsável</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">Status</TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredProducts.map((product) => (
+              <TableRow key={product.id} className="border-border/30 hover:bg-muted/30 transition-colors">
+                <TableCell className="font-medium text-sm">{product.nome}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{product.lote}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{product.marca}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{formatDate(product.dataFabricacao)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{formatDate(product.validade)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{formatDate(product.dataAbertura)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{formatDate(product.utilizarAte)}</TableCell>
+                {!category && (
                   <TableCell>
-                    <Badge 
-                      variant={statusConfig[product.status].variant}
-                      className={statusConfig[product.status].color}
-                    >
-                      {statusConfig[product.status].label}
-                    </Badge>
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                      {categoryLabels[product.localArmazenamento]}
+                    </span>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      {onEdit && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => onEdit(product)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {onPrintLabel && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => onPrintLabel(product)}
-                        >
-                          <Printer className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {onDelete && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => onDelete(product.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Mobile/Tablet Card View */}
-        <div className="lg:hidden space-y-4 p-4">
-          {filteredProducts.map((product) => (
-            <Card key={product.id} className="border-l-4" style={{
-              borderLeftColor: product.status === 'vencido' ? 'hsl(var(--destructive))' : 
-                               product.status === 'proximo-vencimento' ? 'hsl(var(--warning))' : 
-                               'hsl(var(--success))'
-            }}>
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-bold text-base mb-1">{product.nome}</h3>
-                    <p className="text-sm text-muted-foreground">Lote: {product.lote}</p>
-                  </div>
-                  <Badge 
-                    variant={statusConfig[product.status].variant}
-                    className={statusConfig[product.status].color + " text-xs"}
-                  >
+                )}
+                <TableCell className="text-sm text-muted-foreground">{product.responsavel}</TableCell>
+                <TableCell>
+                  <span className={cn("text-[11px] font-medium px-2 py-0.5 rounded-full border", statusConfig[product.status].className)}>
                     {statusConfig[product.status].label}
-                  </Badge>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-                  <div>
-                    <span className="text-muted-foreground">Marca:</span>
-                    <p className="font-medium">{product.marca}</p>
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    {onEdit && (
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(product)}>
+                        <Edit className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+                    {onPrintLabel && (
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onPrintLabel(product)}>
+                        <Printer className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => onDelete(product.id)}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">Validade:</span>
-                    <p className="font-medium">{formatDate(product.validade)}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Abertura:</span>
-                    <p className="font-medium">{formatDate(product.dataAbertura)}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Usar até:</span>
-                    <p className="font-medium">{formatDate(product.utilizarAte)}</p>
-                  </div>
-                  {!category && (
-                    <div className="col-span-2">
-                      <span className="text-muted-foreground">Local: </span>
-                      <Badge variant="outline" className="text-xs">
-                        {categoryLabels[product.localArmazenamento]}
-                      </Badge>
-                    </div>
-                  )}
-                  <div className="col-span-2">
-                    <span className="text-muted-foreground">Responsável:</span>
-                    <p className="font-medium">{product.responsavel}</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2 pt-3 border-t">
-                  {onEdit && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => onEdit(product)}
-                      className="flex-1"
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Editar
-                    </Button>
-                  )}
-                  {onPrintLabel && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => onPrintLabel(product)}
-                      className="flex-1"
-                    >
-                      <Printer className="w-4 h-4 mr-1" />
-                      Imprimir
-                    </Button>
-                  )}
-                  {onDelete && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => onDelete(product.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-          
-        
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground p-4">
-            <p>Nenhum produto encontrado</p>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="lg:hidden divide-y divide-border/30">
+        {filteredProducts.map((product) => (
+          <div key={product.id} className="p-4 hover:bg-muted/20 transition-colors">
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm text-foreground truncate">{product.nome}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Lote: {product.lote} · {product.marca}</p>
+              </div>
+              <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border ml-2 flex-shrink-0", statusConfig[product.status].className)}>
+                {statusConfig[product.status].label}
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-3">
+              <div><span className="text-muted-foreground">Validade:</span> <span className="font-medium">{formatDate(product.validade)}</span></div>
+              <div><span className="text-muted-foreground">Usar até:</span> <span className="font-medium">{formatDate(product.utilizarAte)}</span></div>
+              {!category && <div className="col-span-2"><span className="text-muted-foreground">Local:</span> <span className="font-medium">{categoryLabels[product.localArmazenamento]}</span></div>}
+            </div>
+            
+            <div className="flex gap-1.5">
+              {onEdit && (
+                <Button variant="outline" size="sm" onClick={() => onEdit(product)} className="flex-1 h-8 text-xs">
+                  <Edit className="w-3 h-3 mr-1" />Editar
+                </Button>
+              )}
+              {onPrintLabel && (
+                <Button size="sm" onClick={() => onPrintLabel(product)} className="flex-1 h-8 text-xs">
+                  <Printer className="w-3 h-3 mr-1" />Imprimir
+                </Button>
+              )}
+              {onDelete && (
+                <Button variant="ghost" size="sm" onClick={() => onDelete(product.id)} className="h-8 w-8 p-0 text-destructive">
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              )}
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        ))}
+      </div>
+      
+      {filteredProducts.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <p className="text-sm">Nenhum produto encontrado</p>
+        </div>
+      )}
+    </div>
   );
 }
