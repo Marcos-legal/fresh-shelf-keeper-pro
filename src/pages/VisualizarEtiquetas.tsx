@@ -147,47 +147,23 @@ const VisualizarEtiquetas = () => {
               </div>
             </div>
 
-            {/* Informação do Tamanho e Controles de Visualização */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-              <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200 shadow-lg">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-2 text-green-700">
-                    <Ruler className="w-5 h-5" />
-                    <span className="font-medium">
-                      Tamanho configurado: {largura}×{altura}mm
-                      <span className="text-sm ml-2">(Configure na página de Impressão)</span>
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 shadow-lg">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-blue-700 font-medium">Modo de Visualização:</span>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant={viewMode === 'grid' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setViewMode('grid')}
-                        className="h-8"
-                      >
-                        <Grid className="w-4 h-4 mr-1" />
-                        Grade
-                      </Button>
-                      <Button
-                        variant={viewMode === 'list' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setViewMode('list')}
-                        className="h-8"
-                      >
-                        <List className="w-4 h-4 mr-1" />
-                        Lista
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Controls */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-6">
+              <div className="alert-banner-info">
+                <Ruler className="w-4 h-4 flex-shrink-0" />
+                <span>Tamanho: {largura}×{altura}mm (configure na Impressão)</span>
+              </div>
+              <div className="bg-card rounded-xl border border-border/60 p-3 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-medium">Visualização:</span>
+                <div className="flex gap-1.5">
+                  <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('grid')} className="h-7 text-xs">
+                    <Grid className="w-3.5 h-3.5 mr-1" />Grade
+                  </Button>
+                  <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('list')} className="h-7 text-xs">
+                    <List className="w-3.5 h-3.5 mr-1" />Lista
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {/* Card de Controle */}
