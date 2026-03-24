@@ -202,19 +202,10 @@ const VisualizarEtiquetas = () => {
 
             {/* Alertas para produtos vencidos */}
             {expiredProducts.length > 0 && (
-              <Card className="mb-6 bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center space-x-2">
-                    <AlertTriangle className="w-5 h-5" />
-                    <span>⚠️ Produtos Vencidos - Atenção Especial</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <p className="text-red-800 font-medium">
-                    <strong>{expiredProducts.length} produto(s)</strong> estão fora da validade e destacados em vermelho abaixo.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="alert-banner-danger mb-6">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span><strong>{expiredProducts.length} produto(s)</strong> fora da validade — destacados em vermelho abaixo</span>
+              </div>
             )}
 
             {!user ? (
