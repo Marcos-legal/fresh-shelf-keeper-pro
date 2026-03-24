@@ -907,21 +907,16 @@ const ImpressaoEtiquetas = () => {
         <MobileDrawer />
         <AppSidebar />
         <main className="flex-1 overflow-x-hidden w-full">
-          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-14 sm:pt-4 md:pt-6 lg:pt-8">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
-              <SidebarTrigger className="hidden lg:flex" />
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Printer className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
-                    Impressão Térmica
-                  </h1>
-                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1">
-                    Impressão otimizada para impressoras térmicas
-                  </p>
-                </div>
+          <div className="p-4 sm:p-6 lg:p-8 pt-14 sm:pt-6 max-w-7xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <SidebarTrigger className="hidden lg:flex text-muted-foreground" />
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+                  Impressão de Etiquetas
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  Impressão otimizada para impressoras térmicas
+                </p>
               </div>
             </div>
 
@@ -967,50 +962,29 @@ const ImpressaoEtiquetas = () => {
                         </DialogHeader>
                         <div className="space-y-4 pt-4">
                           <div>
-                            <Label htmlFor="largura" className="text-sm font-medium text-gray-700 mb-2 block">
+                        <Label htmlFor="largura" className="text-sm font-medium text-foreground mb-2 block">
                               Largura (mm)
                             </Label>
-                            <Input
-                              id="largura"
-                              type="number"
-                              min="30"
-                              max="150"
-                              value={largura}
-                              onChange={(e) => handleLarguraChange(e.target.value)}
-                              className="text-center"
-                            />
+                            <Input id="largura" type="number" min="30" max="150" value={largura} onChange={(e) => handleLarguraChange(e.target.value)} className="text-center" />
                           </div>
                           <div>
-                            <Label htmlFor="altura" className="text-sm font-medium text-gray-700 mb-2 block">
+                            <Label htmlFor="altura" className="text-sm font-medium text-foreground mb-2 block">
                               Altura (mm)
                             </Label>
-                            <Input
-                              id="altura"
-                              type="number"
-                              min="20"
-                              max="100"
-                              value={altura}
-                              onChange={(e) => handleAlturaChange(e.target.value)}
-                              className="text-center"
-                            />
+                            <Input id="altura" type="number" min="20" max="100" value={altura} onChange={(e) => handleAlturaChange(e.target.value)} className="text-center" />
                           </div>
-                          <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
-                            <div className="text-sm text-gray-600 mb-2">Preview:</div>
+                          <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
+                            <div className="text-sm text-muted-foreground mb-2">Preview:</div>
                             <div 
-                              className="border-2 border-gray-400 bg-white flex items-center justify-center text-xs font-bold text-gray-700"
-                              style={{
-                                width: `${Math.min(80, largura * 0.8)}px`,
-                                height: `${Math.min(60, altura * 0.8)}px`
-                              }}
+                              className="border-2 border-border bg-card flex items-center justify-center text-xs font-bold text-muted-foreground"
+                              style={{ width: `${Math.min(80, largura * 0.8)}px`, height: `${Math.min(60, altura * 0.8)}px` }}
                             >
                               {largura}×{altura}mm
                             </div>
                           </div>
-                          <div className="p-3 bg-blue-50 rounded-lg">
-                            <p className="text-sm text-blue-700">
-                              <Settings className="w-4 h-4 inline mr-1" />
-                              Layout se adapta automaticamente • Salvo automaticamente
-                            </p>
+                          <div className="alert-banner-info">
+                            <Settings className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-sm">Layout se adapta automaticamente · Salvo automaticamente</span>
                           </div>
                         </div>
                       </DialogContent>
@@ -1185,7 +1159,7 @@ const ImpressaoEtiquetas = () => {
                           </div>
                           {selectedProducts.includes(product.id) && (
                             <div className="flex items-center space-x-2">
-                              <Label className="text-xs text-gray-600">Qtd:</Label>
+                              <Label className="text-xs text-muted-foreground">Qtd:</Label>
                               <Input
                                 type="number"
                                 min="1"
@@ -1243,7 +1217,7 @@ const ImpressaoEtiquetas = () => {
                     </Button>
                     <Button
                       onClick={executePrint}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                      className=""
                     >
                       <Printer className="w-4 h-4 mr-2" />
                       Imprimir

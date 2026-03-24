@@ -5,104 +5,101 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 210 100% 50%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 210 100% 98%;
-    --sidebar-foreground: 210 40% 15%;
-    --sidebar-primary: 210 100% 50%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 210 40% 96.1%;
-    --sidebar-accent-foreground: 210 40% 15%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 210 100% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 217 91% 60%;
 
-    /* Custom colors for the system */
-    --success: 142 76% 36%;
-    --warning: 48 96% 53%;
+    /* Custom colors */
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
     --expired: 0 84% 60%;
+
+    /* Chart colors */
+    --chart-1: 217 91% 60%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 262 83% 58%;
+    --chart-5: 340 75% 55%;
   }
 
-.dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  
-  --sidebar: 222.2 84% 4.9%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-primary: 210 40% 98%;
-  --sidebar-primary-foreground: 222.2 84% 4.9%;
-  --sidebar-accent: 217.2 32.6% 17.5%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-border: 217.2 32.6% 17.5%;
-  --sidebar-ring: 212.7 26.8% 83.9%;
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
 
-  /* Chart colors for dark mode */
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
-
-    --card: 222.2 84% 4.9%;
+    --card: 222 47% 8%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222 47% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 100% 50%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217 33% 17%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    
-    --sidebar-background: 210 40% 8%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 213 27% 84%;
+
+    --sidebar-background: 222 47% 7%;
     --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 210 100% 50%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 32% 15%;
+    --sidebar-accent: 217 33% 14%;
     --sidebar-accent-foreground: 210 40% 90%;
-    --sidebar-border: 210 32% 15%;
-    --sidebar-ring: 210 100% 50%;
+    --sidebar-border: 217 33% 14%;
+    --sidebar-ring: 217 91% 60%;
+
+    --chart-1: 217 91% 60%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 262 83% 58%;
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -112,51 +109,156 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* Custom animations */
+/* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Gradients */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s ease-out;
+}
+
+/* Premium Card Styles */
+.card-premium {
+  @apply bg-card rounded-xl border border-border/50 shadow-sm;
+  transition: all 0.2s ease;
+}
+
+.card-premium:hover {
+  @apply shadow-md;
+  transform: translateY(-1px);
+}
+
+.card-premium-interactive {
+  @apply card-premium cursor-pointer;
+}
+
+.card-premium-interactive:hover {
+  @apply shadow-lg border-primary/20;
+  transform: translateY(-2px);
+}
+
+/* Gradients - kept for backward compat but refined */
 .gradient-blue {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 50%) 100%);
 }
 
 .gradient-success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(142 71% 38%) 100%);
 }
 
 .gradient-warning {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(38 92% 42%) 100%);
 }
 
 .gradient-danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, hsl(0 84% 60%) 0%, hsl(0 84% 52%) 100%);
+}
+
+/* Gradient text */
+.gradient-text {
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--muted-foreground)) 100%);
+}
+
+/* Alert banners */
+.alert-banner {
+  @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium;
+}
+
+.alert-banner-danger {
+  @apply alert-banner;
+  background: hsl(0 84% 60% / 0.08);
+  color: hsl(0 84% 40%);
+  border: 1px solid hsl(0 84% 60% / 0.15);
+}
+
+.alert-banner-warning {
+  @apply alert-banner;
+  background: hsl(38 92% 50% / 0.08);
+  color: hsl(38 80% 35%);
+  border: 1px solid hsl(38 92% 50% / 0.15);
+}
+
+.alert-banner-success {
+  @apply alert-banner;
+  background: hsl(142 71% 45% / 0.08);
+  color: hsl(142 71% 30%);
+  border: 1px solid hsl(142 71% 45% / 0.15);
+}
+
+.alert-banner-info {
+  @apply alert-banner;
+  background: hsl(217 91% 60% / 0.08);
+  color: hsl(217 91% 40%);
+  border: 1px solid hsl(217 91% 60% / 0.15);
+}
+
+/* Dark mode alert adjustments */
+.dark .alert-banner-danger {
+  background: hsl(0 84% 60% / 0.12);
+  color: hsl(0 70% 70%);
+  border-color: hsl(0 84% 60% / 0.2);
+}
+
+.dark .alert-banner-warning {
+  background: hsl(38 92% 50% / 0.12);
+  color: hsl(38 80% 70%);
+  border-color: hsl(38 92% 50% / 0.2);
+}
+
+.dark .alert-banner-success {
+  background: hsl(142 71% 45% / 0.12);
+  color: hsl(142 60% 70%);
+  border-color: hsl(142 71% 45% / 0.2);
+}
+
+.dark .alert-banner-info {
+  background: hsl(217 91% 60% / 0.12);
+  color: hsl(217 80% 70%);
+  border-color: hsl(217 91% 60% / 0.2);
 }
 
 /* Estilos para impressão térmica */
 @media print {
-  /* Reset da página para impressão */
   @page {
     margin: 0;
     size: auto;
   }
   
-  /* Ocultar elementos desnecessários na impressão */
-  .print\\:hidden {
+  .print\:hidden {
     display: none !important;
   }
   
-  /* Estilos específicos para etiquetas térmicas */
   .etiqueta-termica {
     width: var(--etiqueta-width) !important;
     height: var(--etiqueta-height) !important;
@@ -183,7 +285,6 @@
     background: transparent !important;
   }
   
-  /* Grid responsivo para impressão */
   .etiquetas-grid {
     display: grid !important;
     grid-template-columns: repeat(auto-fit, minmax(var(--etiqueta-width, 70mm), 1fr)) !important;
@@ -198,11 +299,10 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-/* Gradientes e bordas melhoradas */
+/* Gradient borders - refined */
 .gradient-border {
-  @apply relative overflow-hidden border border-border/50;
-  background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)/0.3));
-  box-shadow: 0 4px 20px -4px hsl(var(--primary)/0.1);
+  @apply relative overflow-hidden border border-border/50 bg-card;
+  box-shadow: 0 1px 3px 0 hsl(var(--foreground) / 0.04);
 }
 
 .gradient-border::before {
@@ -213,15 +313,14 @@
   right: 0;
   bottom: 0;
   padding: 1px;
-  background: linear-gradient(45deg, hsl(var(--primary)), transparent, hsl(var(--primary)));
+  background: linear-gradient(45deg, hsl(var(--primary) / 0.2), transparent, hsl(var(--primary) / 0.2));
   border-radius: inherit;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: subtract;
-  pointer-events: none; /* Fix: Permite cliques nos elementos internos */
-  z-index: -1; /* Fix: Garante que fique atrás do conteúdo */
+  pointer-events: none;
+  z-index: -1;
 }
 
-/* Garantir que as etiquetas mantenham proporção */
 .etiqueta-container {
   display: flex;
   flex-direction: column;
@@ -234,7 +333,7 @@
   overflow: hidden;
 }
 
-/* Estilos para diferentes tamanhos de impressora térmica */
+/* Print sizes */
 @media print and (max-width: 58mm) {
   .etiquetas-grid {
     grid-template-columns: 1fr !important;
@@ -247,98 +346,26 @@
   }
 }
 
-/* Mobile Responsive Utilities - Melhorado */
+/* Mobile Responsive */
 @media (max-width: 768px) {
-  /* Garantir padding seguro para áreas de toque */
   body {
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
-  .mobile-padding {
-    padding: 1rem;
-  }
-  
-  .mobile-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .mobile-text-sm {
-    font-size: 0.875rem;
-  }
-  
-  .mobile-text-xs {
-    font-size: 0.75rem;
-  }
-  
-  .mobile-hidden {
-    display: none !important;
-  }
-  
-  .mobile-stack {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  
-  .mobile-full-width {
-    width: 100%;
-  }
-  
-  .mobile-compact {
-    padding: 0.5rem;
-    font-size: 0.875rem;
-  }
-  
-  /* Hide sidebar on mobile */
-  .sidebar-desktop {
-    display: none;
-  }
-
-  /* Touch-friendly buttons - Melhorado */
   button {
     min-height: 44px;
     min-width: 44px;
   }
 
-  /* Optimize scroll areas */
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Headers responsivos */
-  h1 {
-    font-size: 1.5rem !important;
-    line-height: 2rem !important;
-  }
-
-  h2 {
-    font-size: 1.25rem !important;
-    line-height: 1.75rem !important;
-  }
-
-  /* Cards responsivos */
-  .card-mobile-compact {
-    padding: 0.75rem !important;
-  }
-
-  /* Spacing mobile */
-  .space-mobile-compact > * + * {
-    margin-top: 0.75rem !important;
+  .sidebar-desktop {
+    display: none;
   }
 }
 
-/* Tablet Responsive */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .tablet-compact {
-    padding: 1rem;
-  }
-  
-  .tablet-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Desktop Responsive */
 @media (min-width: 769px) {
   .mobile-drawer {
     display: none;
@@ -346,13 +373,5 @@
   
   .sidebar-desktop {
     display: flex;
-  }
-}
-
-/* Large Desktop */
-@media (min-width: 1440px) {
-  .container-wide {
-    max-width: 1400px;
-    margin: 0 auto;
   }
 }

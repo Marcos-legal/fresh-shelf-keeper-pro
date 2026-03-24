@@ -134,208 +134,124 @@ const VisualizarEtiquetas = () => {
         <MobileDrawer />
         <AppSidebar />
         <main className="flex-1 overflow-x-hidden w-full">
-          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-14 sm:pt-4 md:pt-6 lg:pt-8">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-6 lg:mb-8">
-              <SidebarTrigger className="hidden lg:flex" />
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg flex items-center justify-center flex-shrink-0">
-                  <Eye className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
-                    👁️ Visualizar Etiquetas
-                  </h1>
-                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1">
-                    Visualize todas as etiquetas ({products.length} produtos) - {largura}×{altura}mm
-                  </p>
+          <div className="p-4 sm:p-6 lg:p-8 pt-14 sm:pt-6 max-w-7xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <SidebarTrigger className="hidden lg:flex text-muted-foreground" />
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+                  Visualizar Etiquetas
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  {products.length} produtos · {largura}×{altura}mm
+                </p>
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-6">
+              <div className="alert-banner-info">
+                <Ruler className="w-4 h-4 flex-shrink-0" />
+                <span>Tamanho: {largura}×{altura}mm (configure na Impressão)</span>
+              </div>
+              <div className="bg-card rounded-xl border border-border/60 p-3 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-medium">Visualização:</span>
+                <div className="flex gap-1.5">
+                  <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('grid')} className="h-7 text-xs">
+                    <Grid className="w-3.5 h-3.5 mr-1" />Grade
+                  </Button>
+                  <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('list')} className="h-7 text-xs">
+                    <List className="w-3.5 h-3.5 mr-1" />Lista
+                  </Button>
                 </div>
               </div>
             </div>
 
-            {/* Informação do Tamanho e Controles de Visualização */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-              <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200 shadow-lg">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-2 text-green-700">
-                    <Ruler className="w-5 h-5" />
-                    <span className="font-medium">
-                      Tamanho configurado: {largura}×{altura}mm
-                      <span className="text-sm ml-2">(Configure na página de Impressão)</span>
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 shadow-lg">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-blue-700 font-medium">Modo de Visualização:</span>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant={viewMode === 'grid' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setViewMode('grid')}
-                        className="h-8"
-                      >
-                        <Grid className="w-4 h-4 mr-1" />
-                        Grade
-                      </Button>
-                      <Button
-                        variant={viewMode === 'list' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setViewMode('list')}
-                        className="h-8"
-                      >
-                        <List className="w-4 h-4 mr-1" />
-                        Lista
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Card de Controle */}
-            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
-              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg">
-                <CardTitle className="flex items-center space-x-2">
-                  <RefreshCw className="w-5 h-5" />
-                  <span>Atualizar Datas "Utilizar até"</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <Checkbox
-                      checked={selectedProducts.length === products.length}
-                      onCheckedChange={handleSelectAll}
-                    />
-                    <span className="text-sm text-gray-600">
-                      Selecionar todos ({products.length} produtos)
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center space-x-4">
-                    <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-64 justify-start text-left font-normal",
-                            !selectedDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {selectedDate ? format(selectedDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={handleDateSelect}
-                          initialFocus
-                          className="pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <Button 
-                      onClick={handleUpdateUtilizarAte}
-                      className="gradient-blue text-white"
-                      disabled={selectedProducts.length === 0}
-                    >
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Atualizar Datas ({selectedProducts.length})
-                    </Button>
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    Selecione produtos e uma data para definir como nova data de abertura
-                  </p>
+            {/* Update Dates Card */}
+            <div className="bg-card rounded-xl border border-border/60 mb-6">
+              <div className="p-4 sm:p-5 border-b border-border/40">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <RefreshCw className="w-4 h-4 text-muted-foreground" />
+                  Atualizar Datas "Utilizar até"
+                </h3>
+              </div>
+              <div className="p-4 sm:p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <Checkbox checked={selectedProducts.length === products.length} onCheckedChange={handleSelectAll} />
+                  <span className="text-sm text-muted-foreground">Selecionar todos ({products.length})</span>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-center gap-3">
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("w-52 justify-start text-left text-sm", !selectedDate && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                        {selectedDate ? format(selectedDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={selectedDate} onSelect={handleDateSelect} initialFocus className="pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                  <Button onClick={handleUpdateUtilizarAte} size="sm" disabled={selectedProducts.length === 0}>
+                    <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                    Atualizar ({selectedProducts.length})
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Selecione produtos e uma data para definir como nova data de abertura</p>
+              </div>
+            </div>
 
             {/* Alertas para produtos vencidos */}
             {expiredProducts.length > 0 && (
-              <Card className="mb-6 bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center space-x-2">
-                    <AlertTriangle className="w-5 h-5" />
-                    <span>⚠️ Produtos Vencidos - Atenção Especial</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <p className="text-red-800 font-medium">
-                    <strong>{expiredProducts.length} produto(s)</strong> estão fora da validade e destacados em vermelho abaixo.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="alert-banner-danger mb-6">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span><strong>{expiredProducts.length} produto(s)</strong> fora da validade — destacados em vermelho abaixo</span>
+              </div>
             )}
 
             {!user ? (
               <div className="text-center py-12">
-                <AlertTriangle className="w-16 h-16 text-amber-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Acesso Restrito
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Faça login para visualizar suas etiquetas.
-                </p>
-                <Button 
-                  onClick={() => window.location.href = '/auth'}
-                  className="gradient-blue text-white"
-                >
-                  Fazer Login
-                </Button>
+                <AlertTriangle className="w-12 h-12 text-warning mx-auto mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-1">Acesso Restrito</h3>
+                <p className="text-sm text-muted-foreground mb-4">Faça login para visualizar suas etiquetas.</p>
+                <Button onClick={() => window.location.href = '/auth'} size="sm">Fazer Login</Button>
               </div>
             ) : loading ? (
               <div className="text-center py-12">
-                <RefreshCw className="w-16 h-16 text-blue-400 mx-auto mb-4 animate-spin" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Carregando etiquetas...
-                </h3>
-                <p className="text-gray-600">
-                  Por favor, aguarde enquanto carregamos seus produtos.
-                </p>
+                <RefreshCw className="w-12 h-12 text-primary mx-auto mb-3 animate-spin" />
+                <h3 className="text-base font-medium text-foreground mb-1">Carregando etiquetas...</h3>
+                <p className="text-sm text-muted-foreground">Aguarde enquanto carregamos seus produtos.</p>
               </div>
             ) : products.length > 0 ? (
               <div className="space-y-8">
                 {/* Produtos Vencidos - Destaque Especial */}
                 {expiredProducts.length > 0 && (
                   <div>
-                    <div className="flex items-center space-x-3 mb-6">
-                      <AlertTriangle className="w-6 h-6 text-red-600" />
-                      <h2 className="text-2xl font-bold text-red-700">🚨 Produtos Vencidos ({expiredProducts.length})</h2>
+                    <div className="flex items-center gap-2 mb-4">
+                      <AlertTriangle className="w-4 h-4 text-destructive" />
+                      <h2 className="text-sm font-semibold text-destructive">Produtos Vencidos ({expiredProducts.length})</h2>
                     </div>
                     <div className={cn(
                       viewMode === 'grid' 
-                        ? "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        : "space-y-4"
+                        ? "grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        : "space-y-3"
                     )}>
                       {expiredProducts.map((product) => (
                         <div key={product.id} className={cn(
                           "print:break-inside-avoid",
-                          viewMode === 'list' && "flex items-center space-x-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg"
+                          viewMode === 'list' && "flex items-center gap-3 p-3 bg-destructive/5 border border-destructive/15 rounded-xl"
                         )}>
                           <div className={cn(
-                            "flex items-center space-x-2 print:hidden",
-                            viewMode === 'list' ? "flex-shrink-0" : "mb-3"
+                            "flex items-center gap-2 print:hidden",
+                            viewMode === 'list' ? "flex-shrink-0" : "mb-2"
                           )}>
-                            <Checkbox
-                              checked={selectedProducts.includes(product.id)}
-                              onCheckedChange={() => handleSelectProduct(product.id)}
-                            />
-                            <span className="text-sm text-red-600 font-bold whitespace-nowrap">⚠️ VENCIDO</span>
+                            <Checkbox checked={selectedProducts.includes(product.id)} onCheckedChange={() => handleSelectProduct(product.id)} />
+                            <span className="text-[11px] text-destructive font-semibold">VENCIDO</span>
                           </div>
                           <div className={cn(
-                            "border-4 border-red-500 rounded-lg p-3 bg-red-50 shadow-lg hover:shadow-xl transition-all duration-200",
+                            "border border-destructive/20 rounded-xl p-3 bg-destructive/5 hover:shadow-sm transition-all duration-200",
                             viewMode === 'list' && "flex-1"
                           )}>
-                            <EtiquetaView 
-                              product={product} 
-                              largura={viewMode === 'list' ? 90 : largura} 
-                              altura={viewMode === 'list' ? 60 : altura} 
-                            />
+                            <EtiquetaView product={product} largura={viewMode === 'list' ? 90 : largura} altura={viewMode === 'list' ? 60 : altura} />
                           </div>
                         </div>
                       ))}
@@ -346,39 +262,32 @@ const VisualizarEtiquetas = () => {
                 {/* Produtos Válidos */}
                 {validProducts.length > 0 && (
                   <div>
-                    <div className="flex items-center space-x-3 mb-6">
-                      <Eye className="w-6 h-6 text-green-600" />
-                      <h2 className="text-2xl font-bold text-green-700">✅ Produtos Válidos ({validProducts.length})</h2>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Eye className="w-4 h-4 text-success" />
+                      <h2 className="text-sm font-semibold text-success">Produtos Válidos ({validProducts.length})</h2>
                     </div>
                     <div className={cn(
                       viewMode === 'grid' 
-                        ? "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        : "space-y-4"
+                        ? "grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        : "space-y-3"
                     )}>
                       {validProducts.map((product) => (
                         <div key={product.id} className={cn(
                           "print:break-inside-avoid",
-                          viewMode === 'list' && "flex items-center space-x-4 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                          viewMode === 'list' && "flex items-center gap-3 p-3 bg-card border border-border/60 rounded-xl hover:shadow-sm transition-shadow"
                         )}>
                           <div className={cn(
-                            "flex items-center space-x-2 print:hidden",
-                            viewMode === 'list' ? "flex-shrink-0" : "mb-3"
+                            "flex items-center gap-2 print:hidden",
+                            viewMode === 'list' ? "flex-shrink-0" : "mb-2"
                           )}>
-                            <Checkbox
-                              checked={selectedProducts.includes(product.id)}
-                              onCheckedChange={() => handleSelectProduct(product.id)}
-                            />
-                            <span className="text-sm text-green-600 whitespace-nowrap">✓ Válido</span>
+                            <Checkbox checked={selectedProducts.includes(product.id)} onCheckedChange={() => handleSelectProduct(product.id)} />
+                            <span className="text-[11px] text-success font-medium">Válido</span>
                           </div>
                           <div className={cn(
-                            "hover:shadow-lg transition-shadow duration-200 border border-gray-200 rounded-lg p-3 bg-white",
+                            "hover:shadow-sm transition-shadow duration-200 border border-border/60 rounded-xl p-3 bg-card",
                             viewMode === 'list' && "flex-1"
                           )}>
-                            <EtiquetaView 
-                              product={product} 
-                              largura={viewMode === 'list' ? 50 : largura} 
-                              altura={viewMode === 'list' ? 35 : altura} 
-                            />
+                            <EtiquetaView product={product} largura={viewMode === 'list' ? 50 : largura} altura={viewMode === 'list' ? 35 : altura} />
                           </div>
                         </div>
                       ))}
@@ -388,19 +297,10 @@ const VisualizarEtiquetas = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Eye className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Nenhuma etiqueta encontrada
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Cadastre produtos para visualizar as etiquetas aqui.
-                </p>
-                <Button 
-                  onClick={() => window.location.href = '/cadastro'}
-                  className="gradient-blue text-white"
-                >
-                  Cadastrar Produto
-                </Button>
+                <Eye className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-1">Nenhuma etiqueta encontrada</h3>
+                <p className="text-sm text-muted-foreground mb-4">Cadastre produtos para visualizar as etiquetas aqui.</p>
+                <Button onClick={() => window.location.href = '/cadastro'} size="sm">Cadastrar Produto</Button>
               </div>
             )}
           </div>
