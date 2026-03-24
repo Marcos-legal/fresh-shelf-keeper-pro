@@ -976,9 +976,9 @@ const ImpressaoEtiquetas = () => {
                           <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
                             <div className="text-sm text-muted-foreground mb-2">Preview:</div>
                             <div 
-                              className="border-2 border-gray-400 bg-white flex items-center justify-center text-xs font-bold text-gray-700"
-                              style={{
-                                width: `${Math.min(80, largura * 0.8)}px`,
+                              className="border-2 border-border bg-card flex items-center justify-center text-xs font-bold text-muted-foreground"
+                              style={{ width: `${Math.min(80, largura * 0.8)}px`, height: `${Math.min(60, altura * 0.8)}px` }}
+                            >
                                 height: `${Math.min(60, altura * 0.8)}px`
                               }}
                             >
