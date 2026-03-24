@@ -1,6 +1,4 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,9 +9,31 @@ interface StatsCardProps {
   variant: 'default' | 'success' | 'warning' | 'danger';
   description?: string;
   onClick?: () => void;
-  actionIcon?: LucideIcon;
-  actionLabel?: string;
+  isActive?: boolean;
 }
+
+const variantStyles = {
+  default: {
+    iconBg: 'bg-primary/10',
+    iconColor: 'text-primary',
+    valueDot: 'bg-primary',
+  },
+  success: {
+    iconBg: 'bg-success/10',
+    iconColor: 'text-success',
+    valueDot: 'bg-success',
+  },
+  warning: {
+    iconBg: 'bg-warning/10',
+    iconColor: 'text-warning',
+    valueDot: 'bg-warning',
+  },
+  danger: {
+    iconBg: 'bg-destructive/10',
+    iconColor: 'text-destructive',
+    valueDot: 'bg-destructive',
+  },
+};
 
 export function StatsCard({ 
   title, 
@@ -22,63 +42,41 @@ export function StatsCard({
   variant, 
   description, 
   onClick,
-  actionIcon: ActionIcon,
-  actionLabel 
+  isActive,
 }: StatsCardProps) {
-  const variants = {
-    default: 'gradient-blue text-white',
-    success: 'gradient-success text-white',
-    warning: 'gradient-warning text-white',
-    danger: 'gradient-danger text-white',
-  };
-
-  const bgClass = variants[variant];
+  const styles = variantStyles[variant];
 
   return (
-    <Card className={cn(
-      "overflow-hidden animate-fade-in transition-all duration-300 hover:shadow-xl group",
-      onClick && "cursor-pointer hover:scale-105"
-    )}>
-      <CardHeader 
-        className={`${bgClass} pb-2 sm:pb-3 p-3 sm:p-6 transition-all duration-300 group-hover:shadow-lg`}
-        onClick={onClick}
-      >
-        <CardTitle className="flex items-center justify-between text-sm sm:text-lg font-semibold">
-          <span className="truncate">{title}</span>
-          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-            <Icon className="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:scale-110" />
-            {onClick && (
-              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/50 rounded-full animate-pulse" />
-            )}
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-3 sm:pt-6 p-3 sm:p-6">
-        <div className="flex items-start justify-between">
-          <div className="min-w-0">
-            <div className="text-2xl sm:text-3xl font-bold text-foreground mb-0.5 sm:mb-1 transition-colors duration-300">
-              {value.toLocaleString()}
-            </div>
-            {description && (
-              <p className="text-xs sm:text-sm text-muted-foreground truncate">{description}</p>
-            )}
-          </div>
-          {ActionIcon && actionLabel && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick?.();
-              }}
-              className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-accent hidden sm:flex"
-            >
-              <ActionIcon className="w-4 h-4 mr-1" />
-              {actionLabel}
-            </Button>
-          )}
+    <div
+      onClick={onClick}
+      className={cn(
+        "group relative bg-card rounded-xl border border-border/60 p-4 sm:p-5 transition-all duration-200",
+        onClick && "cursor-pointer hover:shadow-md hover:-translate-y-0.5",
+        isActive && "ring-2 ring-primary border-primary/30 shadow-md"
+      )}
+    >
+      {/* Header: label + icon */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs sm:text-sm font-medium text-muted-foreground">{title}</span>
+        <div className={cn("w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center", styles.iconBg)}>
+          <Icon className={cn("w-4 h-4 sm:w-[18px] sm:h-[18px]", styles.iconColor)} />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Value */}
+      <div className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+        {value.toLocaleString()}
+      </div>
+
+      {/* Description */}
+      {description && (
+        <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">{description}</p>
+      )}
+
+      {/* Active indicator */}
+      {isActive && (
+        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
+      )}
+    </div>
   );
 }
