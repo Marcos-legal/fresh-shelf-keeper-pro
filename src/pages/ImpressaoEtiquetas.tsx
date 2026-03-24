@@ -1217,7 +1217,7 @@ const ImpressaoEtiquetas = () => {
                     </Button>
                     <Button
                       onClick={executePrint}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                      className=""
                     >
                       <Printer className="w-4 h-4 mr-2" />
                       Imprimir
