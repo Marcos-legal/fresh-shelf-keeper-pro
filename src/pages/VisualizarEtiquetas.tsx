@@ -166,65 +166,39 @@ const VisualizarEtiquetas = () => {
               </div>
             </div>
 
-            {/* Card de Controle */}
-            <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
-              <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-t-lg">
-                <CardTitle className="flex items-center space-x-2">
-                  <RefreshCw className="w-5 h-5" />
-                  <span>Atualizar Datas "Utilizar até"</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <Checkbox
-                      checked={selectedProducts.length === products.length}
-                      onCheckedChange={handleSelectAll}
-                    />
-                    <span className="text-sm text-gray-600">
-                      Selecionar todos ({products.length} produtos)
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center space-x-4">
-                    <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-64 justify-start text-left font-normal",
-                            !selectedDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {selectedDate ? format(selectedDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={handleDateSelect}
-                          initialFocus
-                          className="pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <Button 
-                      onClick={handleUpdateUtilizarAte}
-                      className="gradient-blue text-white"
-                      disabled={selectedProducts.length === 0}
-                    >
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Atualizar Datas ({selectedProducts.length})
-                    </Button>
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    Selecione produtos e uma data para definir como nova data de abertura
-                  </p>
+            {/* Update Dates Card */}
+            <div className="bg-card rounded-xl border border-border/60 mb-6">
+              <div className="p-4 sm:p-5 border-b border-border/40">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <RefreshCw className="w-4 h-4 text-muted-foreground" />
+                  Atualizar Datas "Utilizar até"
+                </h3>
+              </div>
+              <div className="p-4 sm:p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <Checkbox checked={selectedProducts.length === products.length} onCheckedChange={handleSelectAll} />
+                  <span className="text-sm text-muted-foreground">Selecionar todos ({products.length})</span>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-center gap-3">
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("w-52 justify-start text-left text-sm", !selectedDate && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                        {selectedDate ? format(selectedDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={selectedDate} onSelect={handleDateSelect} initialFocus className="pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                  <Button onClick={handleUpdateUtilizarAte} size="sm" disabled={selectedProducts.length === 0}>
+                    <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                    Atualizar ({selectedProducts.length})
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Selecione produtos e uma data para definir como nova data de abertura</p>
+              </div>
+            </div>
 
             {/* Alertas para produtos vencidos */}
             {expiredProducts.length > 0 && (
