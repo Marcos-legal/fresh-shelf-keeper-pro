@@ -1159,7 +1159,7 @@ const ImpressaoEtiquetas = () => {
                           </div>
                           {selectedProducts.includes(product.id) && (
                             <div className="flex items-center space-x-2">
-                              <Label className="text-xs text-gray-600">Qtd:</Label>
+                              <Label className="text-xs text-muted-foreground">Qtd:</Label>
                               <Input
                                 type="number"
                                 min="1"
