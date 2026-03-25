@@ -288,7 +288,7 @@ const Relatorios = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="category" className="text-sm text-gray-600">
+                    <Label htmlFor="category" className="text-sm text-muted-foreground">
                       Filtrar por Categoria
                     </Label>
                     <Select value={selectedCategory} onValueChange={setSelectedCategory}>
