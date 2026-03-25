@@ -111,6 +111,8 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 }
 
@@ -128,11 +130,6 @@
 @keyframes slideInRight {
   from { opacity: 0; transform: translateX(16px); }
   to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
 }
 
 .animate-fade-in {
@@ -167,7 +164,7 @@
   transform: translateY(-2px);
 }
 
-/* Gradients - kept for backward compat but refined */
+/* Gradients */
 .gradient-blue {
   background: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 50%) 100%);
 }
@@ -184,7 +181,6 @@
   background: linear-gradient(135deg, hsl(0 84% 60%) 0%, hsl(0 84% 52%) 100%);
 }
 
-/* Gradient text */
 .gradient-text {
   @apply bg-clip-text text-transparent;
   background-image: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--muted-foreground)) 100%);
@@ -299,7 +295,7 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-/* Gradient borders - refined */
+/* Gradient borders */
 .gradient-border {
   @apply relative overflow-hidden border border-border/50 bg-card;
   box-shadow: 0 1px 3px 0 hsl(var(--foreground) / 0.04);
@@ -346,27 +342,41 @@
   }
 }
 
-/* Mobile Responsive */
-@media (max-width: 768px) {
+/* Mobile Responsive - touch targets */
+@media (max-width: 640px) {
   body {
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
-  button {
+  /* Only apply min-height to interactive buttons, not icon-only or tiny utility buttons */
+  button:not([class*="h-7"]):not([class*="h-8"]):not([class*="w-7"]):not([class*="w-8"]):not([class*="size-"]) {
     min-height: 44px;
-    min-width: 44px;
+  }
+
+  input, select, textarea {
+    font-size: 16px; /* Prevents iOS zoom on focus */
   }
 
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
   }
+}
 
+/* Tablet breakpoint helpers */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .tablet-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop sidebar visibility */
+@media (max-width: 1023px) {
   .sidebar-desktop {
     display: none;
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .mobile-drawer {
     display: none;
   }
