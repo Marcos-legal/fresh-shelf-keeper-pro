@@ -383,11 +383,11 @@ const Relatorios = () => {
             ) : (
               <Card className="shadow-sm">
                 <CardContent className="text-center py-8">
-                  <PackageSearch className="w-10 h-10 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <PackageSearch className="w-10 h-10 text-muted-foreground/40 mx-auto mb-4" />
+                  <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
                     Nenhum produto encontrado
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Altere os filtros ou adicione novos produtos.
                   </p>
                 </CardContent>
