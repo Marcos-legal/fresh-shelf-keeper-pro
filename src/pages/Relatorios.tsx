@@ -358,7 +358,7 @@ const Relatorios = () => {
                       <CardTitle className="text-sm font-medium">{product.nome}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-sm text-gray-600 space-y-1">
+                      <div className="text-sm text-muted-foreground space-y-1">
                         <p>
                           <span className="font-bold">Lote:</span> {product.lote}
                         </p>
