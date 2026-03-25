@@ -14,6 +14,7 @@ import { Package, Calculator, Plus, Trash2, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export default function ContagemEstoque() {
   const {
@@ -34,7 +35,6 @@ export default function ContagemEstoque() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterResponsavel, setFilterResponsavel] = useState('all');
 
-  // Filtros
   const responsaveis = [...new Set(contagens.map(c => c.responsavel).filter(Boolean))] as string[];
   
   const filteredProdutos = produtos.filter(produto => 
@@ -55,10 +55,10 @@ export default function ContagemEstoque() {
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-4 sm:p-6">
             <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-              <div className="h-32 bg-gray-200 rounded"></div>
+              <div className="h-8 bg-muted rounded w-1/4"></div>
+              <div className="h-32 bg-muted rounded"></div>
             </div>
           </main>
         </div>
@@ -72,75 +72,78 @@ export default function ContagemEstoque() {
         <MobileDrawer />
         <AppSidebar />
         <main className="flex-1 overflow-x-hidden w-full">
-          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-14 sm:pt-4 md:pt-6 lg:pt-8 space-y-4 sm:space-y-6">
+          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-16 sm:pt-4 md:pt-6 lg:pt-8 space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
               <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold gradient-text">Contagem de Estoque</h1>
               <div className="flex flex-wrap gap-2">
-              <Button 
-                variant="secondary" 
-                onClick={migrarDadosLocalStorage}
-                className="text-sm"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Migrar dados locais
-              </Button>
-              
-              <ExportarEstoque 
-                produtos={produtos}
-                contagens={contagens}
-                getEstoqueAtual={getEstoqueAtual}
-              />
-              
-              <Dialog open={showProdutoForm} onOpenChange={setShowProdutoForm}>
-                <DialogTrigger asChild>
-                  <Button className="gradient-blue text-white">
-                    <Package className="w-4 h-4 mr-2" />
-                    Cadastrar Produto
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Cadastrar Produto para Estoque</DialogTitle>
-                  </DialogHeader>
-                  <ProdutoEstoqueForm
-                    onSubmit={(data) => {
-                      addProdutoEstoque(data);
-                      setShowProdutoForm(false);
-                    }}
-                  />
-                </DialogContent>
-              </Dialog>
-
-              {produtos.length > 0 && (
-                <Dialog open={showContagemForm} onOpenChange={setShowContagemForm}>
+                <Button 
+                  variant="secondary" 
+                  onClick={migrarDadosLocalStorage}
+                  className="text-xs sm:text-sm flex-1 sm:flex-none"
+                  size="sm"
+                >
+                  <Download className="w-4 h-4 mr-1.5" />
+                  <span className="hidden sm:inline">Migrar dados locais</span>
+                  <span className="sm:hidden">Migrar</span>
+                </Button>
+                
+                <ExportarEstoque 
+                  produtos={produtos}
+                  contagens={contagens}
+                  getEstoqueAtual={getEstoqueAtual}
+                />
+                
+                <Dialog open={showProdutoForm} onOpenChange={setShowProdutoForm}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50">
-                      <Calculator className="w-4 h-4 mr-2" />
-                      Nova Contagem
+                    <Button className="gradient-blue text-white text-xs sm:text-sm flex-1 sm:flex-none" size="sm">
+                      <Package className="w-4 h-4 mr-1.5" />
+                      <span className="hidden sm:inline">Cadastrar Produto</span>
+                      <span className="sm:hidden">Produto</span>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
+                  <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle>Nova Contagem de Estoque</DialogTitle>
+                      <DialogTitle>Cadastrar Produto para Estoque</DialogTitle>
                     </DialogHeader>
-                    <ContagemEstoqueForm
-                      produtos={produtos}
-                      onSubmit={addContagem}
-                      onClose={() => setShowContagemForm(false)}
+                    <ProdutoEstoqueForm
+                      onSubmit={(data) => {
+                        addProdutoEstoque(data);
+                        setShowProdutoForm(false);
+                      }}
                     />
                   </DialogContent>
                 </Dialog>
-              )}
+
+                {produtos.length > 0 && (
+                  <Dialog open={showContagemForm} onOpenChange={setShowContagemForm}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/5 text-xs sm:text-sm flex-1 sm:flex-none" size="sm">
+                        <Calculator className="w-4 h-4 mr-1.5" />
+                        <span className="hidden sm:inline">Nova Contagem</span>
+                        <span className="sm:hidden">Contagem</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Nova Contagem de Estoque</DialogTitle>
+                      </DialogHeader>
+                      <ContagemEstoqueForm
+                        produtos={produtos}
+                        onSubmit={addContagem}
+                        onClose={() => setShowContagemForm(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                )}
               </div>
             </div>
-            {/* Estatísticas */}
+
             <EstoqueStats 
               produtos={produtos}
               contagens={contagens}
               getEstoqueAtual={getEstoqueAtual}
             />
 
-            {/* Filtros de Busca */}
             <EstoqueSearchFilter
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
@@ -153,148 +156,250 @@ export default function ContagemEstoque() {
 
             {/* Produtos Cadastrados */}
             <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Package className="w-5 h-5" />
-                <span>Produtos Cadastrados</span>
-                <Badge variant="secondary">{filteredProdutos.length}</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {filteredProdutos.length === 0 ? (
-                <div className="text-center py-8">
-                  <Package className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-500 mb-4">Nenhum produto cadastrado para estoque</p>
-                  <Button onClick={() => setShowProdutoForm(true)} className="gradient-blue text-white">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Cadastrar Primeiro Produto
-                  </Button>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Produto</TableHead>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Qtd por Unidade</TableHead>
-                      <TableHead>Estoque Atual</TableHead>
-                      <TableHead className="w-[100px]">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredProdutos.map((produto) => {
-                      const estoqueAtual = getEstoqueAtual(produto.id);
-                      return (
-                        <TableRow key={produto.id}>
-                          <TableCell className="font-medium">{produto.nome}</TableCell>
-                          <TableCell>{produto.unidade_medida}</TableCell>
-                          <TableCell>
-                            {produto.quantidade_por_unidade} {produto.unidade_conteudo}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={estoqueAtual > 0 ? "default" : "secondary"}>
-                              {estoqueAtual} {produto.unidade_conteudo}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => deleteProdutoEstoque(produto.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
+                  <Package className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Produtos Cadastrados</span>
+                  <Badge variant="secondary" className="text-xs">{filteredProdutos.length}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0 sm:p-6 sm:pt-0">
+                {filteredProdutos.length === 0 ? (
+                  <div className="text-center py-8 px-4">
+                    <Package className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground/40 mb-3 sm:mb-4" />
+                    <p className="text-sm text-muted-foreground mb-4">Nenhum produto cadastrado para estoque</p>
+                    <Button onClick={() => setShowProdutoForm(true)} className="gradient-blue text-white" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Cadastrar Primeiro Produto
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop Table */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-xs">Produto</TableHead>
+                            <TableHead className="text-xs">Unidade</TableHead>
+                            <TableHead className="text-xs">Qtd por Unidade</TableHead>
+                            <TableHead className="text-xs">Estoque Atual</TableHead>
+                            <TableHead className="text-xs w-[80px]">Ações</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredProdutos.map((produto) => {
+                            const estoqueAtual = getEstoqueAtual(produto.id);
+                            return (
+                              <TableRow key={produto.id}>
+                                <TableCell className="font-medium text-sm">{produto.nome}</TableCell>
+                                <TableCell className="text-sm">{produto.unidade_medida}</TableCell>
+                                <TableCell className="text-sm">
+                                  {produto.quantidade_por_unidade} {produto.unidade_conteudo}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant={estoqueAtual > 0 ? "default" : "secondary"} className="text-xs">
+                                    {estoqueAtual} {produto.unidade_conteudo}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => deleteProdutoEstoque(produto.id)}
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile Cards */}
+                    <div className="md:hidden divide-y divide-border">
+                      {filteredProdutos.map((produto) => {
+                        const estoqueAtual = getEstoqueAtual(produto.id);
+                        return (
+                          <div key={produto.id} className="p-4 hover:bg-muted/20 transition-colors">
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="font-semibold text-sm text-foreground">{produto.nome}</h4>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="h-8 w-8 p-0 flex-shrink-0 ml-2"
+                                onClick={() => deleteProdutoEstoque(produto.id)}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div>
+                                <span className="text-muted-foreground">Unidade:</span>{' '}
+                                <span className="font-medium">{produto.unidade_medida}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Qtd/Un:</span>{' '}
+                                <span className="font-medium">{produto.quantidade_por_unidade} {produto.unidade_conteudo}</span>
+                              </div>
+                              <div className="col-span-2">
+                                <span className="text-muted-foreground">Estoque:</span>{' '}
+                                <Badge variant={estoqueAtual > 0 ? "default" : "secondary"} className="text-xs ml-1">
+                                  {estoqueAtual} {produto.unidade_conteudo}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </CardContent>
             </Card>
 
             {/* Histórico de Contagens */}
             <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Calculator className="w-5 h-5" />
-                <span>Histórico de Contagens</span>
-                <Badge variant="secondary">{filteredContagens.length}</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {filteredContagens.length === 0 ? (
-                <div className="text-center py-8">
-                  <Calculator className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-500">Nenhuma contagem realizada ainda</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Produto</TableHead>
-                      <TableHead>Qtd Principal</TableHead>
-                      <TableHead>Qtd Extra</TableHead>
-                      <TableHead>Total Calculado</TableHead>
-                      <TableHead>Responsável</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead className="w-[100px]">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredContagens
-                      .sort((a, b) => new Date(b.data_contagem).getTime() - new Date(a.data_contagem).getTime())
-                      .map((contagem) => {
-                        const produto = produtos.find(p => p.id === contagem.produto_id);
-                        const quantidadeExtraTexto = contagem.quantidade_extra > 0 ? 
-                          `${contagem.quantidade_extra} ${contagem.unidade_quantidade_extra === 'porcoes' ? 
-                            produto?.unidade_conteudo : 'un. ind.'}` : '-';
-                        
-                        return (
-                          <TableRow key={contagem.id}>
-                            <TableCell className="font-medium">
-                              {produto?.nome || 'Produto removido'}
-                            </TableCell>
-                            <TableCell>
-                              {contagem.quantidade} {produto?.unidade_medida}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="secondary" className="text-xs">
-                                {quantidadeExtraTexto}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline">
-                                {Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{contagem.responsavel || '-'}</TableCell>
-                            <TableCell>
-                              {new Date(contagem.data_contagem).toLocaleDateString('pt-BR', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => deleteContagem(contagem.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </TableCell>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
+                  <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Histórico de Contagens</span>
+                  <Badge variant="secondary" className="text-xs">{filteredContagens.length}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0 sm:p-6 sm:pt-0">
+                {filteredContagens.length === 0 ? (
+                  <div className="text-center py-8 px-4">
+                    <Calculator className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground/40 mb-3" />
+                    <p className="text-sm text-muted-foreground">Nenhuma contagem realizada ainda</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop Table */}
+                    <div className="hidden lg:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-xs">Produto</TableHead>
+                            <TableHead className="text-xs">Qtd Principal</TableHead>
+                            <TableHead className="text-xs">Qtd Extra</TableHead>
+                            <TableHead className="text-xs">Total Calculado</TableHead>
+                            <TableHead className="text-xs">Responsável</TableHead>
+                            <TableHead className="text-xs">Data</TableHead>
+                            <TableHead className="text-xs w-[80px]">Ações</TableHead>
                           </TableRow>
-                        );
-                      })}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredContagens
+                            .sort((a, b) => new Date(b.data_contagem).getTime() - new Date(a.data_contagem).getTime())
+                            .map((contagem) => {
+                              const produto = produtos.find(p => p.id === contagem.produto_id);
+                              const quantidadeExtraTexto = contagem.quantidade_extra > 0 ? 
+                                `${contagem.quantidade_extra} ${contagem.unidade_quantidade_extra === 'porcoes' ? 
+                                  produto?.unidade_conteudo : 'un. ind.'}` : '-';
+                              
+                              return (
+                                <TableRow key={contagem.id}>
+                                  <TableCell className="font-medium text-sm">
+                                    {produto?.nome || 'Produto removido'}
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    {contagem.quantidade} {produto?.unidade_medida}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge variant="secondary" className="text-xs">
+                                      {quantidadeExtraTexto}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge variant="outline" className="text-xs">
+                                      {Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-sm">{contagem.responsavel || '-'}</TableCell>
+                                  <TableCell className="text-sm">
+                                    {new Date(contagem.data_contagem).toLocaleDateString('pt-BR', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="destructive"
+                                      size="sm"
+                                      className="h-8 w-8 p-0"
+                                      onClick={() => deleteContagem(contagem.id)}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile/Tablet Cards */}
+                    <div className="lg:hidden divide-y divide-border">
+                      {filteredContagens
+                        .sort((a, b) => new Date(b.data_contagem).getTime() - new Date(a.data_contagem).getTime())
+                        .map((contagem) => {
+                          const produto = produtos.find(p => p.id === contagem.produto_id);
+                          const quantidadeExtraTexto = contagem.quantidade_extra > 0 ? 
+                            `${contagem.quantidade_extra} ${contagem.unidade_quantidade_extra === 'porcoes' ? 
+                              produto?.unidade_conteudo : 'un. ind.'}` : '-';
+                          
+                          return (
+                            <div key={contagem.id} className="p-4 hover:bg-muted/20 transition-colors">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-semibold text-sm text-foreground truncate">
+                                    {produto?.nome || 'Produto removido'}
+                                  </h4>
+                                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                                    {new Date(contagem.data_contagem).toLocaleDateString('pt-BR', {
+                                      day: '2-digit', month: '2-digit', year: 'numeric',
+                                      hour: '2-digit', minute: '2-digit'
+                                    })}
+                                    {contagem.responsavel && ` · ${contagem.responsavel}`}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 flex-shrink-0 ml-2"
+                                  onClick={() => deleteContagem(contagem.id)}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                              <div className="flex flex-wrap gap-2 text-xs">
+                                <Badge variant="outline" className="text-xs">
+                                  Qtd: {contagem.quantidade} {produto?.unidade_medida}
+                                </Badge>
+                                {contagem.quantidade_extra > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Extra: {quantidadeExtraTexto}
+                                  </Badge>
+                                )}
+                                <Badge variant="default" className="text-xs">
+                                  Total: {Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}
+                                </Badge>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </>
+                )}
+              </CardContent>
             </Card>
           </div>
         </main>

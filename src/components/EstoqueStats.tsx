@@ -10,22 +10,19 @@ interface EstoqueStatsProps {
 }
 
 export function EstoqueStats({ produtos, contagens, getEstoqueAtual }: EstoqueStatsProps) {
-  // Calcular estatísticas
   const totalProdutos = produtos.length;
   const totalContagens = contagens.length;
   
-  // Produtos com estoque baixo (menos de 10 unidades)
   const produtosEstoqueBaixo = produtos.filter(produto => {
     const estoque = getEstoqueAtual(produto.id);
     return estoque > 0 && estoque < 10;
   }).length;
   
-  // Produtos sem contagem recente (mais de 7 dias)
   const produtosSemContagemRecente = produtos.filter(produto => {
     const contagensProduto = contagens.filter(c => c.produto_id === produto.id);
     if (contagensProduto.length === 0) return true;
     
-    const ultimaContagem = contagensProduto[0]; // já ordenado por data desc
+    const ultimaContagem = contagensProduto[0];
     const diasSemContagem = Math.floor((Date.now() - new Date(ultimaContagem.data_contagem).getTime()) / (1000 * 60 * 60 * 24));
     return diasSemContagem > 7;
   }).length;
@@ -49,36 +46,36 @@ export function EstoqueStats({ produtos, contagens, getEstoqueAtual }: EstoqueSt
       title: "Estoque Baixo",
       value: produtosEstoqueBaixo,
       icon: AlertTriangle,
-      description: "Produtos com menos de 10 unidades",
+      description: "Menos de 10 unidades",
       variant: produtosEstoqueBaixo > 0 ? "destructive" as const : "default" as const
     },
     {
-      title: "Sem Contagem Recente",
+      title: "Sem Contagem",
       value: produtosSemContagemRecente,
       icon: Calendar,
-      description: "Produtos não contados há mais de 7 dias",
+      description: "Não contados há 7+ dias",
       variant: produtosSemContagemRecente > 0 ? "secondary" as const : "default" as const
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
       {estatisticas.map((stat) => (
         <Card key={stat.title}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-            <stat.icon className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-6">
+            <CardTitle className="text-[11px] sm:text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+            <stat.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="text-2xl font-bold">{stat.value}</div>
+          <CardContent className="p-3 sm:p-6 pt-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
               {stat.variant !== "default" && (
-                <Badge variant={stat.variant}>
-                  {stat.variant === "destructive" ? "Atenção" : "Verificar"}
+                <Badge variant={stat.variant} className="text-[10px] sm:text-xs">
+                  {stat.variant === "destructive" ? "!" : "?"}
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">{stat.description}</p>
           </CardContent>
         </Card>
       ))}
