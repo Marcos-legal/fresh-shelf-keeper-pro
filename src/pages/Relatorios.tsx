@@ -305,7 +305,7 @@ const Relatorios = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-sm text-gray-600">
+                    <Label className="text-sm text-muted-foreground">
                       Filtrar por Data de Criação
                     </Label>
                     <div className="flex items-center space-x-2">
