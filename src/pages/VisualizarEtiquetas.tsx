@@ -289,10 +289,7 @@ const VisualizarEtiquetas = () => {
                 <Button onClick={() => window.location.href = '/cadastro'} size="sm">Cadastrar Produto</Button>
               </div>
             )}
-          </div>
-        </main>
-      </div>
-    </SidebarProvider>
+    </PageLayout>
   );
 };
 
