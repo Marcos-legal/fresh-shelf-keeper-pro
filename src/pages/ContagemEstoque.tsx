@@ -50,29 +50,21 @@ export default function ContagemEstoque() {
 
   if (loading) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <main className="flex-1 p-4 sm:p-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-muted rounded w-1/4"></div>
-              <div className="h-32 bg-muted rounded"></div>
-            </div>
-          </main>
+      <PageLayout title="Contagem de Estoque" description="Carregando..." icon={Calculator}>
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted rounded w-1/4"></div>
+          <div className="h-32 bg-muted rounded"></div>
         </div>
-      </SidebarProvider>
+      </PageLayout>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <MobileDrawer />
-        <AppSidebar />
-        <main className="flex-1 overflow-x-hidden w-full">
-          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-16 sm:pt-4 md:pt-6 lg:pt-8 space-y-4 sm:space-y-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
-              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold gradient-text">Contagem de Estoque</h1>
+    <PageLayout 
+      title="Contagem de Estoque" 
+      description="Gerencie o estoque de produtos"
+      icon={Calculator}
+      headerActions={
               <div className="flex flex-wrap gap-2">
                 <Button 
                   variant="secondary" 
