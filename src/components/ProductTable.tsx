@@ -1,17 +1,18 @@
-
 import { useState } from "react";
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Trash2, Printer, Search } from "lucide-react";
+import { Edit, Trash2, Printer, Search, ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
 import { Product, StorageLocation } from "@/types/product";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ProductTableProps {
   products: Product[];
@@ -29,7 +30,7 @@ const statusConfig = {
   'vencido': { label: 'Vencido', className: 'bg-destructive/10 text-destructive border-destructive/20' },
 };
 
-const categoryLabels = {
+const categoryLabels: Record<string, string> = {
   'refrigerado': 'Refrigerado',
   'congelado': 'Congelado',
   'ambiente': 'Ambiente',
@@ -43,6 +44,7 @@ export function ProductTable({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("nome");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const safeGetDate = (dateValue: any): Date | null => {
     if (!dateValue) return null;
@@ -91,106 +93,108 @@ export function ProductTable({
     });
 
   return (
-    <div className="bg-card rounded-xl border border-border/60 animate-fade-in">
+    <div className="bg-card rounded-xl border border-border/60 animate-fade-in overflow-hidden">
       {/* Header */}
-      <div className="p-4 sm:p-5 border-b border-border/60">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-4 sm:p-5 border-b border-border/40">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
-            {filteredProducts.length} produtos
+          <span className="text-[11px] text-muted-foreground bg-muted/80 px-2.5 py-1 rounded-full font-medium tabular-nums">
+            {filteredProducts.length} produto{filteredProducts.length !== 1 ? 's' : ''}
           </span>
         </div>
         
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        {/* Filters - stack on mobile, row on desktop */}
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar produtos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 h-9 text-sm"
+              className="pl-9 h-10 sm:h-9 text-sm bg-background"
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-40 h-9 text-sm">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="valido">Válidos</SelectItem>
-              <SelectItem value="proximo-vencimento">Próx. vencimento</SelectItem>
-              <SelectItem value="vencido">Vencidos</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full sm:w-36 h-9 text-sm">
-              <SelectValue placeholder="Ordenar" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="nome">Nome</SelectItem>
-              <SelectItem value="validade">Validade</SelectItem>
-              <SelectItem value="status">Status</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="flex-1 sm:w-40 h-10 sm:h-9 text-sm bg-background">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="valido">Válidos</SelectItem>
+                <SelectItem value="proximo-vencimento">Próx. vencimento</SelectItem>
+                <SelectItem value="vencido">Vencidos</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="flex-1 sm:w-36 h-10 sm:h-9 text-sm bg-background">
+                <SelectValue placeholder="Ordenar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="nome">Nome</SelectItem>
+                <SelectItem value="validade">Validade</SelectItem>
+                <SelectItem value="status">Status</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
       
-      {/* Desktop Table */}
+      {/* Desktop Table - hidden below lg */}
       <div className="hidden lg:block overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="border-border/40 hover:bg-transparent">
-              <TableHead className="text-xs font-medium text-muted-foreground">Produto</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">Lote</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">Marca</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">Fabricação</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">Validade</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">Abertura</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">Usar Até</TableHead>
-              {!category && <TableHead className="text-xs font-medium text-muted-foreground">Local</TableHead>}
-              <TableHead className="text-xs font-medium text-muted-foreground">Responsável</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">Status</TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">Ações</TableHead>
+            <TableRow className="border-border/30 hover:bg-transparent">
+              <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Produto</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Lote</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Marca</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Fabricação</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Validade</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Abertura</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Usar Até</TableHead>
+              {!category && <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Local</TableHead>}
+              <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Responsável</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Status</TableHead>
+              <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider w-24">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredProducts.map((product) => (
-              <TableRow key={product.id} className="border-border/30 hover:bg-muted/30 transition-colors">
+              <TableRow key={product.id} className="border-border/20 hover:bg-muted/30 transition-colors">
                 <TableCell className="font-medium text-sm">{product.nome}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{product.lote}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{product.marca}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{formatDate(product.dataFabricacao)}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{formatDate(product.validade)}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{formatDate(product.dataAbertura)}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{formatDate(product.utilizarAte)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground tabular-nums">{formatDate(product.dataFabricacao)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground tabular-nums">{formatDate(product.validade)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground tabular-nums">{formatDate(product.dataAbertura)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground tabular-nums">{formatDate(product.utilizarAte)}</TableCell>
                 {!category && (
                   <TableCell>
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                    <span className="text-[11px] text-muted-foreground bg-muted/80 px-2 py-0.5 rounded-md">
                       {categoryLabels[product.localArmazenamento]}
                     </span>
                   </TableCell>
                 )}
                 <TableCell className="text-sm text-muted-foreground">{product.responsavel}</TableCell>
                 <TableCell>
-                  <span className={cn("text-[11px] font-medium px-2 py-0.5 rounded-full border", statusConfig[product.status].className)}>
+                  <span className={cn("text-[11px] font-medium px-2.5 py-1 rounded-full border", statusConfig[product.status].className)}>
                     {statusConfig[product.status].label}
                   </span>
                 </TableCell>
                 <TableCell>
-                  <div className="flex gap-1">
+                  <div className="flex gap-0.5">
                     {onEdit && (
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(product)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-primary/10 hover:text-primary" onClick={() => onEdit(product)}>
                         <Edit className="w-3.5 h-3.5" />
                       </Button>
                     )}
                     {onPrintLabel && (
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onPrintLabel(product)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-primary/10 hover:text-primary" onClick={() => onPrintLabel(product)}>
                         <Printer className="w-3.5 h-3.5" />
                       </Button>
                     )}
                     {onDelete && (
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => onDelete(product.id)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive/70 hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(product.id)}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     )}
@@ -202,50 +206,98 @@ export function ProductTable({
         </Table>
       </div>
 
-      {/* Mobile Cards */}
-      <div className="lg:hidden divide-y divide-border/30">
-        {filteredProducts.map((product) => (
-          <div key={product.id} className="p-4 hover:bg-muted/20 transition-colors">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm text-foreground truncate">{product.nome}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Lote: {product.lote} · {product.marca}</p>
+      {/* Mobile Cards - shown below lg */}
+      <div className="lg:hidden">
+        {filteredProducts.map((product) => {
+          const isExpanded = expandedId === product.id;
+          return (
+            <div 
+              key={product.id} 
+              className={cn(
+                "border-b border-border/20 last:border-0 transition-colors",
+                isExpanded ? "bg-muted/20" : "hover:bg-muted/10"
+              )}
+            >
+              {/* Card header - always visible */}
+              <div 
+                className="flex items-center gap-3 p-4 cursor-pointer active:bg-muted/30"
+                onClick={() => setExpandedId(isExpanded ? null : product.id)}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h4 className="font-semibold text-sm text-foreground truncate">{product.nome}</h4>
+                    <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border flex-shrink-0", statusConfig[product.status].className)}>
+                      {statusConfig[product.status].label}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    {product.marca} · Lote: {product.lote}
+                    {!category && ` · ${categoryLabels[product.localArmazenamento]}`}
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  {isExpanded 
+                    ? <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                    : <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  }
+                </div>
               </div>
-              <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border ml-2 flex-shrink-0", statusConfig[product.status].className)}>
-                {statusConfig[product.status].label}
-              </span>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-3">
-              <div><span className="text-muted-foreground">Validade:</span> <span className="font-medium">{formatDate(product.validade)}</span></div>
-              <div><span className="text-muted-foreground">Usar até:</span> <span className="font-medium">{formatDate(product.utilizarAte)}</span></div>
-              {!category && <div className="col-span-2"><span className="text-muted-foreground">Local:</span> <span className="font-medium">{categoryLabels[product.localArmazenamento]}</span></div>}
-            </div>
-            
-            <div className="flex gap-1.5">
-              {onEdit && (
-                <Button variant="outline" size="sm" onClick={() => onEdit(product)} className="flex-1 h-8 text-xs">
-                  <Edit className="w-3 h-3 mr-1" />Editar
-                </Button>
+
+              {/* Expandable details */}
+              {isExpanded && (
+                <div className="px-4 pb-4 animate-fade-in">
+                  <div className="grid grid-cols-2 gap-3 mb-3 bg-muted/30 rounded-lg p-3">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-0.5">Fabricação</span>
+                      <span className="text-xs font-medium tabular-nums">{formatDate(product.dataFabricacao)}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-0.5">Validade</span>
+                      <span className="text-xs font-medium tabular-nums">{formatDate(product.validade)}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-0.5">Abertura</span>
+                      <span className="text-xs font-medium tabular-nums">{formatDate(product.dataAbertura)}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-0.5">Usar Até</span>
+                      <span className="text-xs font-medium tabular-nums">{formatDate(product.utilizarAte)}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-0.5">Responsável</span>
+                      <span className="text-xs font-medium">{product.responsavel || '-'}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {onEdit && (
+                      <Button variant="outline" size="sm" onClick={() => onEdit(product)} className="flex-1 h-9 text-xs">
+                        <Edit className="w-3.5 h-3.5 mr-1.5" />Editar
+                      </Button>
+                    )}
+                    {onPrintLabel && (
+                      <Button size="sm" onClick={() => onPrintLabel(product)} className="flex-1 h-9 text-xs">
+                        <Printer className="w-3.5 h-3.5 mr-1.5" />Imprimir
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button variant="ghost" size="icon" onClick={() => onDelete(product.id)} className="h-9 w-9 text-destructive hover:bg-destructive/10">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
               )}
-              {onPrintLabel && (
-                <Button size="sm" onClick={() => onPrintLabel(product)} className="flex-1 h-8 text-xs">
-                  <Printer className="w-3 h-3 mr-1" />Imprimir
-                </Button>
-              )}
-              {onDelete && (
-                <Button variant="ghost" size="sm" onClick={() => onDelete(product.id)} className="h-8 w-8 p-0 text-destructive">
-                  <Trash2 className="w-3 h-3" />
-                </Button>
-              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       
       {filteredProducts.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <p className="text-sm">Nenhum produto encontrado</p>
+        <div className="text-center py-16 text-muted-foreground">
+          <Search className="w-8 h-8 mx-auto mb-3 text-muted-foreground/40" />
+          <p className="text-sm font-medium">Nenhum produto encontrado</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">Tente ajustar os filtros de busca</p>
         </div>
       )}
     </div>
