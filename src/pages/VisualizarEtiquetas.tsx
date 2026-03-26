@@ -127,23 +127,11 @@ const VisualizarEtiquetas = () => {
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <MobileDrawer />
-        <AppSidebar />
-        <main className="flex-1 overflow-x-hidden w-full">
-          <div className="p-4 sm:p-6 lg:p-8 pt-14 sm:pt-6 max-w-7xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <SidebarTrigger className="hidden lg:flex text-muted-foreground" />
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-                  Visualizar Etiquetas
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  {products.length} produtos · {largura}×{altura}mm
-                </p>
-              </div>
-            </div>
+    <PageLayout 
+      title="Visualizar Etiquetas" 
+      description={`${products.length} produtos · ${largura}×${altura}mm`}
+      icon={Eye}
+    >
 
             {/* Controls */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-6">
