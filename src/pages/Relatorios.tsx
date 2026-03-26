@@ -374,10 +374,7 @@ const Relatorios = () => {
                 </CardContent>
               </Card>
             )}
-          </div>
-        </main>
-      </div>
-    </SidebarProvider>
+    </PageLayout>
   );
 };
 
