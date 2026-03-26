@@ -1212,9 +1212,6 @@ const ImpressaoEtiquetas = () => {
                 </div>
               </DialogContent>
             </Dialog>
-          </div>
-        </DialogContent>
-      </Dialog>
     </PageLayout>
   );
 };
