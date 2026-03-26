@@ -240,28 +240,11 @@ const Relatorios = () => {
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <MobileDrawer />
-        <AppSidebar />
-        <main className="flex-1 overflow-x-hidden w-full">
-          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-14 sm:pt-4 md:pt-6 lg:pt-8">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
-              <SidebarTrigger className="hidden lg:flex" />
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <PackageSearch className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
-                    Relatórios
-                  </h1>
-                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1">
-                    Visualize e exporte os dados dos seus produtos
-                  </p>
-                </div>
-              </div>
-            </div>
+    <PageLayout 
+      title="Relatórios" 
+      description="Visualize e exporte os dados dos seus produtos"
+      icon={PackageSearch}
+    >
 
             {/* Filtros e Exportação */}
             <Card className="mb-6">
