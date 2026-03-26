@@ -1,7 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { MobileDrawer } from "@/components/MobileDrawer";
+import { PageLayout } from "@/components/PageLayout";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
