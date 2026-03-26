@@ -1,8 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { MobileDrawer } from "@/components/MobileDrawer";
+import { PageLayout } from "@/components/PageLayout";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -902,23 +900,11 @@ const ImpressaoEtiquetas = () => {
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <MobileDrawer />
-        <AppSidebar />
-        <main className="flex-1 overflow-x-hidden w-full">
-          <div className="p-4 sm:p-6 lg:p-8 pt-14 sm:pt-6 max-w-7xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <SidebarTrigger className="hidden lg:flex text-muted-foreground" />
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-                  Impressão de Etiquetas
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  Impressão otimizada para impressoras térmicas
-                </p>
-              </div>
-            </div>
+    <PageLayout 
+      title="Impressão de Etiquetas" 
+      description="Impressão otimizada para impressoras térmicas"
+      icon={Printer}
+    >
 
             {/* Controles de Impressão */}
             <Card className="mb-6">
@@ -1226,10 +1212,7 @@ const ImpressaoEtiquetas = () => {
                 </div>
               </DialogContent>
             </Dialog>
-          </div>
-        </main>
-      </div>
-    </SidebarProvider>
+    </PageLayout>
   );
 };
 

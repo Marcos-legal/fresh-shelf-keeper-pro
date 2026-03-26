@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { MobileDrawer } from "@/components/MobileDrawer";
+import { PageLayout } from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProdutoEstoqueForm } from "@/components/ProdutoEstoqueForm";
@@ -52,91 +50,60 @@ export default function ContagemEstoque() {
 
   if (loading) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <main className="flex-1 p-4 sm:p-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-muted rounded w-1/4"></div>
-              <div className="h-32 bg-muted rounded"></div>
-            </div>
-          </main>
+      <PageLayout title="Contagem de Estoque" description="Carregando..." icon={Calculator}>
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted rounded w-1/4"></div>
+          <div className="h-32 bg-muted rounded"></div>
         </div>
-      </SidebarProvider>
+      </PageLayout>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <MobileDrawer />
-        <AppSidebar />
-        <main className="flex-1 overflow-x-hidden w-full">
-          <div className="p-3 sm:p-4 md:p-6 lg:p-8 pt-16 sm:pt-4 md:pt-6 lg:pt-8 space-y-4 sm:space-y-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
-              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold gradient-text">Contagem de Estoque</h1>
-              <div className="flex flex-wrap gap-2">
-                <Button 
-                  variant="secondary" 
-                  onClick={migrarDadosLocalStorage}
-                  className="text-xs sm:text-sm flex-1 sm:flex-none"
-                  size="sm"
-                >
-                  <Download className="w-4 h-4 mr-1.5" />
-                  <span className="hidden sm:inline">Migrar dados locais</span>
-                  <span className="sm:hidden">Migrar</span>
+    <PageLayout 
+      title="Contagem de Estoque" 
+      description="Gerencie o estoque de produtos"
+      icon={Calculator}
+      headerActions={
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={migrarDadosLocalStorage} className="text-xs sm:text-sm" size="sm">
+            <Download className="w-4 h-4 mr-1.5" />
+            <span className="hidden sm:inline">Migrar dados locais</span>
+            <span className="sm:hidden">Migrar</span>
+          </Button>
+          <ExportarEstoque produtos={produtos} contagens={contagens} getEstoqueAtual={getEstoqueAtual} />
+          <Dialog open={showProdutoForm} onOpenChange={setShowProdutoForm}>
+            <DialogTrigger asChild>
+              <Button className="bg-primary text-primary-foreground text-xs sm:text-sm" size="sm">
+                <Package className="w-4 h-4 mr-1.5" />
+                <span className="hidden sm:inline">Cadastrar Produto</span>
+                <span className="sm:hidden">Produto</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Cadastrar Produto para Estoque</DialogTitle></DialogHeader>
+              <ProdutoEstoqueForm onSubmit={(data) => { addProdutoEstoque(data); setShowProdutoForm(false); }} />
+            </DialogContent>
+          </Dialog>
+          {produtos.length > 0 && (
+            <Dialog open={showContagemForm} onOpenChange={setShowContagemForm}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/5 text-xs sm:text-sm" size="sm">
+                  <Calculator className="w-4 h-4 mr-1.5" />
+                  <span className="hidden sm:inline">Nova Contagem</span>
+                  <span className="sm:hidden">Contagem</span>
                 </Button>
-                
-                <ExportarEstoque 
-                  produtos={produtos}
-                  contagens={contagens}
-                  getEstoqueAtual={getEstoqueAtual}
-                />
-                
-                <Dialog open={showProdutoForm} onOpenChange={setShowProdutoForm}>
-                  <DialogTrigger asChild>
-                    <Button className="gradient-blue text-white text-xs sm:text-sm flex-1 sm:flex-none" size="sm">
-                      <Package className="w-4 h-4 mr-1.5" />
-                      <span className="hidden sm:inline">Cadastrar Produto</span>
-                      <span className="sm:hidden">Produto</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Cadastrar Produto para Estoque</DialogTitle>
-                    </DialogHeader>
-                    <ProdutoEstoqueForm
-                      onSubmit={(data) => {
-                        addProdutoEstoque(data);
-                        setShowProdutoForm(false);
-                      }}
-                    />
-                  </DialogContent>
-                </Dialog>
-
-                {produtos.length > 0 && (
-                  <Dialog open={showContagemForm} onOpenChange={setShowContagemForm}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/5 text-xs sm:text-sm flex-1 sm:flex-none" size="sm">
-                        <Calculator className="w-4 h-4 mr-1.5" />
-                        <span className="hidden sm:inline">Nova Contagem</span>
-                        <span className="sm:hidden">Contagem</span>
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Nova Contagem de Estoque</DialogTitle>
-                      </DialogHeader>
-                      <ContagemEstoqueForm
-                        produtos={produtos}
-                        onSubmit={addContagem}
-                        onClose={() => setShowContagemForm(false)}
-                      />
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </div>
-            </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader><DialogTitle>Nova Contagem de Estoque</DialogTitle></DialogHeader>
+                <ContagemEstoqueForm produtos={produtos} onSubmit={addContagem} onClose={() => setShowContagemForm(false)} />
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+      }
+    >
+      <div className="space-y-4 sm:space-y-6">
 
             <EstoqueStats 
               produtos={produtos}
@@ -401,9 +368,7 @@ export default function ContagemEstoque() {
                 )}
               </CardContent>
             </Card>
-          </div>
-        </main>
       </div>
-    </SidebarProvider>
+    </PageLayout>
   );
 }

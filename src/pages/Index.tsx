@@ -1,18 +1,14 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { MobileDrawer } from "@/components/MobileDrawer";
+import { PageLayout } from "@/components/PageLayout";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Product, ProductFormData } from "@/types/product";
 import { ProductTable } from "@/components/ProductTable";
 import { ProductForm } from "@/components/ProductForm";
 import { StatsCard } from "@/components/StatsCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Package, CheckCircle, AlertTriangle, XCircle, Thermometer, Snowflake, Home, Refrigerator, Clock, Printer, Eye } from "lucide-react";
+import { Plus, Package, CheckCircle, AlertTriangle, XCircle, Thermometer, Snowflake, Home, Refrigerator, Clock, Printer, Eye, LayoutDashboard } from "lucide-react";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DashboardChart } from "@/components/DashboardChart";
@@ -74,15 +70,10 @@ const Index = () => {
     const area = largura * altura;
     const fontSize = Math.max(10, Math.min(14, area / 350));
     const config = {
-      width: `${largura * 3.78}px`,
-      height: `${altura * 3.78}px`,
-      fontSize: `${fontSize}px`,
-      labelSize: `${fontSize - 1}px`,
-      contentSize: `${fontSize}px`,
-      padding: `${Math.max(6, largura * 0.085)}px`,
-      spacing: `${Math.max(3, altura * 0.06)}px`,
-      showGrid: (largura / altura) > 1.2,
-      compactMode: area < 2500
+      width: `${largura * 3.78}px`, height: `${altura * 3.78}px`,
+      fontSize: `${fontSize}px`, labelSize: `${fontSize - 1}px`, contentSize: `${fontSize}px`,
+      padding: `${Math.max(6, largura * 0.085)}px`, spacing: `${Math.max(3, altura * 0.06)}px`,
+      showGrid: (largura / altura) > 1.2, compactMode: area < 2500
     };
 
     const printWindow = window.open('', '_blank');
@@ -123,7 +114,6 @@ const Index = () => {
     toast({ title: "Etiqueta enviada", description: `Etiqueta de ${product.nome} enviada para impressão!` });
   };
 
-  // Produtos próximos do vencimento (2 dias)
   const proximosVencimento = products.filter(product => {
     const now = new Date();
     let targetDate: Date | undefined;
@@ -154,237 +144,163 @@ const Index = () => {
 
   if (loading) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1">
-            <div className="p-6 max-w-7xl mx-auto">
-              <Skeleton className="h-10 w-64 mb-8" />
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-                <Skeleton className="h-72 rounded-xl" />
-                <Skeleton className="h-72 rounded-xl" />
-              </div>
-            </div>
-          </main>
+      <PageLayout title="Dashboard" description="Carregando..." icon={LayoutDashboard}>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
         </div>
-      </SidebarProvider>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <Skeleton className="h-72 rounded-xl" />
+          <Skeleton className="h-72 rounded-xl" />
+        </div>
+      </PageLayout>
     );
   }
 
   const storageLocations = [
-    { name: "Refrigerado", icon: Thermometer, url: "/refrigerado", count: stats.porCategoria.refrigerado },
-    { name: "Congelado", icon: Snowflake, url: "/congelado", count: stats.porCategoria.congelado },
-    { name: "Ambiente", icon: Home, url: "/ambiente", count: stats.porCategoria.ambiente },
-    { name: "Câmara Fria", icon: Refrigerator, url: "/camara-fria", count: stats.porCategoria['camara-fria'] },
+    { name: "Refrigerado", icon: Thermometer, url: "/refrigerado", count: stats.porCategoria.refrigerado, color: "text-primary" },
+    { name: "Congelado", icon: Snowflake, url: "/congelado", count: stats.porCategoria.congelado, color: "text-primary" },
+    { name: "Ambiente", icon: Home, url: "/ambiente", count: stats.porCategoria.ambiente, color: "text-primary" },
+    { name: "Câmara Fria", icon: Refrigerator, url: "/camara-fria", count: stats.porCategoria['camara-fria'], color: "text-primary" },
   ];
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <MobileDrawer />
-        <AppSidebar />
-        <main className="flex-1 w-full">
-          <div className="p-4 sm:p-6 lg:p-8 pt-14 sm:pt-6 max-w-7xl mx-auto">
-
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6 sm:mb-8">
-              <div className="flex items-center gap-3">
-                <SidebarTrigger className="hidden lg:flex text-muted-foreground hover:text-foreground" />
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-                    Dashboard
-                  </h1>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                    Visão geral do controle de validades
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <ThemeToggle />
-                <Button 
-                  onClick={() => { setEditingProduct(null); setShowForm(!showForm); }} 
-                  size="sm"
-                  className="text-sm"
-                >
-                  <Plus className="w-4 h-4 mr-1.5" />
-                  <span className="hidden sm:inline">{showForm ? 'Cancelar' : 'Novo Produto'}</span>
-                  <span className="sm:hidden">Novo</span>
-                </Button>
-              </div>
+    <PageLayout 
+      title="Dashboard" 
+      description="Visão geral do controle de validades"
+      icon={LayoutDashboard}
+      headerActions={
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button 
+            onClick={() => { setEditingProduct(null); setShowForm(!showForm); }} 
+            size="sm" className="text-sm h-9"
+          >
+            <Plus className="w-4 h-4 mr-1.5" />
+            <span className="hidden sm:inline">{showForm ? 'Cancelar' : 'Novo Produto'}</span>
+            <span className="sm:hidden">Novo</span>
+          </Button>
+        </div>
+      }
+    >
+      {/* Alert Banners */}
+      {(produtosVencidos.length > 0 || proximosVencimento.length > 0) && (
+        <div className="flex flex-col gap-2 sm:gap-3 mb-5 sm:mb-6">
+          {produtosVencidos.length > 0 && (
+            <div 
+              className="alert-banner-danger cursor-pointer active:opacity-80 transition-opacity"
+              onClick={() => setActiveFilter(activeFilter === 'vencidos' ? 'todos' : 'vencidos')}
+            >
+              <XCircle className="w-4 h-4 flex-shrink-0" />
+              <span className="text-xs sm:text-sm">{produtosVencidos.length} produto{produtosVencidos.length !== 1 ? 's' : ''} vencido{produtosVencidos.length !== 1 ? 's' : ''} — ação imediata necessária</span>
             </div>
-
-            {/* Alert Banners */}
-            {(produtosVencidos.length > 0 || proximosVencimento.length > 0) && (
-              <div className="flex flex-col gap-3 mb-6">
-                {produtosVencidos.length > 0 && (
-                  <div 
-                    className="alert-banner-danger cursor-pointer"
-                    onClick={() => setActiveFilter(activeFilter === 'vencidos' ? 'todos' : 'vencidos')}
-                  >
-                    <XCircle className="w-4 h-4 flex-shrink-0" />
-                    <span>{produtosVencidos.length} produto{produtosVencidos.length !== 1 ? 's' : ''} vencido{produtosVencidos.length !== 1 ? 's' : ''} — ação imediata necessária</span>
-                  </div>
-                )}
-                {proximosVencimento.length > 0 && (
-                  <div 
-                    className="alert-banner-warning cursor-pointer"
-                    onClick={() => setActiveFilter(activeFilter === 'proximo-vencimento' ? 'todos' : 'proximo-vencimento')}
-                  >
-                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                    <span>{proximosVencimento.length} produto{proximosVencimento.length !== 1 ? 's' : ''} vencendo em até 2 dias</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-              <StatsCard
-                title="Total"
-                value={stats.total}
-                icon={Package}
-                variant="default"
-                description="Produtos cadastrados"
-                onClick={() => setActiveFilter(activeFilter === 'todos' ? 'todos' : 'todos')}
-                isActive={activeFilter === 'todos'}
-              />
-              <StatsCard
-                title="Válidos"
-                value={stats.validos}
-                icon={CheckCircle}
-                variant="success"
-                description="Em condições ideais"
-                onClick={() => setActiveFilter(activeFilter === 'validos' ? 'todos' : 'validos')}
-                isActive={activeFilter === 'validos'}
-              />
-              <StatsCard
-                title="Próx. Vencimento"
-                value={stats.proximoVencimento}
-                icon={Clock}
-                variant="warning"
-                description="Vencendo em até 2 dias"
-                onClick={() => setActiveFilter(activeFilter === 'proximo-vencimento' ? 'todos' : 'proximo-vencimento')}
-                isActive={activeFilter === 'proximo-vencimento'}
-              />
-              <StatsCard
-                title="Vencidos"
-                value={stats.vencidos}
-                icon={XCircle}
-                variant="danger"
-                description="Ação imediata"
-                onClick={() => setActiveFilter(activeFilter === 'vencidos' ? 'todos' : 'vencidos')}
-                isActive={activeFilter === 'vencidos'}
-              />
+          )}
+          {proximosVencimento.length > 0 && (
+            <div 
+              className="alert-banner-warning cursor-pointer active:opacity-80 transition-opacity"
+              onClick={() => setActiveFilter(activeFilter === 'proximo-vencimento' ? 'todos' : 'proximo-vencimento')}
+            >
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <span className="text-xs sm:text-sm">{proximosVencimento.length} produto{proximosVencimento.length !== 1 ? 's' : ''} vencendo em até 2 dias</span>
             </div>
+          )}
+        </div>
+      )}
 
-            {/* Charts */}
-            <DashboardChart 
-              categoryData={stats.porCategoria}
-              statusData={{
-                validos: stats.validos,
-                proximoVencimento: stats.proximoVencimento,
-                vencidos: stats.vencidos
-              }}
-            />
-
-            {/* Storage Locations */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-              {storageLocations.map((loc) => (
-                <div
-                  key={loc.name}
-                  onClick={() => navigate(loc.url)}
-                  className="group bg-card rounded-xl border border-border/60 p-4 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/20"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <loc.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </div>
-                  <div className="text-xl sm:text-2xl font-bold text-foreground">{loc.count}</div>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">{loc.name}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              <Button variant="outline" size="sm" onClick={() => navigate('/impressao-etiquetas')} className="text-xs">
-                <Printer className="w-3.5 h-3.5 mr-1.5" />
-                Imprimir Etiquetas
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/visualizar-etiquetas')} className="text-xs">
-                <Eye className="w-3.5 h-3.5 mr-1.5" />
-                Visualizar Etiquetas
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/relatorios')} className="text-xs">
-                <Package className="w-3.5 h-3.5 mr-1.5" />
-                Relatórios
-              </Button>
-            </div>
-
-            {/* Form */}
-            {showForm && (
-              <div className="mb-6">
-                <ProductForm
-                  onSubmit={editingProduct ? handleEditProduct : handleAddProduct}
-                  initialData={editingProduct ? {
-                    nome: editingProduct.nome,
-                    lote: editingProduct.lote,
-                    marca: editingProduct.marca,
-                    dataFabricacao: editingProduct.dataFabricacao instanceof Date 
-                      ? editingProduct.dataFabricacao.toISOString().split('T')[0] 
-                      : editingProduct.dataFabricacao || '',
-                    validade: typeof editingProduct.validade === 'string' 
-                      ? editingProduct.validade 
-                      : editingProduct.validade instanceof Date 
-                        ? editingProduct.validade.toISOString().split('T')[0] 
-                        : '',
-                    dataAbertura: editingProduct.dataAbertura instanceof Date 
-                      ? editingProduct.dataAbertura.toISOString().split('T')[0] 
-                      : editingProduct.dataAbertura || '',
-                    diasParaVencer: editingProduct.diasParaVencer,
-                    localArmazenamento: editingProduct.localArmazenamento,
-                    responsavel: editingProduct.responsavel,
-                    showOptionalDates: editingProduct.showOptionalDates ?? false,
-                  } : undefined}
-                  title={editingProduct ? 'Editar Produto' : 'Cadastro de Produto'}
-                  submitLabel={editingProduct ? 'Atualizar Produto' : 'Salvar Produto'}
-                />
-              </div>
-            )}
-
-            {/* Active filter indicator */}
-            {activeFilter !== 'todos' && (
-              <div className="alert-banner-info mb-4">
-                <span className="text-sm">Filtrando: <strong>{filterTitles[activeFilter]}</strong></span>
-                <Button variant="ghost" size="sm" onClick={() => setActiveFilter('todos')} className="text-xs ml-auto h-7 px-2">
-                  Limpar
-                </Button>
-              </div>
-            )}
-
-            {/* Product Table */}
-            <ProductTable
-              products={filteredProducts}
-              onEdit={handleEditClick}
-              onDelete={handleDeleteProduct}
-              onPrintLabel={handlePrintLabel}
-              title={filterTitles[activeFilter]}
-            />
-          </div>
-        </main>
-
-        <FloatingActionButton
-          onNewProduct={() => { setEditingProduct(null); setShowForm(true); }}
-          onQuickPrint={() => navigate('/impressao-etiquetas')}
-          onReports={() => navigate('/relatorios')}
-          onExport={() => toast({ title: "Exportação", description: "Funcionalidade em desenvolvimento..." })}
-          onImport={() => toast({ title: "Importação", description: "Funcionalidade em desenvolvimento..." })}
-          onSettings={() => toast({ title: "Configurações", description: "Funcionalidade em desenvolvimento..." })}
-        />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+        <StatsCard title="Total" value={stats.total} icon={Package} variant="default" description="Produtos cadastrados"
+          onClick={() => setActiveFilter(activeFilter === 'todos' ? 'todos' : 'todos')} isActive={activeFilter === 'todos'} />
+        <StatsCard title="Válidos" value={stats.validos} icon={CheckCircle} variant="success" description="Em condições ideais"
+          onClick={() => setActiveFilter(activeFilter === 'validos' ? 'todos' : 'validos')} isActive={activeFilter === 'validos'} />
+        <StatsCard title="Próx. Venc." value={stats.proximoVencimento} icon={Clock} variant="warning" description="Vencendo em até 2 dias"
+          onClick={() => setActiveFilter(activeFilter === 'proximo-vencimento' ? 'todos' : 'proximo-vencimento')} isActive={activeFilter === 'proximo-vencimento'} />
+        <StatsCard title="Vencidos" value={stats.vencidos} icon={XCircle} variant="danger" description="Ação imediata"
+          onClick={() => setActiveFilter(activeFilter === 'vencidos' ? 'todos' : 'vencidos')} isActive={activeFilter === 'vencidos'} />
       </div>
-    </SidebarProvider>
+
+      {/* Charts */}
+      <DashboardChart 
+        categoryData={stats.porCategoria}
+        statusData={{ validos: stats.validos, proximoVencimento: stats.proximoVencimento, vencidos: stats.vencidos }}
+      />
+
+      {/* Storage Locations */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+        {storageLocations.map((loc) => (
+          <div
+            key={loc.name}
+            onClick={() => navigate(loc.url)}
+            className="group bg-card rounded-xl border border-border/60 p-4 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98]"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <loc.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+            <div className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">{loc.count}</div>
+            <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">{loc.name}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex flex-wrap gap-2 mb-5 sm:mb-6">
+        <Button variant="outline" size="sm" onClick={() => navigate('/impressao-etiquetas')} className="text-xs h-9">
+          <Printer className="w-3.5 h-3.5 mr-1.5" /> Imprimir Etiquetas
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => navigate('/visualizar-etiquetas')} className="text-xs h-9">
+          <Eye className="w-3.5 h-3.5 mr-1.5" /> Visualizar Etiquetas
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => navigate('/relatorios')} className="text-xs h-9">
+          <Package className="w-3.5 h-3.5 mr-1.5" /> Relatórios
+        </Button>
+      </div>
+
+      {/* Form */}
+      {showForm && (
+        <div className="mb-6">
+          <ProductForm
+            onSubmit={editingProduct ? handleEditProduct : handleAddProduct}
+            initialData={editingProduct ? {
+              nome: editingProduct.nome, lote: editingProduct.lote, marca: editingProduct.marca,
+              dataFabricacao: editingProduct.dataFabricacao instanceof Date ? editingProduct.dataFabricacao.toISOString().split('T')[0] : editingProduct.dataFabricacao || '',
+              validade: typeof editingProduct.validade === 'string' ? editingProduct.validade : editingProduct.validade instanceof Date ? editingProduct.validade.toISOString().split('T')[0] : '',
+              dataAbertura: editingProduct.dataAbertura instanceof Date ? editingProduct.dataAbertura.toISOString().split('T')[0] : editingProduct.dataAbertura || '',
+              diasParaVencer: editingProduct.diasParaVencer, localArmazenamento: editingProduct.localArmazenamento,
+              responsavel: editingProduct.responsavel, showOptionalDates: editingProduct.showOptionalDates ?? false,
+            } : undefined}
+            title={editingProduct ? 'Editar Produto' : 'Cadastro de Produto'}
+            submitLabel={editingProduct ? 'Atualizar Produto' : 'Salvar Produto'}
+          />
+        </div>
+      )}
+
+      {/* Active filter indicator */}
+      {activeFilter !== 'todos' && (
+        <div className="alert-banner-info mb-4">
+          <span className="text-xs sm:text-sm">Filtrando: <strong>{filterTitles[activeFilter]}</strong></span>
+          <Button variant="ghost" size="sm" onClick={() => setActiveFilter('todos')} className="text-xs ml-auto h-7 px-2">
+            Limpar
+          </Button>
+        </div>
+      )}
+
+      {/* Product Table */}
+      <ProductTable
+        products={filteredProducts}
+        onEdit={handleEditClick}
+        onDelete={handleDeleteProduct}
+        onPrintLabel={handlePrintLabel}
+        title={filterTitles[activeFilter]}
+      />
+
+      <FloatingActionButton
+        onNewProduct={() => { setEditingProduct(null); setShowForm(true); }}
+        onQuickPrint={() => navigate('/impressao-etiquetas')}
+        onReports={() => navigate('/relatorios')}
+        onExport={() => toast({ title: "Exportação", description: "Funcionalidade em desenvolvimento..." })}
+        onImport={() => toast({ title: "Importação", description: "Funcionalidade em desenvolvimento..." })}
+        onSettings={() => toast({ title: "Configurações", description: "Funcionalidade em desenvolvimento..." })}
+      />
+    </PageLayout>
   );
 };
 
