@@ -368,9 +368,7 @@ export default function ContagemEstoque() {
                 )}
               </CardContent>
             </Card>
-          </div>
-        </main>
       </div>
-    </SidebarProvider>
+    </PageLayout>
   );
 }
