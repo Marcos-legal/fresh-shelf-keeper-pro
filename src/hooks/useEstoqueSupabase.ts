@@ -274,6 +274,54 @@ export function useEstoqueSupabase() {
     }
   };
 
+  // Atualizar contagem
+  const updateContagem = async (id: string, data: ContagemFormData) => {
+    try {
+      const produto = produtos.find(p => p.id === data.produto_id);
+      if (!produto) {
+        toast({ title: "Erro", description: "Produto não encontrado.", variant: "destructive" });
+        return;
+      }
+
+      const quantidadeBase = data.quantidade * produto.quantidade_por_unidade;
+      let quantidadeTotal = quantidadeBase;
+      if (data.quantidade_extra > 0) {
+        if (data.unidade_quantidade_extra === 'porcoes') {
+          quantidadeTotal += data.quantidade_extra;
+        } else {
+          quantidadeTotal += data.quantidade_extra / produto.quantidade_por_unidade;
+        }
+      }
+
+      const { data: updated, error } = await supabase
+        .from('contagens_estoque')
+        .update({
+          quantidade: data.quantidade,
+          quantidade_extra: data.quantidade_extra,
+          unidade_quantidade_extra: data.unidade_quantidade_extra,
+          quantidade_total: quantidadeTotal,
+          responsavel: data.responsavel,
+          observacoes: data.observacoes,
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao atualizar contagem:', error);
+        toast({ title: "Erro ao atualizar contagem", description: error.message, variant: "destructive" });
+        return;
+      }
+
+      const mapped = { ...updated, unidade_quantidade_extra: updated.unidade_quantidade_extra as 'porcoes' | 'unidades' };
+      setContagens(prev => prev.map(c => c.id === id ? mapped : c));
+      toast({ title: "Contagem atualizada", description: "Contagem foi atualizada com sucesso!" });
+    } catch (error) {
+      console.error('Erro ao atualizar contagem:', error);
+      toast({ title: "Erro ao atualizar contagem", description: "Ocorreu um erro ao atualizar a contagem.", variant: "destructive" });
+    }
+  };
+
   // Excluir contagem
   const deleteContagem = async (id: string) => {
     try {
