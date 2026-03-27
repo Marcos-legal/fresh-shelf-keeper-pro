@@ -275,13 +275,13 @@ export default function ContagemEstoque() {
                               <TableCell className="font-medium text-sm">{produto?.nome || 'Produto removido'}</TableCell>
                               <TableCell>
                                 {isEditing ? (
-                                  <div className="flex items-center gap-1">
-                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setEditQuantidade(Math.max(0, editQuantidade - 1))}>
-                                      <MinusIcon className="w-3 h-3" />
+                                  <div className="flex items-center gap-1.5">
+                                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 touch-manipulation" onClick={() => setEditQuantidade(Math.max(0, editQuantidade - 1))}>
+                                      <MinusIcon className="w-3.5 h-3.5" />
                                     </Button>
-                                    <Input type="number" className="w-16 h-7 text-center text-xs" value={editQuantidade} onChange={e => setEditQuantidade(Number(e.target.value))} min={0} />
-                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setEditQuantidade(editQuantidade + 1)}>
-                                      <PlusIcon className="w-3 h-3" />
+                                    <Input type="number" className="w-16 h-8 text-center text-sm [&::-webkit-inner-spin-button]:appearance-none" value={editQuantidade} onChange={e => setEditQuantidade(Number(e.target.value))} min={0} />
+                                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 touch-manipulation" onClick={() => setEditQuantidade(editQuantidade + 1)}>
+                                      <PlusIcon className="w-3.5 h-3.5" />
                                     </Button>
                                   </div>
                                 ) : (
@@ -290,13 +290,13 @@ export default function ContagemEstoque() {
                               </TableCell>
                               <TableCell>
                                 {isEditing ? (
-                                  <div className="flex items-center gap-1">
-                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setEditQuantidadeExtra(Math.max(0, editQuantidadeExtra - 1))}>
-                                      <MinusIcon className="w-3 h-3" />
+                                  <div className="flex items-center gap-1.5">
+                                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 touch-manipulation" onClick={() => setEditQuantidadeExtra(Math.max(0, editQuantidadeExtra - 1))}>
+                                      <MinusIcon className="w-3.5 h-3.5" />
                                     </Button>
-                                    <Input type="number" className="w-16 h-7 text-center text-xs" value={editQuantidadeExtra} onChange={e => setEditQuantidadeExtra(Number(e.target.value))} min={0} />
-                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setEditQuantidadeExtra(editQuantidadeExtra + 1)}>
-                                      <PlusIcon className="w-3 h-3" />
+                                    <Input type="number" className="w-16 h-8 text-center text-sm [&::-webkit-inner-spin-button]:appearance-none" value={editQuantidadeExtra} onChange={e => setEditQuantidadeExtra(Number(e.target.value))} min={0} />
+                                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 touch-manipulation" onClick={() => setEditQuantidadeExtra(editQuantidadeExtra + 1)}>
+                                      <PlusIcon className="w-3.5 h-3.5" />
                                     </Button>
                                   </div>
                                 ) : (
