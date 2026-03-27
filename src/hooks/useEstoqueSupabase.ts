@@ -415,6 +415,7 @@ export function useEstoqueSupabase() {
     updateProdutoEstoque,
     deleteProdutoEstoque,
     addContagem,
+    updateContagem,
     deleteContagem,
     getEstoqueAtual,
     migrarDadosLocalStorage,
