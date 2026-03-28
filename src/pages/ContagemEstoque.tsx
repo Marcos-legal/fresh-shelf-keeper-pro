@@ -9,12 +9,20 @@ import { useEstoqueSupabase } from "@/hooks/useEstoqueSupabase";
 import { EstoqueSearchFilter } from "@/components/EstoqueSearchFilter";
 import { EstoqueStats } from "@/components/EstoqueStats";
 import { ContagemEstoque as ContagemType } from "@/types/estoque";
-import { Package, Calculator, Plus, Trash2, Download, Minus as MinusIcon, PlusIcon } from "lucide-react";
+import { Package, Calculator, Plus, Trash2, Download, Minus as MinusIcon, PlusIcon, Save, Pencil, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
+
+interface EditState {
+  quantidade: number;
+  quantidade_extra: number;
+  responsavel: string;
+  observacoes: string;
+}
 
 export default function ContagemEstoque() {
   const {
@@ -35,6 +43,7 @@ export default function ContagemEstoque() {
   const [showContagemForm, setShowContagemForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterResponsavel, setFilterResponsavel] = useState('all');
+  const [editingStates, setEditingStates] = useState<Record<string, EditState>>({});
 
   const responsaveis = [...new Set(contagens.map(c => c.responsavel).filter(Boolean))] as string[];
 
@@ -51,29 +60,50 @@ export default function ContagemEstoque() {
     return matchesSearch && matchesResponsavel;
   });
 
-  const handleQuantidadeChange = (contagem: ContagemType, newQuantidade: number) => {
-    const val = Math.max(0, newQuantidade);
-    updateContagem(contagem.id, {
-      produto_id: contagem.produto_id,
-      quantidade: val,
-      quantidade_extra: contagem.quantidade_extra,
-      unidade_quantidade_extra: contagem.unidade_quantidade_extra,
-      responsavel: contagem.responsavel,
-      observacoes: contagem.observacoes,
+  const startEditing = (contagem: ContagemType) => {
+    setEditingStates(prev => ({
+      ...prev,
+      [contagem.id]: {
+        quantidade: contagem.quantidade,
+        quantidade_extra: contagem.quantidade_extra,
+        responsavel: contagem.responsavel || '',
+        observacoes: contagem.observacoes || '',
+      }
+    }));
+  };
+
+  const cancelEditing = (id: string) => {
+    setEditingStates(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
     });
   };
 
-  const handleQuantidadeExtraChange = (contagem: ContagemType, newExtra: number) => {
-    const val = Math.max(0, newExtra);
-    updateContagem(contagem.id, {
-      produto_id: contagem.produto_id,
-      quantidade: contagem.quantidade,
-      quantidade_extra: val,
-      unidade_quantidade_extra: contagem.unidade_quantidade_extra,
-      responsavel: contagem.responsavel,
-      observacoes: contagem.observacoes,
-    });
+  const updateEditField = (id: string, field: keyof EditState, value: number | string) => {
+    setEditingStates(prev => ({
+      ...prev,
+      [id]: { ...prev[id], [field]: value }
+    }));
   };
+
+  const saveEditing = async (contagem: ContagemType) => {
+    const editState = editingStates[contagem.id];
+    if (!editState) return;
+
+    await updateContagem(contagem.id, {
+      produto_id: contagem.produto_id,
+      quantidade: Math.max(0, editState.quantidade),
+      quantidade_extra: Math.max(0, editState.quantidade_extra),
+      unidade_quantidade_extra: contagem.unidade_quantidade_extra,
+      responsavel: editState.responsavel || undefined,
+      observacoes: editState.observacoes || undefined,
+    });
+
+    cancelEditing(contagem.id);
+  };
+
+  const isEditing = (id: string) => id in editingStates;
 
   if (loading) {
     return (
@@ -255,8 +285,9 @@ export default function ContagemEstoque() {
                         <TableHead className="text-xs">Qtd Extra</TableHead>
                         <TableHead className="text-xs">Total Calculado</TableHead>
                         <TableHead className="text-xs">Responsável</TableHead>
+                        <TableHead className="text-xs">Observações</TableHead>
                         <TableHead className="text-xs">Data</TableHead>
-                        <TableHead className="text-xs w-[60px]">Ações</TableHead>
+                        <TableHead className="text-xs w-[100px]">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -264,55 +295,106 @@ export default function ContagemEstoque() {
                         .sort((a, b) => new Date(b.data_contagem).getTime() - new Date(a.data_contagem).getTime())
                         .map((contagem) => {
                           const produto = produtos.find(p => p.id === contagem.produto_id);
+                          const editing = isEditing(contagem.id);
+                          const editState = editingStates[contagem.id];
+
                           return (
-                            <TableRow key={contagem.id}>
+                            <TableRow key={contagem.id} className={cn(editing && "bg-primary/5 ring-1 ring-primary/20")}>
                               <TableCell className="font-medium text-sm">{produto?.nome || 'Produto removido'}</TableCell>
                               <TableCell>
-                                <div className="flex items-center gap-1">
-                                  <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => handleQuantidadeChange(contagem, contagem.quantidade - 1)}>
-                                    <MinusIcon className="w-3 h-3" />
-                                  </Button>
-                                  <Input
-                                    type="number"
-                                    className="w-16 h-7 text-center text-xs"
-                                    value={contagem.quantidade}
-                                    onChange={e => handleQuantidadeChange(contagem, Number(e.target.value))}
-                                    min={0}
-                                  />
-                                  <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => handleQuantidadeChange(contagem, contagem.quantidade + 1)}>
-                                    <PlusIcon className="w-3 h-3" />
-                                  </Button>
-                                  <span className="text-xs text-muted-foreground ml-1">{produto?.unidade_medida}</span>
-                                </div>
+                                {editing ? (
+                                  <div className="flex items-center gap-1">
+                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => updateEditField(contagem.id, 'quantidade', Math.max(0, editState.quantidade - 1))}>
+                                      <MinusIcon className="w-3 h-3" />
+                                    </Button>
+                                    <Input
+                                      type="number"
+                                      className="w-16 h-7 text-center text-xs"
+                                      value={editState.quantidade}
+                                      onChange={e => updateEditField(contagem.id, 'quantidade', Number(e.target.value))}
+                                      min={0}
+                                    />
+                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => updateEditField(contagem.id, 'quantidade', editState.quantidade + 1)}>
+                                      <PlusIcon className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <span className="text-sm tabular-nums">{contagem.quantidade} {produto?.unidade_medida}</span>
+                                )}
                               </TableCell>
                               <TableCell>
-                                <div className="flex items-center gap-1">
-                                  <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => handleQuantidadeExtraChange(contagem, contagem.quantidade_extra - 1)}>
-                                    <MinusIcon className="w-3 h-3" />
-                                  </Button>
-                                  <Input
-                                    type="number"
-                                    className="w-16 h-7 text-center text-xs"
-                                    value={contagem.quantidade_extra}
-                                    onChange={e => handleQuantidadeExtraChange(contagem, Number(e.target.value))}
-                                    min={0}
-                                  />
-                                  <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => handleQuantidadeExtraChange(contagem, contagem.quantidade_extra + 1)}>
-                                    <PlusIcon className="w-3 h-3" />
-                                  </Button>
-                                </div>
+                                {editing ? (
+                                  <div className="flex items-center gap-1">
+                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => updateEditField(contagem.id, 'quantidade_extra', Math.max(0, editState.quantidade_extra - 1))}>
+                                      <MinusIcon className="w-3 h-3" />
+                                    </Button>
+                                    <Input
+                                      type="number"
+                                      className="w-16 h-7 text-center text-xs"
+                                      value={editState.quantidade_extra}
+                                      onChange={e => updateEditField(contagem.id, 'quantidade_extra', Number(e.target.value))}
+                                      min={0}
+                                    />
+                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => updateEditField(contagem.id, 'quantidade_extra', editState.quantidade_extra + 1)}>
+                                      <PlusIcon className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <span className="text-sm tabular-nums">{contagem.quantidade_extra}</span>
+                                )}
                               </TableCell>
                               <TableCell>
                                 <Badge variant="outline" className="text-xs tabular-nums">{Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}</Badge>
                               </TableCell>
-                              <TableCell className="text-sm">{contagem.responsavel || '-'}</TableCell>
+                              <TableCell>
+                                {editing ? (
+                                  <Input
+                                    className="h-7 text-xs w-24"
+                                    value={editState.responsavel}
+                                    onChange={e => updateEditField(contagem.id, 'responsavel', e.target.value)}
+                                    placeholder="Responsável"
+                                  />
+                                ) : (
+                                  <span className="text-sm">{contagem.responsavel || '-'}</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {editing ? (
+                                  <Input
+                                    className="h-7 text-xs w-28"
+                                    value={editState.observacoes}
+                                    onChange={e => updateEditField(contagem.id, 'observacoes', e.target.value)}
+                                    placeholder="Observações"
+                                  />
+                                ) : (
+                                  <span className="text-sm truncate max-w-[120px] block">{contagem.observacoes || '-'}</span>
+                                )}
+                              </TableCell>
                               <TableCell className="text-sm">
                                 {new Date(contagem.data_contagem).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                               </TableCell>
                               <TableCell>
-                                <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteContagem(contagem.id)}>
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
+                                <div className="flex items-center gap-1">
+                                  {editing ? (
+                                    <>
+                                      <Button variant="default" size="sm" className="h-8 w-8 p-0" onClick={() => saveEditing(contagem)} title="Salvar">
+                                        <Save className="w-3.5 h-3.5" />
+                                      </Button>
+                                      <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => cancelEditing(contagem.id)} title="Cancelar">
+                                        <X className="w-3.5 h-3.5" />
+                                      </Button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => startEditing(contagem)} title="Editar">
+                                        <Pencil className="w-3.5 h-3.5" />
+                                      </Button>
+                                      <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteContagem(contagem.id)} title="Excluir">
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
                               </TableCell>
                             </TableRow>
                           );
@@ -327,62 +409,114 @@ export default function ContagemEstoque() {
                     .sort((a, b) => new Date(b.data_contagem).getTime() - new Date(a.data_contagem).getTime())
                     .map((contagem) => {
                       const produto = produtos.find(p => p.id === contagem.produto_id);
+                      const editing = isEditing(contagem.id);
+                      const editState = editingStates[contagem.id];
+
                       return (
-                        <div key={contagem.id} className="p-4 hover:bg-muted/20 transition-colors">
+                        <div key={contagem.id} className={cn("p-4 transition-colors", editing ? "bg-primary/5 ring-1 ring-inset ring-primary/20" : "hover:bg-muted/20")}>
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1 min-w-0">
                               <h4 className="font-semibold text-sm text-foreground truncate">{produto?.nome || 'Produto removido'}</h4>
                               <p className="text-[11px] text-muted-foreground mt-0.5">
                                 {new Date(contagem.data_contagem).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                {contagem.responsavel && ` · ${contagem.responsavel}`}
+                                {contagem.responsavel && !editing && ` · ${contagem.responsavel}`}
                               </p>
                             </div>
-                            <Button variant="destructive" size="sm" className="h-8 w-8 p-0 flex-shrink-0 ml-2" onClick={() => deleteContagem(contagem.id)}>
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                            <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                              {editing ? (
+                                <>
+                                  <Button variant="default" size="sm" className="h-8 w-8 p-0" onClick={() => saveEditing(contagem)} title="Salvar">
+                                    <Save className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => cancelEditing(contagem.id)} title="Cancelar">
+                                    <X className="w-3.5 h-3.5" />
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => startEditing(contagem)} title="Editar">
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteContagem(contagem.id)} title="Excluir">
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
                           </div>
 
-                          <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border">
-                            <div>
-                              <label className="text-xs text-muted-foreground mb-1 block">Qtd Principal ({produto?.unidade_medida})</label>
-                              <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => handleQuantidadeChange(contagem, contagem.quantidade - 1)}>
-                                  <MinusIcon className="w-4 h-4" />
-                                </Button>
+                          {editing ? (
+                            <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border">
+                              <div>
+                                <label className="text-xs text-muted-foreground mb-1 block">Qtd Principal ({produto?.unidade_medida})</label>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => updateEditField(contagem.id, 'quantidade', Math.max(0, editState.quantidade - 1))}>
+                                    <MinusIcon className="w-4 h-4" />
+                                  </Button>
+                                  <Input
+                                    type="number"
+                                    className="h-9 text-center flex-1"
+                                    value={editState.quantidade}
+                                    onChange={e => updateEditField(contagem.id, 'quantidade', Number(e.target.value))}
+                                    min={0}
+                                  />
+                                  <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => updateEditField(contagem.id, 'quantidade', editState.quantidade + 1)}>
+                                    <PlusIcon className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground mb-1 block">Qtd Extra</label>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => updateEditField(contagem.id, 'quantidade_extra', Math.max(0, editState.quantidade_extra - 1))}>
+                                    <MinusIcon className="w-4 h-4" />
+                                  </Button>
+                                  <Input
+                                    type="number"
+                                    className="h-9 text-center flex-1"
+                                    value={editState.quantidade_extra}
+                                    onChange={e => updateEditField(contagem.id, 'quantidade_extra', Number(e.target.value))}
+                                    min={0}
+                                  />
+                                  <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => updateEditField(contagem.id, 'quantidade_extra', editState.quantidade_extra + 1)}>
+                                    <PlusIcon className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground mb-1 block">Responsável</label>
                                 <Input
-                                  type="number"
-                                  className="h-9 text-center flex-1"
-                                  value={contagem.quantidade}
-                                  onChange={e => handleQuantidadeChange(contagem, Number(e.target.value))}
-                                  min={0}
+                                  className="h-9 text-sm"
+                                  value={editState.responsavel}
+                                  onChange={e => updateEditField(contagem.id, 'responsavel', e.target.value)}
+                                  placeholder="Responsável"
                                 />
-                                <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => handleQuantidadeChange(contagem, contagem.quantidade + 1)}>
-                                  <PlusIcon className="w-4 h-4" />
-                                </Button>
+                              </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground mb-1 block">Observações</label>
+                                <Input
+                                  className="h-9 text-sm"
+                                  value={editState.observacoes}
+                                  onChange={e => updateEditField(contagem.id, 'observacoes', e.target.value)}
+                                  placeholder="Observações"
+                                />
+                              </div>
+                              <div className="pt-1 border-t border-border/50">
+                                <Badge variant="default" className="text-xs tabular-nums">Total: {Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}</Badge>
                               </div>
                             </div>
-                            <div>
-                              <label className="text-xs text-muted-foreground mb-1 block">Qtd Extra</label>
-                              <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => handleQuantidadeExtraChange(contagem, contagem.quantidade_extra - 1)}>
-                                  <MinusIcon className="w-4 h-4" />
-                                </Button>
-                                <Input
-                                  type="number"
-                                  className="h-9 text-center flex-1"
-                                  value={contagem.quantidade_extra}
-                                  onChange={e => handleQuantidadeExtraChange(contagem, Number(e.target.value))}
-                                  min={0}
-                                />
-                                <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => handleQuantidadeExtraChange(contagem, contagem.quantidade_extra + 1)}>
-                                  <PlusIcon className="w-4 h-4" />
-                                </Button>
+                          ) : (
+                            <div className="grid grid-cols-2 gap-2 text-xs p-3 bg-muted/30 rounded-lg border border-border">
+                              <div><span className="text-muted-foreground">Qtd Principal:</span> <span className="font-medium tabular-nums">{contagem.quantidade} {produto?.unidade_medida}</span></div>
+                              <div><span className="text-muted-foreground">Qtd Extra:</span> <span className="font-medium tabular-nums">{contagem.quantidade_extra}</span></div>
+                              {contagem.observacoes && (
+                                <div className="col-span-2"><span className="text-muted-foreground">Obs:</span> <span className="font-medium">{contagem.observacoes}</span></div>
+                              )}
+                              <div className="col-span-2 pt-1 border-t border-border/50">
+                                <Badge variant="default" className="text-xs tabular-nums">Total: {Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}</Badge>
                               </div>
                             </div>
-                            <div className="pt-1 border-t border-border/50">
-                              <Badge variant="default" className="text-xs tabular-nums">Total: {Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}</Badge>
-                            </div>
-                          </div>
+                          )}
                         </div>
                       );
                     })}
