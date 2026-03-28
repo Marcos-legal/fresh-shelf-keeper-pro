@@ -35,45 +35,29 @@ export default function ContagemEstoque() {
   const [showContagemForm, setShowContagemForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterResponsavel, setFilterResponsavel] = useState('all');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editQuantidade, setEditQuantidade] = useState(0);
-  const [editQuantidadeExtra, setEditQuantidadeExtra] = useState(0);
 
-  const responsaveis = [...new Set(contagens.map(c => c.responsavel).filter(Boolean))] as string[];
-  
-  const filteredProdutos = produtos.filter(produto => 
-    produto.nome.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  const filteredContagens = contagens.filter(contagem => {
-    const produto = produtos.find(p => p.id === contagem.produto_id);
-    const matchesSearch = !searchTerm || 
-      produto?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contagem.observacoes?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesResponsavel = filterResponsavel === 'all' || contagem.responsavel === filterResponsavel;
-    return matchesSearch && matchesResponsavel;
-  });
-
-  const startEditing = (contagem: ContagemType) => {
-    setEditingId(contagem.id);
-    setEditQuantidade(contagem.quantidade);
-    setEditQuantidadeExtra(contagem.quantidade_extra);
-  };
-
-  const cancelEditing = () => {
-    setEditingId(null);
-  };
-
-  const saveEditing = async (contagem: ContagemType) => {
-    await updateContagem(contagem.id, {
+  const handleQuantidadeChange = (contagem: ContagemType, newQuantidade: number) => {
+    const val = Math.max(0, newQuantidade);
+    updateContagem(contagem.id, {
       produto_id: contagem.produto_id,
-      quantidade: editQuantidade,
-      quantidade_extra: editQuantidadeExtra,
+      quantidade: val,
+      quantidade_extra: contagem.quantidade_extra,
       unidade_quantidade_extra: contagem.unidade_quantidade_extra,
       responsavel: contagem.responsavel,
       observacoes: contagem.observacoes,
     });
-    setEditingId(null);
+  };
+
+  const handleQuantidadeExtraChange = (contagem: ContagemType, newExtra: number) => {
+    const val = Math.max(0, newExtra);
+    updateContagem(contagem.id, {
+      produto_id: contagem.produto_id,
+      quantidade: contagem.quantidade,
+      quantidade_extra: val,
+      unidade_quantidade_extra: contagem.unidade_quantidade_extra,
+      responsavel: contagem.responsavel,
+      observacoes: contagem.observacoes,
+    });
   };
 
   if (loading) {
