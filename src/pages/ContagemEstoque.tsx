@@ -36,6 +36,21 @@ export default function ContagemEstoque() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterResponsavel, setFilterResponsavel] = useState('all');
 
+  const responsaveis = [...new Set(contagens.map(c => c.responsavel).filter(Boolean))] as string[];
+
+  const filteredProdutos = produtos.filter(produto =>
+    produto.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredContagens = contagens.filter(contagem => {
+    const produto = produtos.find(p => p.id === contagem.produto_id);
+    const matchesSearch = !searchTerm ||
+      produto?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contagem.observacoes?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesResponsavel = filterResponsavel === 'all' || contagem.responsavel === filterResponsavel;
+    return matchesSearch && matchesResponsavel;
+  });
+
   const handleQuantidadeChange = (contagem: ContagemType, newQuantidade: number) => {
     const val = Math.max(0, newQuantidade);
     updateContagem(contagem.id, {
@@ -72,8 +87,8 @@ export default function ContagemEstoque() {
   }
 
   return (
-    <PageLayout 
-      title="Contagem de Estoque" 
+    <PageLayout
+      title="Contagem de Estoque"
       description="Gerencie o estoque de produtos"
       icon={Calculator}
       headerActions={
@@ -241,7 +256,7 @@ export default function ContagemEstoque() {
                         <TableHead className="text-xs">Total Calculado</TableHead>
                         <TableHead className="text-xs">Responsável</TableHead>
                         <TableHead className="text-xs">Data</TableHead>
-                        <TableHead className="text-xs w-[120px]">Ações</TableHead>
+                        <TableHead className="text-xs w-[60px]">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -249,73 +264,55 @@ export default function ContagemEstoque() {
                         .sort((a, b) => new Date(b.data_contagem).getTime() - new Date(a.data_contagem).getTime())
                         .map((contagem) => {
                           const produto = produtos.find(p => p.id === contagem.produto_id);
-                          const isEditing = editingId === contagem.id;
-                          const quantidadeExtraTexto = contagem.quantidade_extra > 0 
-                            ? `${contagem.quantidade_extra} ${contagem.unidade_quantidade_extra === 'porcoes' ? produto?.unidade_conteudo : 'un. ind.'}`
-                            : '-';
-
                           return (
                             <TableRow key={contagem.id}>
                               <TableCell className="font-medium text-sm">{produto?.nome || 'Produto removido'}</TableCell>
                               <TableCell>
-                                {isEditing ? (
-                                  <div className="flex items-center gap-1">
-                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setEditQuantidade(Math.max(0, editQuantidade - 1))}>
-                                      <MinusIcon className="w-3 h-3" />
-                                    </Button>
-                                    <Input type="number" className="w-16 h-7 text-center text-xs" value={editQuantidade} onChange={e => setEditQuantidade(Number(e.target.value))} min={0} />
-                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setEditQuantidade(editQuantidade + 1)}>
-                                      <PlusIcon className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <span className="text-sm">{contagem.quantidade} {produto?.unidade_medida}</span>
-                                )}
+                                <div className="flex items-center gap-1">
+                                  <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => handleQuantidadeChange(contagem, contagem.quantidade - 1)}>
+                                    <MinusIcon className="w-3 h-3" />
+                                  </Button>
+                                  <Input
+                                    type="number"
+                                    className="w-16 h-7 text-center text-xs"
+                                    value={contagem.quantidade}
+                                    onChange={e => handleQuantidadeChange(contagem, Number(e.target.value))}
+                                    min={0}
+                                  />
+                                  <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => handleQuantidadeChange(contagem, contagem.quantidade + 1)}>
+                                    <PlusIcon className="w-3 h-3" />
+                                  </Button>
+                                  <span className="text-xs text-muted-foreground ml-1">{produto?.unidade_medida}</span>
+                                </div>
                               </TableCell>
                               <TableCell>
-                                {isEditing ? (
-                                  <div className="flex items-center gap-1">
-                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setEditQuantidadeExtra(Math.max(0, editQuantidadeExtra - 1))}>
-                                      <MinusIcon className="w-3 h-3" />
-                                    </Button>
-                                    <Input type="number" className="w-16 h-7 text-center text-xs" value={editQuantidadeExtra} onChange={e => setEditQuantidadeExtra(Number(e.target.value))} min={0} />
-                                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setEditQuantidadeExtra(editQuantidadeExtra + 1)}>
-                                      <PlusIcon className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <Badge variant="secondary" className="text-xs">{quantidadeExtraTexto}</Badge>
-                                )}
+                                <div className="flex items-center gap-1">
+                                  <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => handleQuantidadeExtraChange(contagem, contagem.quantidade_extra - 1)}>
+                                    <MinusIcon className="w-3 h-3" />
+                                  </Button>
+                                  <Input
+                                    type="number"
+                                    className="w-16 h-7 text-center text-xs"
+                                    value={contagem.quantidade_extra}
+                                    onChange={e => handleQuantidadeExtraChange(contagem, Number(e.target.value))}
+                                    min={0}
+                                  />
+                                  <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => handleQuantidadeExtraChange(contagem, contagem.quantidade_extra + 1)}>
+                                    <PlusIcon className="w-3 h-3" />
+                                  </Button>
+                                </div>
                               </TableCell>
                               <TableCell>
-                                <Badge variant="outline" className="text-xs">{Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}</Badge>
+                                <Badge variant="outline" className="text-xs tabular-nums">{Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}</Badge>
                               </TableCell>
                               <TableCell className="text-sm">{contagem.responsavel || '-'}</TableCell>
                               <TableCell className="text-sm">
                                 {new Date(contagem.data_contagem).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                               </TableCell>
                               <TableCell>
-                                <div className="flex items-center gap-1">
-                                  {isEditing ? (
-                                    <>
-                                      <Button variant="default" size="sm" className="h-8 w-8 p-0" onClick={() => saveEditing(contagem)}>
-                                        <Save className="w-3.5 h-3.5" />
-                                      </Button>
-                                      <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={cancelEditing}>
-                                        <X className="w-3.5 h-3.5" />
-                                      </Button>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => startEditing(contagem)}>
-                                        <Pencil className="w-3.5 h-3.5" />
-                                      </Button>
-                                      <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteContagem(contagem.id)}>
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                      </Button>
-                                    </>
-                                  )}
-                                </div>
+                                <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteContagem(contagem.id)}>
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
                               </TableCell>
                             </TableRow>
                           );
@@ -330,14 +327,9 @@ export default function ContagemEstoque() {
                     .sort((a, b) => new Date(b.data_contagem).getTime() - new Date(a.data_contagem).getTime())
                     .map((contagem) => {
                       const produto = produtos.find(p => p.id === contagem.produto_id);
-                      const isEditing = editingId === contagem.id;
-                      const quantidadeExtraTexto = contagem.quantidade_extra > 0 
-                        ? `${contagem.quantidade_extra} ${contagem.unidade_quantidade_extra === 'porcoes' ? produto?.unidade_conteudo : 'un. ind.'}`
-                        : '-';
-
                       return (
                         <div key={contagem.id} className="p-4 hover:bg-muted/20 transition-colors">
-                          <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-start justify-between mb-3">
                             <div className="flex-1 min-w-0">
                               <h4 className="font-semibold text-sm text-foreground truncate">{produto?.nome || 'Produto removido'}</h4>
                               <p className="text-[11px] text-muted-foreground mt-0.5">
@@ -345,65 +337,52 @@ export default function ContagemEstoque() {
                                 {contagem.responsavel && ` · ${contagem.responsavel}`}
                               </p>
                             </div>
-                            <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                              {isEditing ? (
-                                <>
-                                  <Button variant="default" size="sm" className="h-8 w-8 p-0" onClick={() => saveEditing(contagem)}>
-                                    <Save className="w-3.5 h-3.5" />
-                                  </Button>
-                                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={cancelEditing}>
-                                    <X className="w-3.5 h-3.5" />
-                                  </Button>
-                                </>
-                              ) : (
-                                <>
-                                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => startEditing(contagem)}>
-                                    <Pencil className="w-3.5 h-3.5" />
-                                  </Button>
-                                  <Button variant="destructive" size="sm" className="h-8 w-8 p-0 flex-shrink-0" onClick={() => deleteContagem(contagem.id)}>
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </Button>
-                                </>
-                              )}
-                            </div>
+                            <Button variant="destructive" size="sm" className="h-8 w-8 p-0 flex-shrink-0 ml-2" onClick={() => deleteContagem(contagem.id)}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
                           </div>
 
-                          {isEditing ? (
-                            <div className="space-y-3 mt-3 p-3 bg-muted/30 rounded-lg border border-border">
-                              <div>
-                                <label className="text-xs text-muted-foreground mb-1 block">Qtd Principal ({produto?.unidade_medida})</label>
-                                <div className="flex items-center gap-2">
-                                  <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => setEditQuantidade(Math.max(0, editQuantidade - 1))}>
-                                    <MinusIcon className="w-4 h-4" />
-                                  </Button>
-                                  <Input type="number" className="h-9 text-center flex-1" value={editQuantidade} onChange={e => setEditQuantidade(Number(e.target.value))} min={0} />
-                                  <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => setEditQuantidade(editQuantidade + 1)}>
-                                    <PlusIcon className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                              <div>
-                                <label className="text-xs text-muted-foreground mb-1 block">Qtd Extra</label>
-                                <div className="flex items-center gap-2">
-                                  <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => setEditQuantidadeExtra(Math.max(0, editQuantidadeExtra - 1))}>
-                                    <MinusIcon className="w-4 h-4" />
-                                  </Button>
-                                  <Input type="number" className="h-9 text-center flex-1" value={editQuantidadeExtra} onChange={e => setEditQuantidadeExtra(Number(e.target.value))} min={0} />
-                                  <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => setEditQuantidadeExtra(editQuantidadeExtra + 1)}>
-                                    <PlusIcon className="w-4 h-4" />
-                                  </Button>
-                                </div>
+                          <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border">
+                            <div>
+                              <label className="text-xs text-muted-foreground mb-1 block">Qtd Principal ({produto?.unidade_medida})</label>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => handleQuantidadeChange(contagem, contagem.quantidade - 1)}>
+                                  <MinusIcon className="w-4 h-4" />
+                                </Button>
+                                <Input
+                                  type="number"
+                                  className="h-9 text-center flex-1"
+                                  value={contagem.quantidade}
+                                  onChange={e => handleQuantidadeChange(contagem, Number(e.target.value))}
+                                  min={0}
+                                />
+                                <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => handleQuantidadeChange(contagem, contagem.quantidade + 1)}>
+                                  <PlusIcon className="w-4 h-4" />
+                                </Button>
                               </div>
                             </div>
-                          ) : (
-                            <div className="flex flex-wrap gap-2 text-xs">
-                              <Badge variant="outline" className="text-xs">Qtd: {contagem.quantidade} {produto?.unidade_medida}</Badge>
-                              {contagem.quantidade_extra > 0 && (
-                                <Badge variant="secondary" className="text-xs">Extra: {quantidadeExtraTexto}</Badge>
-                              )}
-                              <Badge variant="default" className="text-xs">Total: {Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}</Badge>
+                            <div>
+                              <label className="text-xs text-muted-foreground mb-1 block">Qtd Extra</label>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => handleQuantidadeExtraChange(contagem, contagem.quantidade_extra - 1)}>
+                                  <MinusIcon className="w-4 h-4" />
+                                </Button>
+                                <Input
+                                  type="number"
+                                  className="h-9 text-center flex-1"
+                                  value={contagem.quantidade_extra}
+                                  onChange={e => handleQuantidadeExtraChange(contagem, Number(e.target.value))}
+                                  min={0}
+                                />
+                                <Button variant="outline" size="sm" className="h-9 w-9 p-0" onClick={() => handleQuantidadeExtraChange(contagem, contagem.quantidade_extra + 1)}>
+                                  <PlusIcon className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
-                          )}
+                            <div className="pt-1 border-t border-border/50">
+                              <Badge variant="default" className="text-xs tabular-nums">Total: {Math.round(contagem.quantidade_total)} {produto?.unidade_conteudo}</Badge>
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
