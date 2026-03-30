@@ -44,9 +44,28 @@ const navSections = [
 
 export function MobileDrawer() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const location = useLocation();
   const { stats } = useProductsSupabase();
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY.current && currentScrollY > 60) {
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY.current - 5) {
+        setIsVisible(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   if (!isMobile) return null;
 
