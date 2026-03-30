@@ -3,7 +3,7 @@ import {
   Package, FileText, Printer, Eye, Calculator, Menu, ChevronRight
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
