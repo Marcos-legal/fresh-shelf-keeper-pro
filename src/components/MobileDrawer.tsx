@@ -83,7 +83,10 @@ export function MobileDrawer() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="fixed top-0 left-0 right-0 z-40 lg:hidden bg-background/95 backdrop-blur-md border-b border-border/50">
+      <div className={cn(
+        "fixed top-0 left-0 right-0 z-40 lg:hidden bg-background/95 backdrop-blur-md border-b border-border/50 transition-transform duration-300",
+        isVisible ? "translate-y-0" : "-translate-y-full"
+      )}>
         <div className="flex items-center justify-between h-14 px-4">
           <div className="flex items-center gap-3">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
