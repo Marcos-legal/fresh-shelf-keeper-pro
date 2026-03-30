@@ -3,7 +3,7 @@ import {
   Package, FileText, Printer, Eye, Calculator, Menu, ChevronRight
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
@@ -44,9 +44,28 @@ const navSections = [
 
 export function MobileDrawer() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const location = useLocation();
   const { stats } = useProductsSupabase();
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY.current && currentScrollY > 60) {
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY.current - 5) {
+        setIsVisible(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   if (!isMobile) return null;
 
@@ -64,7 +83,10 @@ export function MobileDrawer() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="fixed top-0 left-0 right-0 z-40 lg:hidden bg-background/95 backdrop-blur-md border-b border-border/50">
+      <div className={cn(
+        "fixed top-0 left-0 right-0 z-40 lg:hidden bg-background/95 backdrop-blur-md border-b border-border/50 transition-transform duration-300",
+        isVisible ? "translate-y-0" : "-translate-y-full"
+      )}>
         <div className="flex items-center justify-between h-14 px-4">
           <div className="flex items-center gap-3">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
