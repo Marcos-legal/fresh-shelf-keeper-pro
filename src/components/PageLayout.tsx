@@ -28,7 +28,7 @@ export function PageLayout({
         <MobileDrawer />
         <AppSidebar />
         <main className="flex-1 w-full min-w-0 overflow-x-hidden">
-          <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 pt-16 sm:pt-6 max-w-[1400px] mx-auto w-full">
+          <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-[1400px] mx-auto w-full">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
               <div className="flex items-center gap-3 min-w-0">
