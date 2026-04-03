@@ -126,41 +126,58 @@ export default function ContagemEstoque() {
       description="Gerencie o estoque de produtos"
       icon={Calculator}
       headerActions={
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={migrarDadosLocalStorage} className="text-xs sm:text-sm" size="sm">
-            <Download className="w-4 h-4 mr-1.5" />
-            <span className="hidden sm:inline">Migrar dados locais</span>
-            <span className="sm:hidden">Migrar</span>
+        <div className="flex flex-col gap-2">
+          {/* Mobile toggle button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="lg:hidden text-xs"
+            onClick={() => setShowActions(!showActions)}
+          >
+            <ChevronDown className={cn("w-4 h-4 mr-1.5 transition-transform", showActions && "rotate-180")} />
+            Ações
           </Button>
-          <ExportarEstoque produtos={produtos} contagens={contagens} getEstoqueAtual={getEstoqueAtual} />
-          <Dialog open={showProdutoForm} onOpenChange={setShowProdutoForm}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary text-primary-foreground text-xs sm:text-sm" size="sm">
-                <Package className="w-4 h-4 mr-1.5" />
-                <span className="hidden sm:inline">Cadastrar Produto</span>
-                <span className="sm:hidden">Produto</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader><DialogTitle>Cadastrar Produto para Estoque</DialogTitle></DialogHeader>
-              <ProdutoEstoqueForm onSubmit={(data) => { addProdutoEstoque(data); setShowProdutoForm(false); }} />
-            </DialogContent>
-          </Dialog>
-          {produtos.length > 0 && (
-            <Dialog open={showContagemForm} onOpenChange={setShowContagemForm}>
+
+          {/* Action buttons - always visible on desktop, toggleable on mobile */}
+          <div className={cn(
+            "flex flex-wrap gap-2",
+            showActions ? "flex" : "hidden lg:flex"
+          )}>
+            <Button variant="secondary" onClick={migrarDadosLocalStorage} className="text-xs sm:text-sm" size="sm">
+              <Download className="w-4 h-4 mr-1.5" />
+              <span className="hidden sm:inline">Migrar dados locais</span>
+              <span className="sm:hidden">Migrar</span>
+            </Button>
+            <ExportarEstoque produtos={produtos} contagens={contagens} getEstoqueAtual={getEstoqueAtual} />
+            <Dialog open={showProdutoForm} onOpenChange={setShowProdutoForm}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/5 text-xs sm:text-sm" size="sm">
-                  <Calculator className="w-4 h-4 mr-1.5" />
-                  <span className="hidden sm:inline">Nova Contagem</span>
-                  <span className="sm:hidden">Contagem</span>
+                <Button className="bg-primary text-primary-foreground text-xs sm:text-sm" size="sm">
+                  <Package className="w-4 h-4 mr-1.5" />
+                  <span className="hidden sm:inline">Cadastrar Produto</span>
+                  <span className="sm:hidden">Produto</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader><DialogTitle>Nova Contagem de Estoque</DialogTitle></DialogHeader>
-                <ContagemEstoqueForm produtos={produtos} onSubmit={addContagem} onClose={() => setShowContagemForm(false)} />
+                <DialogHeader><DialogTitle>Cadastrar Produto para Estoque</DialogTitle></DialogHeader>
+                <ProdutoEstoqueForm onSubmit={(data) => { addProdutoEstoque(data); setShowProdutoForm(false); }} />
               </DialogContent>
             </Dialog>
-          )}
+            {produtos.length > 0 && (
+              <Dialog open={showContagemForm} onOpenChange={setShowContagemForm}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/5 text-xs sm:text-sm" size="sm">
+                    <Calculator className="w-4 h-4 mr-1.5" />
+                    <span className="hidden sm:inline">Nova Contagem</span>
+                    <span className="sm:hidden">Contagem</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader><DialogTitle>Nova Contagem de Estoque</DialogTitle></DialogHeader>
+                  <ContagemEstoqueForm produtos={produtos} onSubmit={addContagem} onClose={() => setShowContagemForm(false)} />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         </div>
       }
     >
