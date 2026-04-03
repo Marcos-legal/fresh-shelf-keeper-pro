@@ -291,16 +291,16 @@ export function ExportarEstoque({ produtos, contagens, getEstoqueAtual }: Export
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 w-full">
+    <div className="flex flex-row gap-1.5 sm:gap-2 w-full">
       <Button
         onClick={exportarRelatorioCompleto}
         disabled={loading || produtos.length === 0}
         variant="outline"
         size="sm"
-        className="border-green-500 text-green-600 hover:bg-green-50 flex-1 text-xs sm:text-sm min-w-0"
+        className="border-green-500 text-green-600 hover:bg-green-50 flex-1 text-[10px] sm:text-xs h-8 px-2 sm:px-3 min-w-0"
       >
-        <BarChart3 className="w-4 h-4 shrink-0" />
-        <span className="truncate">📊 Relatório</span>
+        <BarChart3 className="w-3.5 h-3.5 shrink-0" />
+        <span className="truncate">Relatório</span>
       </Button>
       
       <Button
@@ -308,10 +308,10 @@ export function ExportarEstoque({ produtos, contagens, getEstoqueAtual }: Export
         disabled={loading || contagens.length === 0}
         variant="outline"
         size="sm"
-        className="border-blue-500 text-blue-600 hover:bg-blue-50 flex-1 text-xs sm:text-sm min-w-0"
+        className="border-blue-500 text-blue-600 hover:bg-blue-50 flex-1 text-[10px] sm:text-xs h-8 px-2 sm:px-3 min-w-0"
       >
-        <FileText className="w-4 h-4 shrink-0" />
-        <span className="truncate">📋 Histórico</span>
+        <FileText className="w-3.5 h-3.5 shrink-0" />
+        <span className="truncate">Histórico</span>
       </Button>
     </div>
   );
