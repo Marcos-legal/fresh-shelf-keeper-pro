@@ -9,7 +9,7 @@ import { useEstoqueSupabase } from "@/hooks/useEstoqueSupabase";
 import { EstoqueSearchFilter } from "@/components/EstoqueSearchFilter";
 import { EstoqueStats } from "@/components/EstoqueStats";
 import { ContagemEstoque as ContagemType } from "@/types/estoque";
-import { Package, Calculator, Plus, Trash2, Download, Minus as MinusIcon, PlusIcon, Save, Pencil, X } from "lucide-react";
+import { Package, Calculator, Plus, Trash2, Download, Minus as MinusIcon, PlusIcon, Save, Pencil, X, ChevronDown, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
