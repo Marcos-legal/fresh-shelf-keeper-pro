@@ -9,7 +9,7 @@ import { useEstoqueSupabase } from "@/hooks/useEstoqueSupabase";
 import { EstoqueSearchFilter } from "@/components/EstoqueSearchFilter";
 import { EstoqueStats } from "@/components/EstoqueStats";
 import { ContagemEstoque as ContagemType } from "@/types/estoque";
-import { Package, Calculator, Plus, Trash2, Download, Minus as MinusIcon, PlusIcon, Save, Pencil, X } from "lucide-react";
+import { Package, Calculator, Plus, Trash2, Download, Minus as MinusIcon, PlusIcon, Save, Pencil, X, ChevronDown, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +44,8 @@ export default function ContagemEstoque() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterResponsavel, setFilterResponsavel] = useState('all');
   const [editingStates, setEditingStates] = useState<Record<string, EditState>>({});
+  const [showActions, setShowActions] = useState(false);
+  const [historicoSearch, setHistoricoSearch] = useState('');
 
   const responsaveis = [...new Set(contagens.map(c => c.responsavel).filter(Boolean))] as string[];
 
@@ -53,9 +55,11 @@ export default function ContagemEstoque() {
 
   const filteredContagens = contagens.filter(contagem => {
     const produto = produtos.find(p => p.id === contagem.produto_id);
-    const matchesSearch = !searchTerm ||
-      produto?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contagem.observacoes?.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchQuery = historicoSearch || searchTerm;
+    const matchesSearch = !searchQuery ||
+      produto?.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contagem.observacoes?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contagem.responsavel?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesResponsavel = filterResponsavel === 'all' || contagem.responsavel === filterResponsavel;
     return matchesSearch && matchesResponsavel;
   });
@@ -122,41 +126,58 @@ export default function ContagemEstoque() {
       description="Gerencie o estoque de produtos"
       icon={Calculator}
       headerActions={
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={migrarDadosLocalStorage} className="text-xs sm:text-sm" size="sm">
-            <Download className="w-4 h-4 mr-1.5" />
-            <span className="hidden sm:inline">Migrar dados locais</span>
-            <span className="sm:hidden">Migrar</span>
+        <div className="flex flex-col gap-2">
+          {/* Mobile toggle button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="lg:hidden text-xs"
+            onClick={() => setShowActions(!showActions)}
+          >
+            <ChevronDown className={cn("w-4 h-4 mr-1.5 transition-transform", showActions && "rotate-180")} />
+            Ações
           </Button>
-          <ExportarEstoque produtos={produtos} contagens={contagens} getEstoqueAtual={getEstoqueAtual} />
-          <Dialog open={showProdutoForm} onOpenChange={setShowProdutoForm}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary text-primary-foreground text-xs sm:text-sm" size="sm">
-                <Package className="w-4 h-4 mr-1.5" />
-                <span className="hidden sm:inline">Cadastrar Produto</span>
-                <span className="sm:hidden">Produto</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader><DialogTitle>Cadastrar Produto para Estoque</DialogTitle></DialogHeader>
-              <ProdutoEstoqueForm onSubmit={(data) => { addProdutoEstoque(data); setShowProdutoForm(false); }} />
-            </DialogContent>
-          </Dialog>
-          {produtos.length > 0 && (
-            <Dialog open={showContagemForm} onOpenChange={setShowContagemForm}>
+
+          {/* Action buttons - always visible on desktop, toggleable on mobile */}
+          <div className={cn(
+            "flex flex-wrap gap-2",
+            showActions ? "flex" : "hidden lg:flex"
+          )}>
+            <Button variant="secondary" onClick={migrarDadosLocalStorage} className="text-xs sm:text-sm" size="sm">
+              <Download className="w-4 h-4 mr-1.5" />
+              <span className="hidden sm:inline">Migrar dados locais</span>
+              <span className="sm:hidden">Migrar</span>
+            </Button>
+            <ExportarEstoque produtos={produtos} contagens={contagens} getEstoqueAtual={getEstoqueAtual} />
+            <Dialog open={showProdutoForm} onOpenChange={setShowProdutoForm}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/5 text-xs sm:text-sm" size="sm">
-                  <Calculator className="w-4 h-4 mr-1.5" />
-                  <span className="hidden sm:inline">Nova Contagem</span>
-                  <span className="sm:hidden">Contagem</span>
+                <Button className="bg-primary text-primary-foreground text-xs sm:text-sm" size="sm">
+                  <Package className="w-4 h-4 mr-1.5" />
+                  <span className="hidden sm:inline">Cadastrar Produto</span>
+                  <span className="sm:hidden">Produto</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader><DialogTitle>Nova Contagem de Estoque</DialogTitle></DialogHeader>
-                <ContagemEstoqueForm produtos={produtos} onSubmit={addContagem} onClose={() => setShowContagemForm(false)} />
+                <DialogHeader><DialogTitle>Cadastrar Produto para Estoque</DialogTitle></DialogHeader>
+                <ProdutoEstoqueForm onSubmit={(data) => { addProdutoEstoque(data); setShowProdutoForm(false); }} />
               </DialogContent>
             </Dialog>
-          )}
+            {produtos.length > 0 && (
+              <Dialog open={showContagemForm} onOpenChange={setShowContagemForm}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/5 text-xs sm:text-sm" size="sm">
+                    <Calculator className="w-4 h-4 mr-1.5" />
+                    <span className="hidden sm:inline">Nova Contagem</span>
+                    <span className="sm:hidden">Contagem</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader><DialogTitle>Nova Contagem de Estoque</DialogTitle></DialogHeader>
+                  <ContagemEstoqueForm produtos={produtos} onSubmit={addContagem} onClose={() => setShowContagemForm(false)} />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         </div>
       }
     >
@@ -261,11 +282,22 @@ export default function ContagemEstoque() {
         {/* Histórico de Contagens */}
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
-              <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Histórico de Contagens</span>
-              <Badge variant="secondary" className="text-xs">{filteredContagens.length}</Badge>
-            </CardTitle>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
+                <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Histórico de Contagens</span>
+                <Badge variant="secondary" className="text-xs">{filteredContagens.length}</Badge>
+              </CardTitle>
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar produto, responsável..."
+                  value={historicoSearch}
+                  onChange={(e) => setHistoricoSearch(e.target.value)}
+                  className="pl-9 h-9 text-sm"
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-0 sm:p-6 sm:pt-0">
             {filteredContagens.length === 0 ? (
