@@ -36,6 +36,7 @@ const ImpressaoEtiquetas = () => {
   const [singleProductToPrint, setSingleProductToPrint] = useState<any>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [quickSearchTerm, setQuickSearchTerm] = useState('');
   const editorRef = useRef<HTMLDivElement>(null);
   
   const navigate = useNavigate();
