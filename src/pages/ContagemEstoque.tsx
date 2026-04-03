@@ -282,11 +282,22 @@ export default function ContagemEstoque() {
         {/* Histórico de Contagens */}
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
-              <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Histórico de Contagens</span>
-              <Badge variant="secondary" className="text-xs">{filteredContagens.length}</Badge>
-            </CardTitle>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
+                <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Histórico de Contagens</span>
+                <Badge variant="secondary" className="text-xs">{filteredContagens.length}</Badge>
+              </CardTitle>
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar produto, responsável..."
+                  value={historicoSearch}
+                  onChange={(e) => setHistoricoSearch(e.target.value)}
+                  className="pl-9 h-9 text-sm"
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-0 sm:p-6 sm:pt-0">
             {filteredContagens.length === 0 ? (
