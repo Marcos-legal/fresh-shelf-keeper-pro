@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Printer, Package, Eye, FileText, Settings, Ruler, Edit } from "lucide-react";
+import { Printer, Package, Eye, FileText, Settings, Ruler, Edit, Search } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { escapeHtml } from "@/lib/security";
