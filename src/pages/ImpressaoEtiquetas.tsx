@@ -1049,8 +1049,17 @@ const ImpressaoEtiquetas = () => {
                 <div className="text-xs sm:text-sm text-muted-foreground mb-4">
                   Clique em Editar para personalizar a etiqueta antes de imprimir
                 </div>
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar produto..."
+                    value={quickSearchTerm}
+                    onChange={(e) => setQuickSearchTerm(e.target.value)}
+                    className="pl-9 h-9"
+                  />
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {products.map(product => {
+                  {products.filter(p => p.nome?.toLowerCase().includes(quickSearchTerm.toLowerCase()) || p.lote?.toLowerCase().includes(quickSearchTerm.toLowerCase()) || p.marca?.toLowerCase().includes(quickSearchTerm.toLowerCase())).map(product => {
                     const currentQuantity = quickPrintQuantities[product.id] || 1;
                     return (
                       <div key={product.id} className="relative border-2 rounded-lg p-4 sm:p-5 hover:border-primary hover:shadow-lg hover:scale-[1.02] transition-all duration-200 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20">
