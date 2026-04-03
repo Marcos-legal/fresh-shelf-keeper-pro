@@ -55,9 +55,11 @@ export default function ContagemEstoque() {
 
   const filteredContagens = contagens.filter(contagem => {
     const produto = produtos.find(p => p.id === contagem.produto_id);
-    const matchesSearch = !searchTerm ||
-      produto?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contagem.observacoes?.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchQuery = historicoSearch || searchTerm;
+    const matchesSearch = !searchQuery ||
+      produto?.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contagem.observacoes?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contagem.responsavel?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesResponsavel = filterResponsavel === 'all' || contagem.responsavel === filterResponsavel;
     return matchesSearch && matchesResponsavel;
   });
