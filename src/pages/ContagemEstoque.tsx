@@ -44,6 +44,8 @@ export default function ContagemEstoque() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterResponsavel, setFilterResponsavel] = useState('all');
   const [editingStates, setEditingStates] = useState<Record<string, EditState>>({});
+  const [showActions, setShowActions] = useState(false);
+  const [historicoSearch, setHistoricoSearch] = useState('');
 
   const responsaveis = [...new Set(contagens.map(c => c.responsavel).filter(Boolean))] as string[];
 
