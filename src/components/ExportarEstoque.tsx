@@ -291,25 +291,27 @@ export function ExportarEstoque({ produtos, contagens, getEstoqueAtual }: Export
   };
 
   return (
-    <div className="flex space-x-2">
+    <div className="flex flex-col sm:flex-row gap-2 w-full">
       <Button
         onClick={exportarRelatorioCompleto}
         disabled={loading || produtos.length === 0}
         variant="outline"
-        className="border-green-500 text-green-600 hover:bg-green-50"
+        size="sm"
+        className="border-green-500 text-green-600 hover:bg-green-50 flex-1 text-xs sm:text-sm min-w-0"
       >
-        <BarChart3 className="w-4 h-4 mr-2" />
-        📊 Relatório Moderno
+        <BarChart3 className="w-4 h-4 shrink-0" />
+        <span className="truncate">📊 Relatório</span>
       </Button>
       
       <Button
         onClick={exportarHistoricoDetalhado}
         disabled={loading || contagens.length === 0}
         variant="outline"
-        className="border-blue-500 text-blue-600 hover:bg-blue-50"
+        size="sm"
+        className="border-blue-500 text-blue-600 hover:bg-blue-50 flex-1 text-xs sm:text-sm min-w-0"
       >
-        <FileText className="w-4 h-4 mr-2" />
-        📋 Histórico Moderno
+        <FileText className="w-4 h-4 shrink-0" />
+        <span className="truncate">📋 Histórico</span>
       </Button>
     </div>
   );
