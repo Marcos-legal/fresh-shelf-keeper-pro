@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Package, Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2, Shield, KeyRound } from 'lucide-react';
+import { Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2, Shield, KeyRound } from 'lucide-react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { HCAPTCHA_ENABLED, HCAPTCHA_SITE_KEY } from '@/config/hcaptcha';
 import { supabase } from '@/integrations/supabase/client';
