@@ -449,7 +449,7 @@ export default function Auth() {
         {/* Footer */}
         <div className="text-center">
           <p className="text-xs text-muted-foreground/70">
-            © 2024 Sistema de Validade - Versão 2.0
+            © 2025 ValiControl - Versão 2.0
           </p>
         </div>
       </div>

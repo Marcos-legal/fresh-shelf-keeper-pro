@@ -44,6 +44,7 @@ const App: React.FC = () => (
               <BrowserRouter>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/refrigerado" element={<ProtectedRoute><Refrigerado /></ProtectedRoute>} />
                 <Route path="/congelado" element={<ProtectedRoute><Congelado /></ProtectedRoute>} />
