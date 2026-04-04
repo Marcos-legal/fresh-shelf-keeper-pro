@@ -250,9 +250,7 @@ export default function Auth() {
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="relative flex justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-xl shadow-primary/20 ring-2 ring-primary/10">
-              <Package className="w-8 h-8 text-primary-foreground" />
-            </div>
+            <img src="/logo-valicontrol.png" alt="ValiControl Logo" className="w-20 h-20 rounded-xl shadow-xl object-contain" />
           </div>
           <div className="space-y-1">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
