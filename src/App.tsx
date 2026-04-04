@@ -21,6 +21,7 @@ import Relatorios from "./pages/Relatorios";
 import ImpressaoEtiquetas from "./pages/ImpressaoEtiquetas";
 import VisualizarEtiquetas from "./pages/VisualizarEtiquetas";
 import ContagemEstoque from "./pages/ContagemEstoque";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient({
   defaultOptions: {
