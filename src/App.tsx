@@ -21,6 +21,7 @@ import Relatorios from "./pages/Relatorios";
 import ImpressaoEtiquetas from "./pages/ImpressaoEtiquetas";
 import VisualizarEtiquetas from "./pages/VisualizarEtiquetas";
 import ContagemEstoque from "./pages/ContagemEstoque";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +44,7 @@ const App: React.FC = () => (
               <BrowserRouter>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/refrigerado" element={<ProtectedRoute><Refrigerado /></ProtectedRoute>} />
                 <Route path="/congelado" element={<ProtectedRoute><Congelado /></ProtectedRoute>} />

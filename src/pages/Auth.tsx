@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Package, Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2, Shield, KeyRound } from 'lucide-react';
+import { Loader2, LogIn, UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2, Shield, KeyRound } from 'lucide-react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { HCAPTCHA_ENABLED, HCAPTCHA_SITE_KEY } from '@/config/hcaptcha';
 import { supabase } from '@/integrations/supabase/client';
@@ -233,7 +233,7 @@ export default function Auth() {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/auth?tab=reset`
+      redirectTo: `${window.location.origin}/reset-password`
     });
 
     if (error) {
@@ -250,9 +250,7 @@ export default function Auth() {
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="relative flex justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-xl shadow-primary/20 ring-2 ring-primary/10">
-              <Package className="w-8 h-8 text-primary-foreground" />
-            </div>
+            <img src="/logo-valicontrol.png" alt="ValiControl Logo" className="w-20 h-20 rounded-xl shadow-xl object-contain" />
           </div>
           <div className="space-y-1">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
@@ -451,7 +449,7 @@ export default function Auth() {
         {/* Footer */}
         <div className="text-center">
           <p className="text-xs text-muted-foreground/70">
-            © 2024 Sistema de Validade - Versão 2.0
+            © 2025 ValiControl - Versão 2.0
           </p>
         </div>
       </div>
