@@ -35,7 +35,7 @@ export function useSubscription(): SubscriptionState {
 
     const fetchSubscription = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('subscriptions')
         .select('status, trial_start, trial_end, plan, payment_provider, payment_id')
         .eq('user_id', user.id)
