@@ -64,6 +64,7 @@ const App: React.FC = () => (
             </SidebarProvider>
           </TooltipProvider>
         </ResponsaveisProvider>
+        </SubscriptionProvider>
       </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
