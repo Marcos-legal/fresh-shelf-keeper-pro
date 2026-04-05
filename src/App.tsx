@@ -37,6 +37,7 @@ const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <AuthProvider>
+        <SubscriptionProvider>
         <ResponsaveisProvider>
           <TooltipProvider>
             <SidebarProvider>
