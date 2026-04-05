@@ -175,6 +175,45 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          payment_id: string | null
+          payment_provider: string | null
+          plan: string | null
+          status: string
+          trial_end: string
+          trial_start: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payment_id?: string | null
+          payment_provider?: string | null
+          plan?: string | null
+          status?: string
+          trial_end?: string
+          trial_start?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payment_id?: string | null
+          payment_provider?: string | null
+          plan?: string | null
+          status?: string
+          trial_end?: string
+          trial_start?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
