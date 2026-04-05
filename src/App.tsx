@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ResponsaveisProvider } from "@/contexts/ResponsaveisContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -36,6 +37,7 @@ const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <AuthProvider>
+        <SubscriptionProvider>
         <ResponsaveisProvider>
           <TooltipProvider>
             <SidebarProvider>
@@ -62,6 +64,7 @@ const App: React.FC = () => (
             </SidebarProvider>
           </TooltipProvider>
         </ResponsaveisProvider>
+        </SubscriptionProvider>
       </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>

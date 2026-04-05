@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
+import { TrialBanner } from '@/components/TrialBanner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -25,5 +26,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/auth" replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <TrialBanner />
+      {children}
+    </>
+  );
 }
