@@ -33,7 +33,7 @@ export function TrialBanner() {
         </AlertTitle>
         <AlertDescription className="text-destructive/80 space-y-2">
           <p>Seu período de teste expirou. Você pode visualizar os dados, mas para criar ou editar é necessário assinar um plano.</p>
-          <Button size="sm" className="mt-2">
+          <Button size="sm" className="mt-2" onClick={() => navigate('/planos')}>
             Assinar agora
           </Button>
         </AlertDescription>
