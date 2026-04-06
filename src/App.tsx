@@ -23,6 +23,7 @@ import ImpressaoEtiquetas from "./pages/ImpressaoEtiquetas";
 import VisualizarEtiquetas from "./pages/VisualizarEtiquetas";
 import ContagemEstoque from "./pages/ContagemEstoque";
 import ResetPassword from "./pages/ResetPassword";
+import Planos from "./pages/Planos";
 
 const queryClient = new QueryClient({
   defaultOptions: {
