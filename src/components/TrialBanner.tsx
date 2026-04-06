@@ -2,9 +2,11 @@ import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Clock, AlertTriangle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export function TrialBanner() {
   const { isTrialing, isExpired, daysRemaining, loading } = useSubscriptionContext();
+  const navigate = useNavigate();
 
   if (loading) return null;
 
@@ -31,7 +33,7 @@ export function TrialBanner() {
         </AlertTitle>
         <AlertDescription className="text-destructive/80 space-y-2">
           <p>Seu período de teste expirou. Você pode visualizar os dados, mas para criar ou editar é necessário assinar um plano.</p>
-          <Button size="sm" className="mt-2">
+          <Button size="sm" className="mt-2" onClick={() => navigate('/planos')}>
             Assinar agora
           </Button>
         </AlertDescription>
