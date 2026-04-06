@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 export function TrialBanner() {
   const { isTrialing, isExpired, daysRemaining, loading } = useSubscriptionContext();
+  const navigate = useNavigate();
 
   if (loading) return null;
 
