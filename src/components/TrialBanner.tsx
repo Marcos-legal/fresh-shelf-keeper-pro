@@ -2,6 +2,7 @@ import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Clock, AlertTriangle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export function TrialBanner() {
   const { isTrialing, isExpired, daysRemaining, loading } = useSubscriptionContext();
