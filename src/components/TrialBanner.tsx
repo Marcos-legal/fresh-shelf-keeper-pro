@@ -1,11 +1,11 @@
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Clock, AlertTriangle, Lock } from 'lucide-react';
+import { Clock, Lock, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 export function TrialBanner() {
-  const { isTrialing, isExpired, daysRemaining, loading } = useSubscriptionContext();
+  const { isTrialing, isExpired, isDefaulting, daysRemaining, loading } = useSubscriptionContext();
   const navigate = useNavigate();
 
   if (loading) return null;
@@ -24,15 +24,32 @@ export function TrialBanner() {
     );
   }
 
+  if (isDefaulting) {
+    return (
+      <Alert className="border-destructive/30 bg-destructive/5 mx-4 mt-4">
+        <AlertTriangle className="h-4 w-4 text-destructive" />
+        <AlertTitle className="text-destructive font-semibold">
+          Assinatura pendente
+        </AlertTitle>
+        <AlertDescription className="text-destructive/80 space-y-2">
+          <p>Seu pagamento falhou. Atualize seus dados para manter o acesso.</p>
+          <Button size="sm" className="mt-2" onClick={() => navigate('/planos')}>
+            Regularizar pagamento
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   if (isExpired) {
     return (
       <Alert className="border-destructive/30 bg-destructive/5 mx-4 mt-4">
         <Lock className="h-4 w-4 text-destructive" />
         <AlertTitle className="text-destructive font-semibold">
-          Período de teste expirado
+          Acesso bloqueado
         </AlertTitle>
         <AlertDescription className="text-destructive/80 space-y-2">
-          <p>Seu período de teste expirou. Você pode visualizar os dados, mas para criar ou editar é necessário assinar um plano.</p>
+          <p>Sua assinatura expirou. Assine um plano para continuar usando o sistema.</p>
           <Button size="sm" className="mt-2" onClick={() => navigate('/planos')}>
             Assinar agora
           </Button>
