@@ -60,6 +60,7 @@ const App: React.FC = () => (
                 <Route path="/visualizar-etiquetas" element={<ProtectedRoute><VisualizarEtiquetas /></ProtectedRoute>} />
                 <Route path="/contagem-estoque" element={<ProtectedRoute><ContagemEstoque /></ProtectedRoute>} />
                 <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
+                <Route path="/minha-assinatura" element={<ProtectedRoute><MinhaAssinatura /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
