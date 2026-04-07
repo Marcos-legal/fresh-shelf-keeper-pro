@@ -24,6 +24,7 @@ import VisualizarEtiquetas from "./pages/VisualizarEtiquetas";
 import ContagemEstoque from "./pages/ContagemEstoque";
 import ResetPassword from "./pages/ResetPassword";
 import Planos from "./pages/Planos";
+import MinhaAssinatura from "./pages/MinhaAssinatura";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +60,7 @@ const App: React.FC = () => (
                 <Route path="/visualizar-etiquetas" element={<ProtectedRoute><VisualizarEtiquetas /></ProtectedRoute>} />
                 <Route path="/contagem-estoque" element={<ProtectedRoute><ContagemEstoque /></ProtectedRoute>} />
                 <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
+                <Route path="/minha-assinatura" element={<ProtectedRoute><MinhaAssinatura /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

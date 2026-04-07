@@ -22,7 +22,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate JWT
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Missing authorization" }), {
@@ -43,64 +42,78 @@ Deno.serve(async (req) => {
       });
     }
 
-    const siteUrl = req.headers.get("origin") || "https://id-preview--727567d0-f790-4ae1-9b4c-1e1c79db0238.lovable.app";
+    // Get subscription from DB
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Create Mercado Pago recurring subscription (preapproval)
-    const preapproval = {
-      reason: "ValiControl - Assinatura Mensal",
-      auto_recurring: {
-        frequency: 1,
-        frequency_type: "months",
-        transaction_amount: 29.9,
-        currency_id: "BRL",
-        free_trial: {
-          frequency: 7,
-          frequency_type: "days",
+    const { data: subscription, error: subError } = await adminClient
+      .from("subscriptions")
+      .select("mp_subscription_id, current_period_end, status")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (subError || !subscription) {
+      return new Response(JSON.stringify({ error: "Subscription not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!subscription.mp_subscription_id) {
+      return new Response(JSON.stringify({ error: "No active Mercado Pago subscription" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Cancel on Mercado Pago
+    const mpResponse = await fetch(
+      `https://api.mercadopago.com/preapproval/${subscription.mp_subscription_id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${mercadoPagoToken}`,
         },
-      },
-      payer_email: user.email,
-      back_url: `${siteUrl}/minha-assinatura`,
-      external_reference: user.id,
-      notification_url: `${supabaseUrl}/functions/v1/payment-webhook`,
-    };
-
-    const mpResponse = await fetch("https://api.mercadopago.com/preapproval", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${mercadoPagoToken}`,
-      },
-      body: JSON.stringify(preapproval),
-    });
+        body: JSON.stringify({ status: "cancelled" }),
+      }
+    );
 
     if (!mpResponse.ok) {
       const mpError = await mpResponse.text();
-      console.error("Mercado Pago error:", mpError);
-      return new Response(JSON.stringify({ error: "Failed to create subscription" }), {
+      console.error("MP cancel error:", mpError);
+      return new Response(JSON.stringify({ error: "Failed to cancel subscription" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const mpData = await mpResponse.json();
-
-    // Store mp_subscription_id in database
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    await adminClient
+    // Update DB - keep access until current_period_end
+    const { error: updateError } = await adminClient
       .from("subscriptions")
       .update({
-        mp_subscription_id: mpData.id,
+        status: "cancelled",
         updated_at: new Date().toISOString(),
       })
       .eq("user_id", user.id);
 
+    if (updateError) {
+      console.error("Error updating subscription:", updateError);
+      return new Response(JSON.stringify({ error: "Failed to update subscription" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(
-      JSON.stringify({ init_point: mpData.init_point }),
+      JSON.stringify({
+        success: true,
+        access_until: subscription.current_period_end,
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    console.error("Checkout error:", err);
+    console.error("Cancel error:", err);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

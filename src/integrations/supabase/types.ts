@@ -178,7 +178,9 @@ export type Database = {
       subscriptions: {
         Row: {
           created_at: string
+          current_period_end: string | null
           id: string
+          mp_subscription_id: string | null
           payment_id: string | null
           payment_provider: string | null
           plan: string | null
@@ -190,7 +192,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_period_end?: string | null
           id?: string
+          mp_subscription_id?: string | null
           payment_id?: string | null
           payment_provider?: string | null
           plan?: string | null
@@ -202,7 +206,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_period_end?: string | null
           id?: string
+          mp_subscription_id?: string | null
           payment_id?: string | null
           payment_provider?: string | null
           plan?: string | null
