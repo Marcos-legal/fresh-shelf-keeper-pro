@@ -10,6 +10,14 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // Only allow POST
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -17,11 +25,12 @@ Deno.serve(async (req) => {
 
     if (!mercadoPagoToken) {
       return new Response(
-        JSON.stringify({ error: "MERCADO_PAGO_ACCESS_TOKEN not configured" }),
+        JSON.stringify({ error: "Payment provider not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // Authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Missing authorization" }), {
@@ -42,7 +51,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get subscription from DB
+    // Get subscription from DB using service role
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
@@ -59,8 +68,16 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Validate subscription can be cancelled
+    if (subscription.status === "cancelled") {
+      return new Response(JSON.stringify({ error: "Subscription already cancelled" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (!subscription.mp_subscription_id) {
-      return new Response(JSON.stringify({ error: "No active Mercado Pago subscription" }), {
+      return new Response(JSON.stringify({ error: "No active payment subscription" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -88,7 +105,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Update DB - keep access until current_period_end
+    // Update DB
     const { error: updateError } = await adminClient
       .from("subscriptions")
       .update({
