@@ -17,12 +17,12 @@ Deno.serve(async (req) => {
 
     if (!mercadoPagoToken) {
       return new Response(
-        JSON.stringify({ error: "MERCADO_PAGO_ACCESS_TOKEN not configured" }),
+        JSON.stringify({ error: "Payment provider not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Validate JWT
+    // Validate JWT - authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Missing authorization" }), {
@@ -43,7 +43,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    const siteUrl = req.headers.get("origin") || "https://id-preview--727567d0-f790-4ae1-9b4c-1e1c79db0238.lovable.app";
+    // Validate user email exists
+    if (!user.email) {
+      return new Response(JSON.stringify({ error: "User email is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate origin for back_url (prevent open redirect)
+    const origin = req.headers.get("origin") || "";
+    const allowedOrigins = [
+      "https://id-preview--727567d0-f790-4ae1-9b4c-1e1c79db0238.lovable.app",
+      "http://localhost:5173",
+      "http://localhost:8080",
+    ];
+    const siteUrl = allowedOrigins.includes(origin) 
+      ? origin 
+      : "https://id-preview--727567d0-f790-4ae1-9b4c-1e1c79db0238.lovable.app";
 
     // Create Mercado Pago recurring subscription (preapproval)
     const preapproval = {
@@ -84,7 +101,16 @@ Deno.serve(async (req) => {
 
     const mpData = await mpResponse.json();
 
-    // Store mp_subscription_id in database
+    // Validate response has init_point
+    if (!mpData.init_point) {
+      console.error("Missing init_point in MP response");
+      return new Response(JSON.stringify({ error: "Invalid payment provider response" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Store mp_subscription_id in database using service role
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     await adminClient
