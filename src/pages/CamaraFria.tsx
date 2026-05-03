@@ -8,7 +8,6 @@ const CamaraFria = () => {
   const camaraFriaProducts = products.filter(product => product.localArmazenamento === 'camara-fria');
 
   const handlePrintLabel = (product: any) => {
-    console.log("Imprimindo etiqueta:", product);
   };
 
   return (

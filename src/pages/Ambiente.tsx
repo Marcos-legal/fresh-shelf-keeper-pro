@@ -8,7 +8,6 @@ const Ambiente = () => {
   const ambienteProducts = products.filter(product => product.localArmazenamento === 'ambiente');
 
   const handlePrintLabel = (product: any) => {
-    console.log("Imprimindo etiqueta:", product);
   };
 
   return (

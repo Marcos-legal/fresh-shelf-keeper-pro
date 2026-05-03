@@ -30,9 +30,6 @@ const VisualizarEtiquetas = () => {
   const largura = parseInt(localStorage.getItem('etiqueta-largura') || '70');
   const altura = parseInt(localStorage.getItem('etiqueta-altura') || '50');
 
-  console.log('Produtos carregados:', products);
-  console.log('Total de produtos:', products.length);
-
   // Função para verificar se produto está vencido
   const isProductExpired = (product: any) => {
     const now = new Date();
