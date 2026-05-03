@@ -8,7 +8,6 @@ const Refrigerado = () => {
   const refrigeradoProducts = products.filter(product => product.localArmazenamento === 'refrigerado');
 
   const handlePrintLabel = (product: any) => {
-    console.log("Imprimindo etiqueta:", product);
   };
 
   return (
