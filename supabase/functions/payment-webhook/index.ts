@@ -192,6 +192,47 @@ Deno.serve(async (req) => {
         });
       }
 
+      // Verify Mercado Pago webhook signature (HMAC-SHA256)
+      const mpWebhookSecret = Deno.env.get("MERCADO_PAGO_WEBHOOK_SECRET");
+      if (mpWebhookSecret) {
+        const signatureHeader = req.headers.get("x-signature") || "";
+        const requestId = req.headers.get("x-request-id") || "";
+        const parts: Record<string, string> = {};
+        for (const p of signatureHeader.split(",")) {
+          const [k, v] = p.split("=").map((s) => s.trim());
+          if (k && v) parts[k] = v;
+        }
+        const ts = parts["ts"];
+        const v1 = parts["v1"];
+        if (!ts || !v1) {
+          return new Response(JSON.stringify({ error: "Invalid signature" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
+        const key = await crypto.subtle.importKey(
+          "raw",
+          new TextEncoder().encode(mpWebhookSecret),
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign"],
+        );
+        const sigBuf = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(manifest));
+        const expected = Array.from(new Uint8Array(sigBuf))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+        if (expected !== v1) {
+          console.error("Invalid MP webhook signature");
+          return new Response(JSON.stringify({ error: "Invalid signature" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } else {
+        console.warn("MERCADO_PAGO_WEBHOOK_SECRET not set — IPN signature unverified");
+      }
+
       if (topic === "preapproval") {
         return await handlePreapproval(dataId, mercadoPagoToken);
       }
