@@ -27,9 +27,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   return (
-    <>
-      <TrialBanner />
-      {children}
-    </>
+    <>{children}</>
   );
 }
