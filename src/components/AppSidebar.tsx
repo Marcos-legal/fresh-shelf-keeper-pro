@@ -10,6 +10,7 @@ import {
   Printer,
   Eye,
   Calculator,
+  QrCode,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
@@ -52,6 +53,7 @@ const navSections = [
       { title: "Estoque", url: "/contagem-estoque", icon: Calculator },
       { title: "Etiquetas", url: "/impressao-etiquetas", icon: Printer },
       { title: "Visualizar", url: "/visualizar-etiquetas", icon: Eye },
+      { title: "Leitor QR", url: "/leitor-qrcode", icon: QrCode },
       { title: "Relatórios", url: "/relatorios", icon: FileText },
     ],
   },
