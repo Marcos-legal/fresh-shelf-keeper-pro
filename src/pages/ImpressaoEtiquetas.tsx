@@ -486,6 +486,8 @@ const ImpressaoEtiquetas = () => {
       return Array(quantity).fill(product);
     });
 
+    const qrMap = await buildQrMap(selectedProductsData);
+
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       const totalLabels = expandedProducts.length;
@@ -708,6 +710,7 @@ const ImpressaoEtiquetas = () => {
   const handlePrintSingle = async (product: any) => {
     const quantity = product.quickPrintQuantity || 1;
     const expandedProducts = Array(quantity).fill(product);
+    const qrMap = await buildQrMap([product]);
     
     const printWindow = window.open('', '_blank');
     if (printWindow) {
