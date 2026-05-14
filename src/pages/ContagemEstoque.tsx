@@ -8,7 +8,7 @@ import { ExportarEstoque } from "@/components/ExportarEstoque";
 import { useEstoqueSupabase } from "@/hooks/useEstoqueSupabase";
 import { EstoqueSearchFilter } from "@/components/EstoqueSearchFilter";
 import { EstoqueStats } from "@/components/EstoqueStats";
-import { ContagemEstoque as ContagemType } from "@/types/estoque";
+import { ContagemEstoque as ContagemType, ProdutoEstoque } from "@/types/estoque";
 import { Package, Calculator, Plus, Trash2, Download, Minus as MinusIcon, PlusIcon, Save, Pencil, X, ChevronDown, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -30,6 +30,7 @@ export default function ContagemEstoque() {
     contagens,
     loading,
     addProdutoEstoque,
+    updateProdutoEstoque,
     deleteProdutoEstoque,
     addContagem,
     updateContagem,
@@ -41,6 +42,7 @@ export default function ContagemEstoque() {
 
   const [showProdutoForm, setShowProdutoForm] = useState(false);
   const [showContagemForm, setShowContagemForm] = useState(false);
+  const [editingProduto, setEditingProduto] = useState<ProdutoEstoque | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterResponsavel, setFilterResponsavel] = useState('all');
   const [editingStates, setEditingStates] = useState<Record<string, EditState>>({});
