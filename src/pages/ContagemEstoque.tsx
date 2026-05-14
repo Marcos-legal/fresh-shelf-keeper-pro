@@ -570,6 +570,28 @@ export default function ContagemEstoque() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={!!editingProduto} onOpenChange={(open) => !open && setEditingProduto(null)}>
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Editar Produto de Estoque</DialogTitle></DialogHeader>
+          {editingProduto && (
+            <ProdutoEstoqueForm
+              title="Editar Produto"
+              submitLabel="Atualizar Produto"
+              initialData={{
+                nome: editingProduto.nome,
+                unidade_medida: editingProduto.unidade_medida,
+                quantidade_por_unidade: editingProduto.quantidade_por_unidade,
+                unidade_conteudo: editingProduto.unidade_conteudo,
+              }}
+              onSubmit={async (data) => {
+                await updateProdutoEstoque(editingProduto.id, data);
+                setEditingProduto(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 }
