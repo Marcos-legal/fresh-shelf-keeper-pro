@@ -237,8 +237,10 @@ const ImpressaoEtiquetas = () => {
     setShowEditor(true);
   };
 
-  const handleEditorPrint = (editedProduct: Product, editedResponsavel: string, quantity: number) => {
+  const handleEditorPrint = async (editedProduct: Product, editedResponsavel: string, quantity: number) => {
     const expandedProducts = Array(quantity).fill(editedProduct);
+    const qrMap = await buildQrMap([editedProduct]);
+    const qrImg = qrMap.get(String(editedProduct.id)) || '';
     
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -475,7 +477,7 @@ const ImpressaoEtiquetas = () => {
     setSingleProductToPrint(null);
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
 
     // Expandir produtos baseado nas quantidades
@@ -703,7 +705,7 @@ const ImpressaoEtiquetas = () => {
     });
   };
 
-  const handlePrintSingle = (product: any) => {
+  const handlePrintSingle = async (product: any) => {
     const quantity = product.quickPrintQuantity || 1;
     const expandedProducts = Array(quantity).fill(product);
     
