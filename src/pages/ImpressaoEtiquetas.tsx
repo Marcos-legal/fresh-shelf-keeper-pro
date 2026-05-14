@@ -15,6 +15,27 @@ import { escapeHtml } from "@/lib/security";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
 import { EtiquetaEditor } from "@/components/EtiquetaEditor";
 import { Product } from "@/types/product";
+import QRCode from "qrcode";
+import { buildEtiquetaQrPayload } from "@/lib/qrcode";
+
+async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  await Promise.all(
+    Array.from(new Map(products.map((p) => [String(p.id), p])).values()).map(async (p) => {
+      try {
+        const dataUrl = await QRCode.toDataURL(buildEtiquetaQrPayload(p), {
+          margin: 0,
+          width: 160,
+          errorCorrectionLevel: "M",
+        });
+        map.set(String(p.id), dataUrl);
+      } catch (err) {
+        console.warn("QR generation failed", err);
+      }
+    })
+  );
+  return map;
+}
 
 const ImpressaoEtiquetas = () => {
   const { products } = useProductsSupabase();
@@ -216,8 +237,10 @@ const ImpressaoEtiquetas = () => {
     setShowEditor(true);
   };
 
-  const handleEditorPrint = (editedProduct: Product, editedResponsavel: string, quantity: number) => {
+  const handleEditorPrint = async (editedProduct: Product, editedResponsavel: string, quantity: number) => {
     const expandedProducts = Array(quantity).fill(editedProduct);
+    const qrMap = await buildQrMap([editedProduct]);
+    const qrImg = qrMap.get(String(editedProduct.id)) || '';
     
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -239,6 +262,7 @@ const ImpressaoEtiquetas = () => {
                 print-color-adjust: exact;
               }
               .etiqueta {
+                position: relative;
                 border: 3px solid #000;
                 width: ${config.width};
                 height: ${config.height};
@@ -309,6 +333,16 @@ const ImpressaoEtiquetas = () => {
                 font-size: ${config.compactMode ? '10px' : '12px'};
                 font-weight: 900;
                 margin-right: 2px;
+              }
+
+              .qr-img {
+                position: absolute;
+                bottom: 3px;
+                right: 3px;
+                width: 14mm;
+                height: 14mm;
+                background: white;
+                padding: 1px;
               }
               .clearfix::after {
                 content: "";
@@ -410,6 +444,7 @@ const ImpressaoEtiquetas = () => {
                     <div class="content">${escapeHtml(editedResponsavel.toUpperCase())}</div>
                   </div>
                   ` : ''}
+                  ${qrImg ? `<img class="qr-img" src="${qrImg}" alt="qr" />` : ''}
                 </div>
               `).join('')}
             </div>
@@ -454,7 +489,7 @@ const ImpressaoEtiquetas = () => {
     setSingleProductToPrint(null);
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
 
     // Expandir produtos baseado nas quantidades
@@ -462,6 +497,8 @@ const ImpressaoEtiquetas = () => {
       const quantity = productQuantities[product.id] || 1;
       return Array(quantity).fill(product);
     });
+
+    const qrMap = await buildQrMap(selectedProductsData);
 
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -484,6 +521,7 @@ const ImpressaoEtiquetas = () => {
                 print-color-adjust: exact;
               }
               .etiqueta { 
+                position: relative;
                 border: 3px solid #000;
                 width: ${config.width};
                 height: ${config.height};
@@ -557,6 +595,16 @@ const ImpressaoEtiquetas = () => {
               }
               .compact .campo {
                 margin-bottom: ${Math.max(2, parseInt(config.spacing) / 2)}px;
+              }
+
+              .qr-img {
+                position: absolute;
+                bottom: 3px;
+                right: 3px;
+                width: 14mm;
+                height: 14mm;
+                background: white;
+                padding: 1px;
               }
               .clearfix::after {
                 content: "";
@@ -662,6 +710,7 @@ const ImpressaoEtiquetas = () => {
                     <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
                   </div>
                   ` : ''}
+                  ${(() => { const u = qrMap.get(String(product.id)); return u ? `<img class="qr-img" src="${u}" alt="qr" />` : ''; })()}
                 </div>
               `).join('')}
             </div>
@@ -682,9 +731,10 @@ const ImpressaoEtiquetas = () => {
     });
   };
 
-  const handlePrintSingle = (product: any) => {
+  const handlePrintSingle = async (product: any) => {
     const quantity = product.quickPrintQuantity || 1;
     const expandedProducts = Array(quantity).fill(product);
+    const qrMap = await buildQrMap([product]);
     
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -706,6 +756,7 @@ const ImpressaoEtiquetas = () => {
                 print-color-adjust: exact;
               }
               .etiqueta {
+                position: relative;
                 border: 3px solid #000;
                 width: ${config.width};
                 height: ${config.height};
@@ -776,6 +827,16 @@ const ImpressaoEtiquetas = () => {
                 font-size: ${config.compactMode ? '10px' : '12px'};
                 font-weight: 900;
                 margin-right: 2px;
+              }
+
+              .qr-img {
+                position: absolute;
+                bottom: 3px;
+                right: 3px;
+                width: 14mm;
+                height: 14mm;
+                background: white;
+                padding: 1px;
               }
               .clearfix::after {
                 content: "";
@@ -881,6 +942,7 @@ const ImpressaoEtiquetas = () => {
                         <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
                       </div>
                       ` : ''}
+                  ${(() => { const u = qrMap.get(String(prod.id)); return u ? `<img class="qr-img" src="${u}" alt="qr" />` : ''; })()}
                 </div>
               `).join('')}
             </div>

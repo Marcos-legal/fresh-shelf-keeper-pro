@@ -1,6 +1,8 @@
 
 import { Product } from "@/types/product";
 import { Card, CardContent } from "@/components/ui/card";
+import { QRCodeSVG } from "qrcode.react";
+import { buildEtiquetaQrPayload } from "@/lib/qrcode";
 
 interface EtiquetaViewProps {
   product: Product;
@@ -264,20 +266,33 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
             </div>
           </div>
 
-          {/* Responsável - linha final */}
+          {/* Responsável e QR Code - linha final */}
           <div className="flex-none">
-            <div className="flex items-center">
-              <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Responsável:</span>
-              <div 
-                className="flex-1 border-b-2 border-black relative"
-                style={{ height: `${lineHeight}px` }}
-              >
-                <span 
-                  className="absolute left-1 top-0 font-bold text-black uppercase overflow-hidden"
-                  style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
+            <div className="flex items-end gap-2">
+              <div className="flex items-center flex-1 min-w-0">
+                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Responsável:</span>
+                <div
+                  className="flex-1 border-b-2 border-black relative"
+                  style={{ height: `${lineHeight}px` }}
                 >
-                  {product.responsavel || ''}
-                </span>
+                  <span
+                    className="absolute left-1 top-0 font-bold text-black uppercase overflow-hidden"
+                    style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
+                  >
+                    {product.responsavel || ''}
+                  </span>
+                </div>
+              </div>
+              <div
+                className="flex-shrink-0 bg-white"
+                style={{ width: `${fontSize * 3.2}px`, height: `${fontSize * 3.2}px` }}
+              >
+                <QRCodeSVG
+                  value={buildEtiquetaQrPayload(product)}
+                  size={Math.max(32, fontSize * 3.2)}
+                  level="M"
+                  style={{ width: '100%', height: '100%' }}
+                />
               </div>
             </div>
           </div>

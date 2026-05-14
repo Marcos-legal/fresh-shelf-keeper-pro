@@ -25,6 +25,7 @@ import ContagemEstoque from "./pages/ContagemEstoque";
 import ResetPassword from "./pages/ResetPassword";
 import Planos from "./pages/Planos";
 import MinhaAssinatura from "./pages/MinhaAssinatura";
+import LeitorQrCode from "./pages/LeitorQrCode";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +60,7 @@ const App: React.FC = () => (
                 <Route path="/impressao-etiquetas" element={<ProtectedRoute><ImpressaoEtiquetas /></ProtectedRoute>} />
                 <Route path="/visualizar-etiquetas" element={<ProtectedRoute><VisualizarEtiquetas /></ProtectedRoute>} />
                 <Route path="/contagem-estoque" element={<ProtectedRoute><ContagemEstoque /></ProtectedRoute>} />
+                <Route path="/leitor-qrcode" element={<ProtectedRoute><LeitorQrCode /></ProtectedRoute>} />
                 <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
                 <Route path="/minha-assinatura" element={<ProtectedRoute><MinhaAssinatura /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

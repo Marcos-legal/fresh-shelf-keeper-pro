@@ -8,7 +8,7 @@ import { ExportarEstoque } from "@/components/ExportarEstoque";
 import { useEstoqueSupabase } from "@/hooks/useEstoqueSupabase";
 import { EstoqueSearchFilter } from "@/components/EstoqueSearchFilter";
 import { EstoqueStats } from "@/components/EstoqueStats";
-import { ContagemEstoque as ContagemType } from "@/types/estoque";
+import { ContagemEstoque as ContagemType, ProdutoEstoque } from "@/types/estoque";
 import { Package, Calculator, Plus, Trash2, Download, Minus as MinusIcon, PlusIcon, Save, Pencil, X, ChevronDown, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -30,6 +30,7 @@ export default function ContagemEstoque() {
     contagens,
     loading,
     addProdutoEstoque,
+    updateProdutoEstoque,
     deleteProdutoEstoque,
     addContagem,
     updateContagem,
@@ -41,6 +42,7 @@ export default function ContagemEstoque() {
 
   const [showProdutoForm, setShowProdutoForm] = useState(false);
   const [showContagemForm, setShowContagemForm] = useState(false);
+  const [editingProduto, setEditingProduto] = useState<ProdutoEstoque | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterResponsavel, setFilterResponsavel] = useState('all');
   const [editingStates, setEditingStates] = useState<Record<string, EditState>>({});
@@ -240,9 +242,14 @@ export default function ContagemEstoque() {
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteProdutoEstoque(produto.id)}>
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
+                              <div className="flex items-center gap-1">
+                                <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setEditingProduto(produto)} title="Editar">
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteProdutoEstoque(produto.id)} title="Excluir">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         );
@@ -258,9 +265,14 @@ export default function ContagemEstoque() {
                       <div key={produto.id} className="p-4 hover:bg-muted/20 transition-colors">
                         <div className="flex items-start justify-between mb-2">
                           <h4 className="font-semibold text-sm text-foreground">{produto.nome}</h4>
-                          <Button variant="destructive" size="sm" className="h-8 w-8 p-0 flex-shrink-0 ml-2" onClick={() => deleteProdutoEstoque(produto.id)}>
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
+                          <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setEditingProduto(produto)} title="Editar">
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteProdutoEstoque(produto.id)} title="Excluir">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div><span className="text-muted-foreground">Unidade:</span> <span className="font-medium">{produto.unidade_medida}</span></div>
@@ -558,6 +570,28 @@ export default function ContagemEstoque() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={!!editingProduto} onOpenChange={(open) => !open && setEditingProduto(null)}>
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Editar Produto de Estoque</DialogTitle></DialogHeader>
+          {editingProduto && (
+            <ProdutoEstoqueForm
+              title="Editar Produto"
+              submitLabel="Atualizar Produto"
+              initialData={{
+                nome: editingProduto.nome,
+                unidade_medida: editingProduto.unidade_medida,
+                quantidade_por_unidade: editingProduto.quantidade_por_unidade,
+                unidade_conteudo: editingProduto.unidade_conteudo,
+              }}
+              onSubmit={async (data) => {
+                await updateProdutoEstoque(editingProduto.id, data);
+                setEditingProduto(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 }
