@@ -242,9 +242,14 @@ export default function ContagemEstoque() {
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteProdutoEstoque(produto.id)}>
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
+                              <div className="flex items-center gap-1">
+                                <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setEditingProduto(produto)} title="Editar">
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteProdutoEstoque(produto.id)} title="Excluir">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         );
@@ -260,9 +265,14 @@ export default function ContagemEstoque() {
                       <div key={produto.id} className="p-4 hover:bg-muted/20 transition-colors">
                         <div className="flex items-start justify-between mb-2">
                           <h4 className="font-semibold text-sm text-foreground">{produto.nome}</h4>
-                          <Button variant="destructive" size="sm" className="h-8 w-8 p-0 flex-shrink-0 ml-2" onClick={() => deleteProdutoEstoque(produto.id)}>
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
+                          <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setEditingProduto(produto)} title="Editar">
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => deleteProdutoEstoque(produto.id)} title="Excluir">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div><span className="text-muted-foreground">Unidade:</span> <span className="font-medium">{produto.unidade_medida}</span></div>
