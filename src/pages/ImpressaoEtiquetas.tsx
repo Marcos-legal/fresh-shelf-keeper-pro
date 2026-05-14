@@ -262,6 +262,7 @@ const ImpressaoEtiquetas = () => {
                 print-color-adjust: exact;
               }
               .etiqueta {
+                position: relative;
                 border: 3px solid #000;
                 width: ${config.width};
                 height: ${config.height};
@@ -332,6 +333,16 @@ const ImpressaoEtiquetas = () => {
                 font-size: ${config.compactMode ? '10px' : '12px'};
                 font-weight: 900;
                 margin-right: 2px;
+              }
+
+              .qr-img {
+                position: absolute;
+                bottom: 3px;
+                right: 3px;
+                width: 14mm;
+                height: 14mm;
+                background: white;
+                padding: 1px;
               }
               .clearfix::after {
                 content: "";
@@ -433,6 +444,7 @@ const ImpressaoEtiquetas = () => {
                     <div class="content">${escapeHtml(editedResponsavel.toUpperCase())}</div>
                   </div>
                   ` : ''}
+                  ${qrImg ? `<img class="qr-img" src="${qrImg}" alt="qr" />` : ''}
                 </div>
               `).join('')}
             </div>
@@ -509,6 +521,7 @@ const ImpressaoEtiquetas = () => {
                 print-color-adjust: exact;
               }
               .etiqueta { 
+                position: relative;
                 border: 3px solid #000;
                 width: ${config.width};
                 height: ${config.height};
@@ -582,6 +595,16 @@ const ImpressaoEtiquetas = () => {
               }
               .compact .campo {
                 margin-bottom: ${Math.max(2, parseInt(config.spacing) / 2)}px;
+              }
+
+              .qr-img {
+                position: absolute;
+                bottom: 3px;
+                right: 3px;
+                width: 14mm;
+                height: 14mm;
+                background: white;
+                padding: 1px;
               }
               .clearfix::after {
                 content: "";
@@ -687,6 +710,7 @@ const ImpressaoEtiquetas = () => {
                     <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
                   </div>
                   ` : ''}
+                  ${(() => { const u = qrMap.get(String(product.id)); return u ? `<img class="qr-img" src="${u}" alt="qr" />` : ''; })()}
                 </div>
               `).join('')}
             </div>
@@ -732,6 +756,7 @@ const ImpressaoEtiquetas = () => {
                 print-color-adjust: exact;
               }
               .etiqueta {
+                position: relative;
                 border: 3px solid #000;
                 width: ${config.width};
                 height: ${config.height};
@@ -802,6 +827,16 @@ const ImpressaoEtiquetas = () => {
                 font-size: ${config.compactMode ? '10px' : '12px'};
                 font-weight: 900;
                 margin-right: 2px;
+              }
+
+              .qr-img {
+                position: absolute;
+                bottom: 3px;
+                right: 3px;
+                width: 14mm;
+                height: 14mm;
+                background: white;
+                padding: 1px;
               }
               .clearfix::after {
                 content: "";
@@ -907,6 +942,7 @@ const ImpressaoEtiquetas = () => {
                         <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
                       </div>
                       ` : ''}
+                  ${(() => { const u = qrMap.get(String(prod.id)); return u ? `<img class="qr-img" src="${u}" alt="qr" />` : ''; })()}
                 </div>
               `).join('')}
             </div>
