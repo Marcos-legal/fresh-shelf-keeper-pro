@@ -15,6 +15,27 @@ import { escapeHtml } from "@/lib/security";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
 import { EtiquetaEditor } from "@/components/EtiquetaEditor";
 import { Product } from "@/types/product";
+import QRCode from "qrcode";
+import { buildEtiquetaQrPayload } from "@/lib/qrcode";
+
+async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  await Promise.all(
+    Array.from(new Map(products.map((p) => [String(p.id), p])).values()).map(async (p) => {
+      try {
+        const dataUrl = await QRCode.toDataURL(buildEtiquetaQrPayload(p), {
+          margin: 0,
+          width: 160,
+          errorCorrectionLevel: "M",
+        });
+        map.set(String(p.id), dataUrl);
+      } catch (err) {
+        console.warn("QR generation failed", err);
+      }
+    })
+  );
+  return map;
+}
 
 const ImpressaoEtiquetas = () => {
   const { products } = useProductsSupabase();
