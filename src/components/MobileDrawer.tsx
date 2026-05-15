@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Snowflake, Thermometer, Home, Refrigerator,
-  Package, FileText, Printer, Eye, Calculator, Menu, ChevronRight
+  Package, FileText, Printer, Eye, Calculator, Menu, ChevronRight, QrCode
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
@@ -37,6 +37,7 @@ const navSections = [
       { title: "Estoque", url: "/contagem-estoque", icon: Calculator },
       { title: "Etiquetas", url: "/impressao-etiquetas", icon: Printer },
       { title: "Visualizar", url: "/visualizar-etiquetas", icon: Eye },
+      { title: "Leitor QR", url: "/leitor-qrcode", icon: QrCode },
       { title: "Relatórios", url: "/relatorios", icon: FileText },
     ],
   },
