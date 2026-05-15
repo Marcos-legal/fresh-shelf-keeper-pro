@@ -290,7 +290,7 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
                 <QRCodeSVG
                   value={buildEtiquetaQrPayload(product)}
                   size={Math.max(32, fontSize * 3.2)}
-                  level="M"
+                  level="L"
                   style={{ width: '100%', height: '100%' }}
                 />
               </div>
