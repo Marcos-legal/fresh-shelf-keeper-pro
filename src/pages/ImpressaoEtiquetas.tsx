@@ -24,8 +24,8 @@ async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
     Array.from(new Map(products.map((p) => [String(p.id), p])).values()).map(async (p) => {
       try {
         const dataUrl = await QRCode.toDataURL(buildEtiquetaQrPayload(p), {
-          margin: 0,
-          width: 160,
+          margin: 1,
+          width: 320,
           errorCorrectionLevel: "M",
         });
         map.set(String(p.id), dataUrl);
@@ -335,14 +335,28 @@ const ImpressaoEtiquetas = () => {
                 margin-right: 2px;
               }
 
+              .bottom-row {
+                display: flex;
+                align-items: stretch;
+                gap: 4px;
+                margin-top: auto;
+              }
+              .bottom-row .campo {
+                flex: 1;
+                margin-bottom: 0;
+                min-width: 0;
+              }
+              .bottom-row.qr-only {
+                justify-content: flex-end;
+              }
               .qr-img {
-                position: absolute;
-                bottom: 3px;
-                right: 3px;
-                width: 14mm;
-                height: 14mm;
+                width: 13mm;
+                height: 13mm;
+                flex-shrink: 0;
                 background: white;
                 padding: 1px;
+                box-sizing: border-box;
+                display: block;
               }
               .clearfix::after {
                 content: "";
@@ -439,12 +453,14 @@ const ImpressaoEtiquetas = () => {
                     </div>
                   </div>
                   ${!config.compactMode ? `
-                  <div class="campo">
-                    <div class="label">RESPONSÁVEL:</div>
-                    <div class="content">${escapeHtml(editedResponsavel.toUpperCase())}</div>
+                  <div class="bottom-row">
+                    <div class="campo">
+                      <div class="label">RESPONSÁVEL:</div>
+                      <div class="content">${escapeHtml(editedResponsavel.toUpperCase())}</div>
+                    </div>
+                    ${qrImg ? `<img class="qr-img" src="${qrImg}" alt="qr" />` : ''}
                   </div>
-                  ` : ''}
-                  ${qrImg ? `<img class="qr-img" src="${qrImg}" alt="qr" />` : ''}
+                  ` : (qrImg ? `<div class="bottom-row qr-only"><img class="qr-img" src="${qrImg}" alt="qr" /></div>` : '')}
                 </div>
               `).join('')}
             </div>
@@ -597,14 +613,28 @@ const ImpressaoEtiquetas = () => {
                 margin-bottom: ${Math.max(2, parseInt(config.spacing) / 2)}px;
               }
 
+              .bottom-row {
+                display: flex;
+                align-items: stretch;
+                gap: 4px;
+                margin-top: auto;
+              }
+              .bottom-row .campo {
+                flex: 1;
+                margin-bottom: 0;
+                min-width: 0;
+              }
+              .bottom-row.qr-only {
+                justify-content: flex-end;
+              }
               .qr-img {
-                position: absolute;
-                bottom: 3px;
-                right: 3px;
-                width: 14mm;
-                height: 14mm;
+                width: 13mm;
+                height: 13mm;
+                flex-shrink: 0;
                 background: white;
                 padding: 1px;
+                box-sizing: border-box;
+                display: block;
               }
               .clearfix::after {
                 content: "";
@@ -704,13 +734,20 @@ const ImpressaoEtiquetas = () => {
                       <span>AMB</span>
                     </div>
                   </div>
-                   ${!config.compactMode ? `
-                  <div class="campo">
-                    <div class="label">RESPONSÁVEL:</div>
-                    <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
-                  </div>
-                  ` : ''}
-                  ${(() => { const u = qrMap.get(String(product.id)); return u ? `<img class="qr-img" src="${u}" alt="qr" />` : ''; })()}
+                   ${(() => {
+                     const u = qrMap.get(String(product.id));
+                     const qrTag = u ? `<img class="qr-img" src="${u}" alt="qr" />` : '';
+                     if (!config.compactMode) {
+                       return `<div class="bottom-row">
+                         <div class="campo">
+                           <div class="label">RESPONSÁVEL:</div>
+                           <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
+                         </div>
+                         ${qrTag}
+                       </div>`;
+                     }
+                     return qrTag ? `<div class="bottom-row qr-only">${qrTag}</div>` : '';
+                   })()}
                 </div>
               `).join('')}
             </div>
@@ -829,14 +866,28 @@ const ImpressaoEtiquetas = () => {
                 margin-right: 2px;
               }
 
+              .bottom-row {
+                display: flex;
+                align-items: stretch;
+                gap: 4px;
+                margin-top: auto;
+              }
+              .bottom-row .campo {
+                flex: 1;
+                margin-bottom: 0;
+                min-width: 0;
+              }
+              .bottom-row.qr-only {
+                justify-content: flex-end;
+              }
               .qr-img {
-                position: absolute;
-                bottom: 3px;
-                right: 3px;
-                width: 14mm;
-                height: 14mm;
+                width: 13mm;
+                height: 13mm;
+                flex-shrink: 0;
                 background: white;
                 padding: 1px;
+                box-sizing: border-box;
+                display: block;
               }
               .clearfix::after {
                 content: "";
@@ -936,13 +987,20 @@ const ImpressaoEtiquetas = () => {
                       <span>AMB</span>
                     </div>
                   </div>
-                       ${!config.compactMode ? `
-                      <div class="campo">
-                        <div class="label">RESPONSÁVEL:</div>
-                        <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
-                      </div>
-                      ` : ''}
-                  ${(() => { const u = qrMap.get(String(prod.id)); return u ? `<img class="qr-img" src="${u}" alt="qr" />` : ''; })()}
+                   ${(() => {
+                     const u = qrMap.get(String(prod.id));
+                     const qrTag = u ? `<img class="qr-img" src="${u}" alt="qr" />` : '';
+                     if (!config.compactMode) {
+                       return `<div class="bottom-row">
+                         <div class="campo">
+                           <div class="label">RESPONSÁVEL:</div>
+                           <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
+                         </div>
+                         ${qrTag}
+                       </div>`;
+                     }
+                     return qrTag ? `<div class="bottom-row qr-only">${qrTag}</div>` : '';
+                   })()}
                 </div>
               `).join('')}
             </div>
