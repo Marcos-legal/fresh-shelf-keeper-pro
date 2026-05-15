@@ -453,12 +453,14 @@ const ImpressaoEtiquetas = () => {
                     </div>
                   </div>
                   ${!config.compactMode ? `
-                  <div class="campo">
-                    <div class="label">RESPONSÁVEL:</div>
-                    <div class="content">${escapeHtml(editedResponsavel.toUpperCase())}</div>
+                  <div class="bottom-row">
+                    <div class="campo">
+                      <div class="label">RESPONSÁVEL:</div>
+                      <div class="content">${escapeHtml(editedResponsavel.toUpperCase())}</div>
+                    </div>
+                    ${qrImg ? `<img class="qr-img" src="${qrImg}" alt="qr" />` : ''}
                   </div>
-                  ` : ''}
-                  ${qrImg ? `<img class="qr-img" src="${qrImg}" alt="qr" />` : ''}
+                  ` : (qrImg ? `<div class="bottom-row qr-only"><img class="qr-img" src="${qrImg}" alt="qr" /></div>` : '')}
                 </div>
               `).join('')}
             </div>
