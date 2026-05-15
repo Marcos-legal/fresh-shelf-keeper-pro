@@ -1,56 +1,43 @@
 import { Product } from "@/types/product";
 
-const formatDateForQr = (date: Date | string | undefined): string => {
-  if (!date) return "";
-  if (typeof date === "string") return date;
-  if (date instanceof Date && !isNaN(date.getTime())) {
-    return date.toISOString().slice(0, 10);
-  }
-  return "";
-};
-
 /**
- * Builds the QR payload for a product label. JSON-encoded so the scanner can
- * detect ValiControl labels and route the user to the matching product.
+ * QR payload for product labels.
+ *
+ * IMPORTANT: keep the payload as small as possible. The label QR is printed
+ * at ~13mm — a long JSON string makes the QR extremely dense and unreadable
+ * by phone cameras. We encode only a short prefix + product id; the scanner
+ * looks up the rest from the product list.
  */
+const PREFIX = "VC:";
+
 export function buildEtiquetaQrPayload(product: Product): string {
-  return JSON.stringify({
-    app: "valicontrol",
-    v: 1,
-    id: product.id,
-    nome: product.nome ?? "",
-    lote: product.lote ?? "",
-    marca: product.marca ?? "",
-    fab: formatDateForQr(product.dataFabricacao),
-    val: formatDateForQr(product.validade as Date | string | undefined),
-    abert: formatDateForQr(product.dataAbertura),
-    uso: formatDateForQr(product.utilizarAte),
-    local: product.localArmazenamento ?? "",
-    resp: product.responsavel ?? "",
-  });
+  return `${PREFIX}${product.id}`;
 }
 
 export interface EtiquetaQrData {
-  app?: string;
-  v?: number;
-  id?: string | number;
-  nome?: string;
-  lote?: string;
-  marca?: string;
-  fab?: string;
-  val?: string;
-  abert?: string;
-  uso?: string;
-  local?: string;
-  resp?: string;
+  app: "valicontrol";
+  id: string;
 }
 
 export function parseEtiquetaQrPayload(raw: string): EtiquetaQrData | null {
-  try {
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === "object") return parsed as EtiquetaQrData;
-  } catch {
-    // not JSON — could be plain text/url
+  if (!raw) return null;
+  const trimmed = raw.trim();
+
+  // New short format: "VC:<id>"
+  if (trimmed.startsWith(PREFIX)) {
+    const id = trimmed.slice(PREFIX.length).trim();
+    if (id) return { app: "valicontrol", id };
   }
+
+  // Backwards compatibility: legacy JSON payloads
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (parsed && typeof parsed === "object" && parsed.app === "valicontrol" && parsed.id) {
+      return { app: "valicontrol", id: String(parsed.id) };
+    }
+  } catch {
+    // not JSON
+  }
+
   return null;
 }
