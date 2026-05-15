@@ -126,18 +126,18 @@ export default function LeitorQrCode() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
-              {lastParsed ? (
+              {matchedProduct ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  <Field label="Produto" value={lastParsed.nome} />
-                  <Field label="Lote" value={lastParsed.lote} />
-                  <Field label="Marca" value={lastParsed.marca} />
-                  <Field label="Local" value={lastParsed.local} />
-                  <Field label="Fabricação" value={lastParsed.fab} />
-                  <Field label="Validade" value={lastParsed.val} />
-                  <Field label="Abertura" value={lastParsed.abert} />
-                  <Field label="Utilizar até" value={lastParsed.uso} />
-                  <Field label="Responsável" value={lastParsed.resp} />
+                  <Field label="Produto" value={matchedProduct.nome} />
+                  <Field label="Lote" value={matchedProduct.lote} />
+                  <Field label="Marca" value={matchedProduct.marca} />
+                  <Field label="Local" value={matchedProduct.localArmazenamento} />
+                  <Field label="Responsável" value={matchedProduct.responsavel} />
                 </div>
+              ) : lastParsed ? (
+                <p className="text-sm text-muted-foreground">
+                  Etiqueta ValiControl identificada (id: {lastParsed.id}).
+                </p>
               ) : (
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Conteúdo lido:</p>
