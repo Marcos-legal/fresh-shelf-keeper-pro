@@ -734,13 +734,20 @@ const ImpressaoEtiquetas = () => {
                       <span>AMB</span>
                     </div>
                   </div>
-                   ${!config.compactMode ? `
-                  <div class="campo">
-                    <div class="label">RESPONSÁVEL:</div>
-                    <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
-                  </div>
-                  ` : ''}
-                  ${(() => { const u = qrMap.get(String(product.id)); return u ? `<img class="qr-img" src="${u}" alt="qr" />` : ''; })()}
+                   ${(() => {
+                     const u = qrMap.get(String(product.id));
+                     const qrTag = u ? `<img class="qr-img" src="${u}" alt="qr" />` : '';
+                     if (!config.compactMode) {
+                       return `<div class="bottom-row">
+                         <div class="campo">
+                           <div class="label">RESPONSÁVEL:</div>
+                           <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
+                         </div>
+                         ${qrTag}
+                       </div>`;
+                     }
+                     return qrTag ? `<div class="bottom-row qr-only">${qrTag}</div>` : '';
+                   })()}
                 </div>
               `).join('')}
             </div>
