@@ -24,8 +24,8 @@ async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
     Array.from(new Map(products.map((p) => [String(p.id), p])).values()).map(async (p) => {
       try {
         const dataUrl = await QRCode.toDataURL(buildEtiquetaQrPayload(p), {
-          margin: 0,
-          width: 160,
+          margin: 1,
+          width: 320,
           errorCorrectionLevel: "M",
         });
         map.set(String(p.id), dataUrl);
