@@ -613,14 +613,28 @@ const ImpressaoEtiquetas = () => {
                 margin-bottom: ${Math.max(2, parseInt(config.spacing) / 2)}px;
               }
 
+              .bottom-row {
+                display: flex;
+                align-items: stretch;
+                gap: 4px;
+                margin-top: auto;
+              }
+              .bottom-row .campo {
+                flex: 1;
+                margin-bottom: 0;
+                min-width: 0;
+              }
+              .bottom-row.qr-only {
+                justify-content: flex-end;
+              }
               .qr-img {
-                position: absolute;
-                bottom: 3px;
-                right: 3px;
-                width: 14mm;
-                height: 14mm;
+                width: 13mm;
+                height: 13mm;
+                flex-shrink: 0;
                 background: white;
                 padding: 1px;
+                box-sizing: border-box;
+                display: block;
               }
               .clearfix::after {
                 content: "";
