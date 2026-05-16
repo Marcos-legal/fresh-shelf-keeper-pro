@@ -284,14 +284,14 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
                 </div>
               </div>
               <div
-                className="flex-shrink-0 bg-white"
-                style={{ width: `${fontSize * 3.2}px`, height: `${fontSize * 3.2}px` }}
+                className="flex-shrink-0 bg-white flex items-center justify-center"
+                style={{ width: `${fontSize * 2.4}px`, height: `${fontSize * 2.4}px` }}
               >
                 <QRCodeSVG
                   value={buildEtiquetaQrPayload(product)}
-                  size={Math.max(32, fontSize * 3.2)}
+                  size={Math.max(28, fontSize * 2.4)}
                   level="L"
-                  style={{ width: '100%', height: '100%' }}
+                  style={{ width: '100%', height: '100%', display: 'block' }}
                 />
               </div>
             </div>
