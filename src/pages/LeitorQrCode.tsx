@@ -4,28 +4,36 @@ import { PageLayout } from "@/components/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { QrCode, Camera, CameraOff, RefreshCw, Eye, Pencil, CheckCircle2, XCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { QrCode, Camera, CameraOff, Trash2, CheckCircle2, XCircle } from "lucide-react";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { parseEtiquetaQrPayload, EtiquetaQrData } from "@/lib/qrcode";
 import { toast } from "@/hooks/use-toast";
 import { EtiquetaView } from "@/components/EtiquetaView";
 import { cn } from "@/lib/utils";
+import { Product } from "@/types/product";
 
 const READER_ID = "valicontrol-qr-reader";
 
+interface ScanItem {
+  key: string;
+  raw: string;
+  parsed: EtiquetaQrData | null;
+  product: Product | null;
+  scannedAt: number;
+}
+
 export default function LeitorQrCode() {
-  const navigate = useNavigate();
   const { products } = useProductsSupabase();
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const productsRef = useRef(products);
+  const scansRef = useRef<Set<string>>(new Set());
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastRaw, setLastRaw] = useState<string | null>(null);
-  const [lastParsed, setLastParsed] = useState<EtiquetaQrData | null>(null);
+  const [scans, setScans] = useState<ScanItem[]>([]);
 
-  const matchedProduct = lastParsed?.id
-    ? products.find((p) => String(p.id) === String(lastParsed.id))
-    : null;
+  useEffect(() => {
+    productsRef.current = products;
+  }, [products]);
 
   const stop = async () => {
     try {
@@ -43,8 +51,6 @@ export default function LeitorQrCode() {
 
   const start = async () => {
     setError(null);
-    setLastRaw(null);
-    setLastParsed(null);
     try {
       const html5 = new Html5Qrcode(READER_ID);
       scannerRef.current = html5;
@@ -52,13 +58,24 @@ export default function LeitorQrCode() {
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 240, height: 240 } },
         (decoded) => {
-          setLastRaw(decoded);
-          setLastParsed(parseEtiquetaQrPayload(decoded));
-          toast({ title: "QR Code lido", description: "Verifique os detalhes abaixo." });
-          stop();
+          const parsed = parseEtiquetaQrPayload(decoded);
+          const key = parsed?.id ? `id:${parsed.id}` : `raw:${decoded}`;
+          if (scansRef.current.has(key)) return;
+          scansRef.current.add(key);
+          const product = parsed?.id
+            ? productsRef.current.find((p) => String(p.id) === String(parsed.id)) || null
+            : null;
+          setScans((prev) => [
+            { key, raw: decoded, parsed, product, scannedAt: Date.now() },
+            ...prev,
+          ]);
+          toast({
+            title: "QR Code lido",
+            description: product ? product.nome : "Etiqueta registrada na lista.",
+          });
         },
         () => {
-          // per-frame decode failures — ignore
+          // ignore per-frame failures
         }
       );
       setScanning(true);
@@ -68,7 +85,18 @@ export default function LeitorQrCode() {
     }
   };
 
+  const clearAll = () => {
+    scansRef.current.clear();
+    setScans([]);
+  };
+
+  const removeScan = (key: string) => {
+    scansRef.current.delete(key);
+    setScans((prev) => prev.filter((s) => s.key !== key));
+  };
+
   useEffect(() => {
+    start();
     return () => {
       stop();
     };
@@ -78,26 +106,36 @@ export default function LeitorQrCode() {
   return (
     <PageLayout
       title="Leitor de QR Code"
-      description="Escaneie a etiqueta para visualizar o produto"
+      description="Escaneie várias etiquetas em sequência sem fechar a câmera"
       icon={QrCode}
     >
-      <div className="space-y-4 sm:space-y-6 max-w-3xl">
+      <div className="space-y-4 sm:space-y-6">
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
               <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
                 <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
                 Câmera
+                {scanning && (
+                  <Badge variant="secondary" className="text-xs">Lendo...</Badge>
+                )}
               </CardTitle>
-              {scanning ? (
-                <Button variant="outline" size="sm" onClick={stop}>
-                  <CameraOff className="w-4 h-4 mr-1.5" /> Parar
-                </Button>
-              ) : (
-                <Button size="sm" onClick={start}>
-                  <Camera className="w-4 h-4 mr-1.5" /> Iniciar leitura
-                </Button>
-              )}
+              <div className="flex gap-2">
+                {scanning ? (
+                  <Button variant="outline" size="sm" onClick={stop}>
+                    <CameraOff className="w-4 h-4 mr-1.5" /> Parar
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={start}>
+                    <Camera className="w-4 h-4 mr-1.5" /> Iniciar leitura
+                  </Button>
+                )}
+                {scans.length > 0 && (
+                  <Button variant="ghost" size="sm" onClick={clearAll}>
+                    <Trash2 className="w-4 h-4 mr-1.5" /> Limpar ({scans.length})
+                  </Button>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
@@ -108,100 +146,78 @@ export default function LeitorQrCode() {
             {error && (
               <p className="mt-3 text-sm text-destructive text-center">{error}</p>
             )}
-            {!scanning && !error && !lastRaw && (
+            {scanning && (
               <p className="mt-3 text-xs text-muted-foreground text-center">
-                Permita o acesso à câmera. Em desktop, use HTTPS para que a câmera funcione.
+                Aponte para cada etiqueta. Já lidas são ignoradas automaticamente.
               </p>
             )}
           </CardContent>
         </Card>
 
-        {lastRaw && (
-          <Card>
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-                <QrCode className="w-4 h-4 sm:w-5 sm:h-5" />
-                Resultado
-                {lastParsed?.app === "valicontrol" && (
-                  <Badge variant="secondary" className="text-xs">ValiControl</Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
-              {matchedProduct ? (
-                (() => {
-                  const isValid = matchedProduct.status === "valido";
-                  return (
-                    <div className="space-y-3">
-                      <div
-                        className={cn(
-                          "flex items-center gap-2 rounded-lg border-2 px-3 py-2 font-semibold",
-                          isValid
-                            ? "border-green-600 bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                            : "border-red-600 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+        {scans.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-sm font-semibold text-muted-foreground">
+              Etiquetas lidas ({scans.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {scans.map((scan) => {
+                const product = scan.product;
+                const isValid = product?.status === "valido";
+                return (
+                  <Card key={scan.key} className="overflow-hidden">
+                    <CardHeader className="p-3 sm:p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        {product ? (
+                          <div
+                            className={cn(
+                              "flex items-center gap-2 rounded-md border-2 px-2 py-1 text-xs font-semibold",
+                              isValid
+                                ? "border-green-600 bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                                : "border-red-600 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                            )}
+                          >
+                            {isValid ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                            <span>{isValid ? "VÁLIDA" : "INVÁLIDA"}</span>
+                          </div>
+                        ) : (
+                          <Badge variant="outline" className="text-xs">Não cadastrada</Badge>
                         )}
-                      >
-                        {isValid ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-                        <span>{isValid ? "Etiqueta VÁLIDA" : "Etiqueta INVÁLIDA"}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeScan(scan.key)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
-                      <div
-                        className={cn(
-                          "flex justify-center rounded-lg border-4 p-3 bg-white",
-                          isValid ? "border-green-600" : "border-red-600"
-                        )}
-                      >
-                        <EtiquetaView product={matchedProduct} />
-                      </div>
-                    </div>
-                  );
-                })()
-              ) : lastParsed ? (
-                <p className="text-sm text-muted-foreground">
-                  Etiqueta ValiControl identificada (id: {lastParsed.id}).
-                </p>
-              ) : (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Conteúdo lido:</p>
-                  <pre className="text-xs bg-muted/40 p-3 rounded-md break-all whitespace-pre-wrap">
-                    {lastRaw}
-                  </pre>
-                </div>
-              )}
-
-              <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
-                {matchedProduct && (
-                  <>
-                    <Button size="sm" onClick={() => navigate("/visualizar-etiquetas")}>
-                      <Eye className="w-4 h-4 mr-1.5" /> Ver etiqueta
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => navigate("/cadastro")}>
-                      <Pencil className="w-4 h-4 mr-1.5" /> Editar produto
-                    </Button>
-                  </>
-                )}
-                <Button size="sm" variant="ghost" onClick={start}>
-                  <RefreshCw className="w-4 h-4 mr-1.5" /> Ler outro
-                </Button>
-              </div>
-
-              {lastParsed?.app === "valicontrol" && !matchedProduct && (
-                <p className="text-xs text-muted-foreground">
-                  Produto identificado pelo QR não foi encontrado no seu cadastro atual.
-                </p>
-              )}
-            </CardContent>
-          </Card>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 pt-0">
+                      {product ? (
+                        <div
+                          className={cn(
+                            "flex justify-center rounded-lg border-4 p-2 bg-white",
+                            isValid ? "border-green-600" : "border-red-600"
+                          )}
+                        >
+                          <EtiquetaView product={product} />
+                        </div>
+                      ) : scan.parsed?.id ? (
+                        <p className="text-sm text-muted-foreground">
+                          Etiqueta identificada (id: {scan.parsed.id}), mas não está no cadastro atual.
+                        </p>
+                      ) : (
+                        <pre className="text-xs bg-muted/40 p-2 rounded-md break-all whitespace-pre-wrap">
+                          {scan.raw}
+                        </pre>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
     </PageLayout>
-  );
-}
-
-function Field({ label, value }: { label: string; value?: string }) {
-  return (
-    <div className="rounded-md bg-muted/30 p-2">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="font-medium text-foreground break-words">{value || "—"}</p>
-    </div>
   );
 }
