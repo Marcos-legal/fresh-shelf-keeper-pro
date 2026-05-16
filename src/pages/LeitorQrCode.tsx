@@ -4,11 +4,13 @@ import { PageLayout } from "@/components/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { QrCode, Camera, CameraOff, RefreshCw, Eye, Pencil } from "lucide-react";
+import { QrCode, Camera, CameraOff, RefreshCw, Eye, Pencil, CheckCircle2, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { parseEtiquetaQrPayload, EtiquetaQrData } from "@/lib/qrcode";
 import { toast } from "@/hooks/use-toast";
+import { EtiquetaView } from "@/components/EtiquetaView";
+import { cn } from "@/lib/utils";
 
 const READER_ID = "valicontrol-qr-reader";
 
@@ -127,13 +129,32 @@ export default function LeitorQrCode() {
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
               {matchedProduct ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  <Field label="Produto" value={matchedProduct.nome} />
-                  <Field label="Lote" value={matchedProduct.lote} />
-                  <Field label="Marca" value={matchedProduct.marca} />
-                  <Field label="Local" value={matchedProduct.localArmazenamento} />
-                  <Field label="Responsável" value={matchedProduct.responsavel} />
-                </div>
+                (() => {
+                  const isValid = matchedProduct.status === "valido";
+                  return (
+                    <div className="space-y-3">
+                      <div
+                        className={cn(
+                          "flex items-center gap-2 rounded-lg border-2 px-3 py-2 font-semibold",
+                          isValid
+                            ? "border-green-600 bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                            : "border-red-600 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                        )}
+                      >
+                        {isValid ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                        <span>{isValid ? "Etiqueta VÁLIDA" : "Etiqueta INVÁLIDA"}</span>
+                      </div>
+                      <div
+                        className={cn(
+                          "flex justify-center rounded-lg border-4 p-3 bg-white",
+                          isValid ? "border-green-600" : "border-red-600"
+                        )}
+                      >
+                        <EtiquetaView product={matchedProduct} />
+                      </div>
+                    </div>
+                  );
+                })()
               ) : lastParsed ? (
                 <p className="text-sm text-muted-foreground">
                   Etiqueta ValiControl identificada (id: {lastParsed.id}).

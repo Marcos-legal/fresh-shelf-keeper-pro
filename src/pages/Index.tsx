@@ -7,7 +7,7 @@ import { ProductTable } from "@/components/ProductTable";
 import { ProductForm } from "@/components/ProductForm";
 import { StatsCard } from "@/components/StatsCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Package, CheckCircle, AlertTriangle, XCircle, Thermometer, Snowflake, Home, Refrigerator, Clock, Printer, Eye, LayoutDashboard } from "lucide-react";
+import { Plus, Package, CheckCircle, AlertTriangle, XCircle, Thermometer, Snowflake, Home, Refrigerator, Clock, Printer, Eye, LayoutDashboard, QrCode } from "lucide-react";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { toast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -243,6 +243,9 @@ const Index = () => {
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-2 mb-5 sm:mb-6">
+        <Button size="sm" onClick={() => navigate('/leitor-qrcode')} className="text-xs h-9">
+          <QrCode className="w-3.5 h-3.5 mr-1.5" /> Ler QR Code
+        </Button>
         <Button variant="outline" size="sm" onClick={() => navigate('/impressao-etiquetas')} className="text-xs h-9">
           <Printer className="w-3.5 h-3.5 mr-1.5" /> Imprimir Etiquetas
         </Button>
