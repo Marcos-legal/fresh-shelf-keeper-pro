@@ -26,6 +26,8 @@ export default function LeitorQrCode() {
   const { products } = useProductsSupabase();
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const productsRef = useRef(products);
+  const startingRef = useRef(false);
+  const mountedRef = useRef(true);
   const scansRef = useRef<Set<string>>(new Set());
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,32 @@ export default function LeitorQrCode() {
 
   useEffect(() => {
     productsRef.current = products;
+    setScans((prev) =>
+      prev.map((scan) => {
+        if (scan.product || !scan.parsed?.id) return scan;
+        const product = products.find((p) => String(p.id) === String(scan.parsed?.id)) || null;
+        return product ? { ...scan, product } : scan;
+      })
+    );
   }, [products]);
+
+  const isProductWithinValidity = (product: Product) => {
+    const targetDate = product.utilizarAte instanceof Date
+      ? product.utilizarAte
+      : product.validade instanceof Date
+        ? product.validade
+        : undefined;
+
+    if (!targetDate || isNaN(targetDate.getTime())) return true;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const validityDay = new Date(targetDate);
+    validityDay.setHours(0, 0, 0, 0);
+
+    return validityDay >= today;
+  };
 
   const stop = async () => {
     try {
@@ -50,7 +77,9 @@ export default function LeitorQrCode() {
   };
 
   const start = async () => {
+    if (scannerRef.current || startingRef.current) return;
     setError(null);
+    startingRef.current = true;
     try {
       const html5 = new Html5Qrcode(READER_ID);
       scannerRef.current = html5;
@@ -78,10 +107,13 @@ export default function LeitorQrCode() {
           // ignore per-frame failures
         }
       );
-      setScanning(true);
+      if (mountedRef.current) setScanning(true);
     } catch (err: any) {
+      scannerRef.current = null;
       setError(err?.message || "Não foi possível acessar a câmera.");
       setScanning(false);
+    } finally {
+      startingRef.current = false;
     }
   };
 
@@ -96,8 +128,10 @@ export default function LeitorQrCode() {
   };
 
   useEffect(() => {
+    mountedRef.current = true;
     start();
     return () => {
+      mountedRef.current = false;
       stop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
