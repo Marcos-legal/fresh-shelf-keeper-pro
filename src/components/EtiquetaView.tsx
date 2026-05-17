@@ -76,6 +76,7 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
   const spacing = 1.2 * scaleFactor;
   const padding = 3 * scaleFactor;
   const lineHeight = fontSize + (1.5 * scaleFactor);
+  const qrSize = Math.max(38, fontSize * 3.8);
 
   return (
     <Card 
@@ -267,9 +268,9 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
           </div>
 
           {/* Responsável e QR Code - linha final */}
-          <div className="flex-none">
-            <div className="flex items-end gap-2">
-              <div className="flex items-center flex-1 min-w-0">
+          <div className="flex-1 min-h-0">
+            <div className="flex h-full items-end gap-2">
+              <div className="flex items-center flex-1 min-w-0 pb-0.5">
                 <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Responsável:</span>
                 <div
                   className="flex-1 border-b-2 border-black relative"
@@ -285,12 +286,13 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
               </div>
               <div
                 className="flex-shrink-0 bg-white flex items-center justify-center"
-                style={{ width: `${fontSize * 2.4}px`, height: `${fontSize * 2.4}px` }}
+                style={{ width: `${qrSize}px`, height: `${qrSize}px` }}
               >
                 <QRCodeSVG
                   value={buildEtiquetaQrPayload(product)}
-                  size={Math.max(28, fontSize * 2.4)}
+                  size={qrSize}
                   level="L"
+                  marginSize={2}
                   style={{ width: '100%', height: '100%', display: 'block' }}
                 />
               </div>
