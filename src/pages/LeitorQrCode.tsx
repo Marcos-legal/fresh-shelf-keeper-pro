@@ -108,9 +108,9 @@ export default function LeitorQrCode() {
         }
       );
       if (mountedRef.current) setScanning(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       scannerRef.current = null;
-      setError(err?.message || "Não foi possível acessar a câmera.");
+      setError(err instanceof Error ? err.message : "Não foi possível acessar a câmera.");
       setScanning(false);
     } finally {
       startingRef.current = false;
