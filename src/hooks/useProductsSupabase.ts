@@ -290,11 +290,17 @@ export function useProductsSupabase() {
       return 'valido';
     }
     
-    if (targetDate < now) {
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
+    const validityDay = new Date(targetDate);
+    validityDay.setHours(0, 0, 0, 0);
+
+    if (validityDay < today) {
       return 'vencido';
     }
     
-    const daysToExpire = Math.ceil((targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysToExpire = Math.ceil((validityDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
     if (daysToExpire <= 1) {
       return 'proximo-vencimento';

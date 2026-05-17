@@ -33,6 +33,7 @@ const VisualizarEtiquetas = () => {
   // Função para verificar se produto está vencido
   const isProductExpired = (product: any) => {
     const now = new Date();
+    now.setHours(0, 0, 0, 0);
     let targetDate: Date | undefined;
     
     if (product.utilizarAte instanceof Date) {
@@ -41,7 +42,11 @@ const VisualizarEtiquetas = () => {
       targetDate = product.validade;
     }
     
-    return targetDate && targetDate < now;
+    if (!targetDate) return false;
+    const validityDay = new Date(targetDate);
+    validityDay.setHours(0, 0, 0, 0);
+
+    return validityDay < now;
   };
 
   // Filtrar produtos por status

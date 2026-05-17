@@ -198,7 +198,17 @@ export default function LeitorQrCode() {
                 const product = scan.product;
                 const isWithinValidity = product ? isProductWithinValidity(product) : false;
                 return (
-                  <Card key={scan.key} className="overflow-hidden">
+                  <Card
+                    key={scan.key}
+                    className={cn(
+                      "overflow-hidden border-2",
+                      product
+                        ? isWithinValidity
+                          ? "border-success bg-success/5"
+                          : "border-destructive bg-destructive/5"
+                        : "border-border"
+                    )}
+                  >
                     <CardHeader className="p-3 sm:p-4">
                       <div className="flex items-center justify-between gap-2">
                         {product ? (
