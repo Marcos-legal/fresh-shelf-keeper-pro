@@ -31,7 +31,7 @@ const VisualizarEtiquetas = () => {
   const altura = parseInt(localStorage.getItem('etiqueta-altura') || '50');
 
   // Função para verificar se produto está vencido
-  const isProductExpired = (product: any) => {
+  const isProductExpired = (product: typeof products[number]) => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     let targetDate: Date | undefined;
