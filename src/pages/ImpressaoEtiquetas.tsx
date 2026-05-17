@@ -350,11 +350,11 @@ const ImpressaoEtiquetas = () => {
                 justify-content: flex-end;
               }
               .qr-img {
-                width: 13mm;
-                height: 13mm;
+                width: 15mm;
+                height: 15mm;
                 flex-shrink: 0;
                 background: white;
-                padding: 1px;
+                padding: 1.5mm;
                 box-sizing: border-box;
                 display: block;
               }
@@ -628,11 +628,11 @@ const ImpressaoEtiquetas = () => {
                 justify-content: flex-end;
               }
               .qr-img {
-                width: 13mm;
-                height: 13mm;
+                width: 15mm;
+                height: 15mm;
                 flex-shrink: 0;
                 background: white;
-                padding: 1px;
+                padding: 1.5mm;
                 box-sizing: border-box;
                 display: block;
               }
@@ -881,11 +881,11 @@ const ImpressaoEtiquetas = () => {
                 justify-content: flex-end;
               }
               .qr-img {
-                width: 13mm;
-                height: 13mm;
+                width: 15mm;
+                height: 15mm;
                 flex-shrink: 0;
                 background: white;
-                padding: 1px;
+                padding: 1.5mm;
                 box-sizing: border-box;
                 display: block;
               }
