@@ -24,9 +24,19 @@ export function parseEtiquetaQrPayload(raw: string): EtiquetaQrData | null {
   const trimmed = raw.trim();
 
   // New short format: "VC:<id>"
-  if (trimmed.startsWith(PREFIX)) {
+  if (trimmed.toUpperCase().startsWith(PREFIX)) {
     const id = trimmed.slice(PREFIX.length).trim();
     if (id) return { app: "valicontrol", id };
+  }
+
+  // Some scanners return the QR payload as a URL-safe or plain numeric value.
+  const urlMatch = trimmed.match(/(?:^|[?&#/])(?:vc:|produto=|product=|id=)?(\d+)(?:$|[&#/?])/i);
+  if (urlMatch?.[1]) {
+    return { app: "valicontrol", id: urlMatch[1] };
+  }
+
+  if (/^\d+$/.test(trimmed)) {
+    return { app: "valicontrol", id: trimmed };
   }
 
   // Backwards compatibility: legacy JSON payloads
