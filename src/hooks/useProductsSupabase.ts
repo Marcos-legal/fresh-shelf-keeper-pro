@@ -4,6 +4,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Product, ProductFormData, StorageLocation } from '@/types/product';
 import { toast } from '@/hooks/use-toast';
 import { parseValidadeDate } from '@/utils/productValidation';
+import type { Database } from '@/integrations/supabase/types';
+
+type SupabaseProductRow = Database['public']['Tables']['products']['Row'];
+type SupabaseProductUpdate = Database['public']['Tables']['products']['Update'];
 
 export function useProductsSupabase() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -11,7 +15,7 @@ export function useProductsSupabase() {
   const { user } = useAuth();
 
   // Convert database row to Product interface
-  const mapDbRowToProduct = (row: any): Product => {
+  const mapDbRowToProduct = (row: SupabaseProductRow): Product => {
     // Helper to convert YYYY-MM-DD string to Date without timezone issues
     const parseDate = (dateStr: string | null): Date | undefined => {
       if (!dateStr) return undefined;
@@ -163,7 +167,7 @@ export function useProductsSupabase() {
     if (!user) return;
 
     try {
-      const updateData: any = {};
+      const updateData: SupabaseProductUpdate = {};
       
       if (data.nome !== undefined) updateData.name = data.nome;
       if (data.lote !== undefined) updateData.lot = data.lote;
@@ -290,11 +294,17 @@ export function useProductsSupabase() {
       return 'valido';
     }
     
-    if (targetDate < now) {
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
+    const validityDay = new Date(targetDate);
+    validityDay.setHours(0, 0, 0, 0);
+
+    if (validityDay < today) {
       return 'vencido';
     }
     
-    const daysToExpire = Math.ceil((targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysToExpire = Math.ceil((validityDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
     if (daysToExpire <= 1) {
       return 'proximo-vencimento';

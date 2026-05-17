@@ -26,6 +26,8 @@ export default function LeitorQrCode() {
   const { products } = useProductsSupabase();
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const productsRef = useRef(products);
+  const startingRef = useRef(false);
+  const mountedRef = useRef(true);
   const scansRef = useRef<Set<string>>(new Set());
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,32 @@ export default function LeitorQrCode() {
 
   useEffect(() => {
     productsRef.current = products;
+    setScans((prev) =>
+      prev.map((scan) => {
+        if (scan.product || !scan.parsed?.id) return scan;
+        const product = products.find((p) => String(p.id) === String(scan.parsed?.id)) || null;
+        return product ? { ...scan, product } : scan;
+      })
+    );
   }, [products]);
+
+  const isProductWithinValidity = (product: Product) => {
+    const targetDate = product.utilizarAte instanceof Date
+      ? product.utilizarAte
+      : product.validade instanceof Date
+        ? product.validade
+        : undefined;
+
+    if (!targetDate || isNaN(targetDate.getTime())) return true;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const validityDay = new Date(targetDate);
+    validityDay.setHours(0, 0, 0, 0);
+
+    return validityDay >= today;
+  };
 
   const stop = async () => {
     try {
@@ -50,7 +77,9 @@ export default function LeitorQrCode() {
   };
 
   const start = async () => {
+    if (scannerRef.current || startingRef.current) return;
     setError(null);
+    startingRef.current = true;
     try {
       const html5 = new Html5Qrcode(READER_ID);
       scannerRef.current = html5;
@@ -78,10 +107,13 @@ export default function LeitorQrCode() {
           // ignore per-frame failures
         }
       );
-      setScanning(true);
-    } catch (err: any) {
-      setError(err?.message || "Não foi possível acessar a câmera.");
+      if (mountedRef.current) setScanning(true);
+    } catch (err: unknown) {
+      scannerRef.current = null;
+      setError(err instanceof Error ? err.message : "Não foi possível acessar a câmera.");
       setScanning(false);
+    } finally {
+      startingRef.current = false;
     }
   };
 
@@ -96,8 +128,10 @@ export default function LeitorQrCode() {
   };
 
   useEffect(() => {
+    mountedRef.current = true;
     start();
     return () => {
+      mountedRef.current = false;
       stop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,22 +196,32 @@ export default function LeitorQrCode() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {scans.map((scan) => {
                 const product = scan.product;
-                const isValid = product?.status === "valido";
+                const isWithinValidity = product ? isProductWithinValidity(product) : false;
                 return (
-                  <Card key={scan.key} className="overflow-hidden">
+                  <Card
+                    key={scan.key}
+                    className={cn(
+                      "overflow-hidden border-2",
+                      product
+                        ? isWithinValidity
+                          ? "border-success bg-success/5"
+                          : "border-destructive bg-destructive/5"
+                        : "border-border"
+                    )}
+                  >
                     <CardHeader className="p-3 sm:p-4">
                       <div className="flex items-center justify-between gap-2">
                         {product ? (
                           <div
                             className={cn(
                               "flex items-center gap-2 rounded-md border-2 px-2 py-1 text-xs font-semibold",
-                              isValid
-                                ? "border-green-600 bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                                : "border-red-600 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                              isWithinValidity
+                                ? "border-success bg-success/10 text-success"
+                                : "border-destructive bg-destructive/10 text-destructive"
                             )}
                           >
-                            {isValid ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                            <span>{isValid ? "VÁLIDA" : "INVÁLIDA"}</span>
+                            {isWithinValidity ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                            <span>{isWithinValidity ? "DENTRO DA VALIDADE" : "FORA DA VALIDADE"}</span>
                           </div>
                         ) : (
                           <Badge variant="outline" className="text-xs">Não cadastrada</Badge>
@@ -196,7 +240,7 @@ export default function LeitorQrCode() {
                         <div
                           className={cn(
                             "flex justify-center rounded-lg border-4 p-2 bg-white",
-                            isValid ? "border-green-600" : "border-red-600"
+                            isWithinValidity ? "border-success" : "border-destructive"
                           )}
                         >
                           <EtiquetaView product={product} />
