@@ -376,9 +376,8 @@ const ImpressaoEtiquetas = () => {
             <div class="clearfix">
               ${expandedProducts.map(prod => `
                 <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
-                  <div class="campo">
-                    <div class="label">PRODUTO:</div>
-                    <div class="content">${escapeHtml((prod.nome || '').toUpperCase())}</div>
+                  <div style="background:#000;color:#fff;text-align:center;font-weight:900;text-transform:uppercase;padding:3px 4px;margin-bottom:3px;font-size:calc(${config.fontSize} * 1.5);line-height:1.1;letter-spacing:0.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
+                    ${escapeHtml((prod.nome || '').toUpperCase())}
                   </div>
                   <div class="grid">
                     <div class="campo">
