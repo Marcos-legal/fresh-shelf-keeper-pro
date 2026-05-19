@@ -157,41 +157,7 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
             </div>
           </div>
 
-          {/* Fab. e Val. - mesma linha */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
-            <div className="flex items-center" style={{ gap: `${spacing * 2}px` }}>
-              <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Fab.:</span>
-                <div 
-                  className="flex-1 border-b-2 border-black relative"
-                  style={{ height: `${lineHeight}px` }}
-                >
-                  <span 
-                    className="absolute left-1 top-0 font-bold text-black overflow-hidden"
-                    style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
-                  >
-                    {formatDate(product.dataFabricacao) || ''}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Val.:</span>
-                <div 
-                  className="flex-1 border-b-2 border-black relative"
-                  style={{ height: `${lineHeight}px` }}
-                >
-                  <span 
-                    className="absolute left-1 top-0 font-bold text-black overflow-hidden"
-                    style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
-                  >
-                    {formatDate(product.validade) || ''}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* DT Abert. e Utilizar até - mesma linha */}
+          {/* Abertura e Usar até - mesma linha */}
           <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
             <div className="flex items-center" style={{ gap: `${spacing * 2}px` }}>
               <div className="flex items-center flex-1">
