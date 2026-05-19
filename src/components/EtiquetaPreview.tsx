@@ -58,6 +58,8 @@ export function EtiquetaPreview({ product, largura = 70, altura = 50 }: Etiqueta
   const spacing = 1.2 * scaleFactor;
   const padding = 3 * scaleFactor;
   const lineHeight = fontSize + (1.5 * scaleFactor);
+  const nameFontSize = fontSize * 1.55;
+  const nameLineHeight = nameFontSize + (2 * scaleFactor);
 
   return (
     <Card 
@@ -77,27 +79,22 @@ export function EtiquetaPreview({ product, largura = 70, altura = 50 }: Etiqueta
       >
         <div className="h-full flex flex-col" style={{ gap: `${spacing * 0.5}px` }}>
           
-          {/* Nome do Produto */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
-            <div className="flex items-center" style={{ marginBottom: `${spacing * 0.3}px` }}>
-              <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Nome do Produto:</span>
-              <div 
-                className="flex-1 border-b-2 border-black relative"
-                style={{ height: `${lineHeight}px` }}
-              >
-                <span 
-                  className="absolute left-1 top-0 font-bold text-black uppercase overflow-hidden"
-                  style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
-                >
-                  {product.nome || ''}
-                </span>
-              </div>
+          {/* Nome do Produto - DESTAQUE */}
+          <div className="flex-none" style={{ marginBottom: `${spacing * 0.5}px` }}>
+            <div
+              className="w-full bg-black text-white flex items-center justify-center font-black uppercase tracking-wide overflow-hidden"
+              style={{
+                height: `${nameLineHeight * 1.4}px`,
+                fontSize: `${nameFontSize}px`,
+                lineHeight: 1,
+                padding: `0 ${spacing}px`,
+                letterSpacing: '0.5px',
+              }}
+            >
+              <span className="truncate text-center w-full">{product.nome || ''}</span>
             </div>
-            <div 
-              className="w-full border-b-2 border-black"
-              style={{ height: `${lineHeight}px` }}
-            />
           </div>
+
 
           {/* Lote e Marca */}
           <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
