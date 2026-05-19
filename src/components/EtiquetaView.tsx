@@ -161,7 +161,7 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
           <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
             <div className="flex items-center" style={{ gap: `${spacing * 2}px` }}>
               <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>DT Abert:</span>
+                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Abertura:</span>
                 <div 
                   className="flex-1 border-b-2 border-black relative"
                   style={{ height: `${lineHeight}px` }}
