@@ -76,6 +76,8 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
   const spacing = 1.2 * scaleFactor;
   const padding = 3 * scaleFactor;
   const lineHeight = fontSize + (1.5 * scaleFactor);
+  const nameFontSize = fontSize * 1.55;
+  const nameLineHeight = nameFontSize + (2 * scaleFactor);
   const qrSize = Math.max(38, fontSize * 3.8);
 
   return (
