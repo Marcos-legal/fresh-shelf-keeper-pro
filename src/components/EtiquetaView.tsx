@@ -175,7 +175,7 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
                 </div>
               </div>
               <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Utilizar até:</span>
+                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Usar até:</span>
                 <div 
                   className="flex-1 border-b-2 border-black relative"
                   style={{ height: `${lineHeight}px` }}
