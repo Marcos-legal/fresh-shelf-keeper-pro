@@ -157,45 +157,11 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
             </div>
           </div>
 
-          {/* Fab. e Val. - mesma linha */}
+          {/* Abertura e Usar até - mesma linha */}
           <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
             <div className="flex items-center" style={{ gap: `${spacing * 2}px` }}>
               <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Fab.:</span>
-                <div 
-                  className="flex-1 border-b-2 border-black relative"
-                  style={{ height: `${lineHeight}px` }}
-                >
-                  <span 
-                    className="absolute left-1 top-0 font-bold text-black overflow-hidden"
-                    style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
-                  >
-                    {formatDate(product.dataFabricacao) || ''}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Val.:</span>
-                <div 
-                  className="flex-1 border-b-2 border-black relative"
-                  style={{ height: `${lineHeight}px` }}
-                >
-                  <span 
-                    className="absolute left-1 top-0 font-bold text-black overflow-hidden"
-                    style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
-                  >
-                    {formatDate(product.validade) || ''}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* DT Abert. e Utilizar até - mesma linha */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
-            <div className="flex items-center" style={{ gap: `${spacing * 2}px` }}>
-              <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>DT Abert:</span>
+                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Abertura:</span>
                 <div 
                   className="flex-1 border-b-2 border-black relative"
                   style={{ height: `${lineHeight}px` }}
@@ -209,7 +175,7 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
                 </div>
               </div>
               <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Utilizar até:</span>
+                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Usar até:</span>
                 <div 
                   className="flex-1 border-b-2 border-black relative"
                   style={{ height: `${lineHeight}px` }}
@@ -225,44 +191,32 @@ export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaVie
             </div>
           </div>
 
-          {/* Checkboxes - Uma linha com 3 opções */}
+          {/* Checkboxes - REF / CON / AMB */}
           <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
             <div className="flex items-center justify-start" style={{ gap: `${spacing * 4}px` }}>
-              <label className="flex items-center" style={{ gap: `${spacing * 0.8}px` }}>
-                <div 
-                  className="border-2 border-black flex items-center justify-center bg-white flex-shrink-0"
-                  style={{ width: `${fontSize * 1.2}px`, height: `${fontSize * 1.2}px` }}
-                >
-                  {product.localArmazenamento === 'refrigerado' && (
-                    <span className="text-black font-bold leading-none" style={{ fontSize: `${fontSize * 0.9}px` }}>✓</span>
-                  )}
-                </div>
-                <span className="font-bold text-black whitespace-nowrap">Refrigerado</span>
-              </label>
-              <label className="flex items-center" style={{ gap: `${spacing * 0.8}px` }}>
-                <div 
-                  className="border-2 border-black flex items-center justify-center bg-white flex-shrink-0"
-                  style={{ width: `${fontSize * 1.2}px`, height: `${fontSize * 1.2}px` }}
-                >
-                  {product.localArmazenamento === 'congelado' && (
-                    <span className="text-black font-bold leading-none" style={{ fontSize: `${fontSize * 0.9}px` }}>✓</span>
-                  )}
-                </div>
-                <span className="font-bold text-black whitespace-nowrap">Congelado</span>
-              </label>
-              <label className="flex items-center" style={{ gap: `${spacing * 0.8}px` }}>
-                <div 
-                  className="border-2 border-black flex items-center justify-center bg-white flex-shrink-0"
-                  style={{ width: `${fontSize * 1.2}px`, height: `${fontSize * 1.2}px` }}
-                >
-                  {product.localArmazenamento === 'ambiente' && (
-                    <span className="text-black font-bold leading-none" style={{ fontSize: `${fontSize * 0.9}px` }}>✓</span>
-                  )}
-                </div>
-                <span className="font-bold text-black whitespace-nowrap">Ambiente</span>
-              </label>
+              {[
+                { key: 'refrigerado', label: 'REF' },
+                { key: 'congelado', label: 'CON' },
+                { key: 'ambiente', label: 'AMB' },
+              ].map(({ key, label }) => {
+                const active = product.localArmazenamento === key;
+                return (
+                  <label key={key} className="flex items-center" style={{ gap: `${spacing * 0.8}px` }}>
+                    <div
+                      className="border-2 border-black flex-shrink-0"
+                      style={{
+                        width: `${fontSize * 1.2}px`,
+                        height: `${fontSize * 1.2}px`,
+                        background: active ? '#000' : '#fff',
+                      }}
+                    />
+                    <span className="font-bold text-black whitespace-nowrap">{label}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
+
 
           {/* Responsável e QR Code - linha final */}
           <div className="flex-1 min-h-0">
