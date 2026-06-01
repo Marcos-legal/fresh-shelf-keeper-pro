@@ -292,263 +292,31 @@ const ImpressaoEtiquetas = () => {
   const handlePrint = async () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
 
-    // Expandir produtos baseado nas quantidades
     const expandedProducts = selectedProductsData.flatMap(product => {
       const quantity = productQuantities[product.id] || 1;
       return Array(quantity).fill(product);
     });
 
     const qrMap = await buildQrMap(selectedProductsData);
+    const html = buildEtiquetaPrintHTML({
+      products: expandedProducts,
+      largura,
+      altura,
+      responsavel,
+      qrMap,
+      title: `Etiquetas Térmicas - ${expandedProducts.length} etiquetas`,
+    });
 
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      const totalLabels = expandedProducts.length;
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Etiquetas Térmicas - ${escapeHtml(totalLabels.toString())} etiquetas - ${escapeHtml(largura.toString())}x${escapeHtml(altura.toString())}mm</title>
-            <style>
-              @page {
-                size: A4;
-                margin: 0.5cm;
-              }
-              body { 
-                font-family: 'Courier New', 'Liberation Mono', monospace; 
-                margin: 0; 
-                padding: 0;
-                line-height: 1.1;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              .etiqueta { 
-                position: relative;
-                border: 3px solid #000;
-                width: ${config.width};
-                height: ${config.height};
-                margin: 8px;
-                padding: ${config.padding};
-                float: left;
-                font-size: ${config.fontSize};
-                page-break-inside: avoid;
-                background: white;
-                font-weight: 600;
-                color: #000;
-                box-sizing: border-box;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                overflow: hidden;
-              }
-              .campo {
-                margin-bottom: ${Math.max(2, parseInt(config.spacing) * 0.4)}px;
-                border-bottom: 2px solid #333;
-                padding-bottom: 2px;
-                min-height: ${config.compactMode ? '12px' : '16px'};
-                font-weight: bold;
-                flex-shrink: 0;
-                overflow: hidden;
-              }
-              .label {
-                font-weight: 900;
-                font-size: ${config.labelSize};
-                color: #000;
-                text-transform: uppercase;
-                line-height: 1;
-              }
-              .content {
-                font-weight: 800;
-                font-size: ${config.contentSize};
-                color: #000;
-                text-transform: uppercase;
-                margin-top: 2px;
-                word-wrap: break-word;
-                overflow: hidden;
-                line-height: 1.1;
-                max-height: ${config.compactMode ? '24px' : '32px'};
-              }
-              .grid {
-                display: ${config.showGrid ? 'grid' : 'block'};
-                grid-template-columns: ${config.showGrid ? '1fr 1fr' : '1fr'};
-                gap: ${config.showGrid ? '4px' : '0'};
-                margin-bottom: ${config.spacing};
-              }
-              .checkbox-row {
-                display: ${config.compactMode ? 'flex' : 'grid'};
-                ${config.compactMode ? 'justify-content: space-between' : 'grid-template-columns: 1fr 1fr 1fr'};
-                gap: ${config.compactMode ? '2px' : '4px'};
-                font-size: ${config.labelSize};
-                margin-bottom: ${config.spacing};
-                font-weight: 900;
-                flex-wrap: wrap;
-              }
-              .checkbox-item {
-                display: flex;
-                align-items: center;
-                font-weight: 900;
-                color: #000;
-                ${config.compactMode ? 'font-size: ' + (parseInt(config.labelSize) - 1) + 'px' : ''};
-              }
-              .checkbox-mark {
-                font-size: ${config.compactMode ? '10px' : '12px'};
-                font-weight: 900;
-                margin-right: 2px;
-              }
-              .compact .campo {
-                margin-bottom: ${Math.max(2, parseInt(config.spacing) / 2)}px;
-              }
-
-              .bottom-row {
-                display: flex;
-                align-items: stretch;
-                gap: 4px;
-                margin-top: auto;
-              }
-              .bottom-row .campo {
-                flex: 1;
-                margin-bottom: 0;
-                min-width: 0;
-              }
-              .bottom-row.qr-only {
-                justify-content: flex-end;
-              }
-              .qr-img {
-                width: 15mm;
-                height: 15mm;
-                flex-shrink: 0;
-                background: white;
-                padding: 1.5mm;
-                box-sizing: border-box;
-                display: block;
-              }
-              .clearfix::after {
-                content: "";
-                display: table;
-                clear: both;
-              }
-              @media print {
-                .etiqueta {
-                  page-break-inside: avoid;
-                  -webkit-print-color-adjust: exact;
-                  print-color-adjust: exact;
-                }
-                body {
-                  -webkit-print-color-adjust: exact;
-                  print-color-adjust: exact;
-                }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="clearfix">
-              ${expandedProducts.map(product => `
-                <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
-                  <div class="campo">
-                    <div class="label">PRODUTO:</div>
-                    <div class="content">${escapeHtml((product.nome || '').toUpperCase())}</div>
-                  </div>
-                  <div class="grid">
-                    <div class="campo">
-                      <div class="label">LOTE:</div>
-                      <div class="content">${escapeHtml((product.lote || '').toUpperCase())}</div>
-                    </div>
-                    ${config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">MARCA:</div>
-                      <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${!config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">MARCA:</div>
-                    <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
-                  </div>
-                  ` : ''}
-                  ${product.dataFabricacao || product.validade ? `
-                  <div class="grid">
-                    ${product.dataFabricacao ? `
-                    <div class="campo">
-                      <div class="label">FABRIC.:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(product.dataFabricacao))}</div>
-                    </div>
-                    ` : ''}
-                    ${product.validade && config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">VALID.:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${product.validade && !config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">VALID.:</div>
-                    <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
-                  </div>
-                  ` : ''}
-                  ` : ''}
-                  <div class="grid">
-                    <div class="campo">
-                      <div class="label">ABERTURA:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(product.dataAbertura))}</div>
-                    </div>
-                    ${config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">USAR ATÉ:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(product.utilizarAte))}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${!config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">USAR ATÉ:</div>
-                    <div class="content">${escapeHtml(formatDateSafe(product.utilizarAte))}</div>
-                  </div>
-                  ` : ''}
-                  <div class="checkbox-row">
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${product.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
-                      <span>REF</span>
-                    </div>
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${product.localArmazenamento === 'congelado' ? '■' : '□'}</span>
-                      <span>CON</span>
-                    </div>
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${product.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
-                      <span>AMB</span>
-                    </div>
-                  </div>
-                   ${(() => {
-                     const u = qrMap.get(String(product.id));
-                     const qrTag = u ? `<img class="qr-img" src="${u}" alt="qr" />` : '';
-                     if (!config.compactMode) {
-                       return `<div class="bottom-row">
-                         <div class="campo">
-                           <div class="label">RESPONSÁVEL:</div>
-                           <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
-                         </div>
-                         ${qrTag}
-                       </div>`;
-                     }
-                     return qrTag ? `<div class="bottom-row qr-only">${qrTag}</div>` : '';
-                   })()}
-                </div>
-              `).join('')}
-            </div>
-          </body>
-        </html>
-      `);
+      printWindow.document.write(html);
       printWindow.document.close();
-      
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
+      setTimeout(() => printWindow.print(), 500);
     }
 
-    const totalLabels = expandedProducts.length;
     toast({
       title: "Etiquetas enviadas para impressão",
-      description: `${totalLabels} etiqueta(s) ${largura}x${altura}mm enviadas!`,
+      description: `${expandedProducts.length} etiqueta(s) enviadas!`,
     });
   };
 
