@@ -44,9 +44,9 @@ const ImpressaoEtiquetas = () => {
   const [productQuantities, setProductQuantities] = useState<Record<string, number>>({});
   const [quickPrintQuantities, setQuickPrintQuantities] = useState<Record<string, number>>({});
   
-  // Configurações manuais de tamanho (em mm)
+  // Configurações de tamanho (em mm) - Padrão: bobina 57mm (52x50mm útil)
   const [largura, setLargura] = useState(() => {
-    return parseInt(localStorage.getItem('etiqueta-largura') || '70');
+    return parseInt(localStorage.getItem('etiqueta-largura') || '52');
   });
   const [altura, setAltura] = useState(() => {
     return parseInt(localStorage.getItem('etiqueta-altura') || '50');
