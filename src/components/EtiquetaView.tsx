@@ -1,257 +1,197 @@
-
 import { Product } from "@/types/product";
-import { Card, CardContent } from "@/components/ui/card";
 import { QRCodeSVG } from "qrcode.react";
 import { buildEtiquetaQrPayload } from "@/lib/qrcode";
+import { formatEtiquetaDate, getPresetForWidth } from "@/lib/etiquetaLayout";
 
 interface EtiquetaViewProps {
   product: Product;
+  /** Largura em mm. Se 57 → preset 52x50. Se 80 → preset 72x50. */
   largura?: number;
   altura?: number;
 }
 
-export function EtiquetaView({ product, largura = 70, altura = 50 }: EtiquetaViewProps) {
-  const formatDate = (date: Date | undefined | string) => {
-    if (!date) return '';
-    
-    try {
-      if (typeof date === 'string') {
-        if (date.includes('/')) {
-          if (date.match(/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+\/\d{4}$/)) {
-            return date;
-          } else if (date.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
-            return date;
-          } else if (date.match(/^\d{1,2}\/\d{4}$/)) {
-            return date;
-          }
-        } else {
-          const [year, month, day] = date.split('-').map(Number);
-          if (year && month && day) {
-            const dateObj = new Date(year, month - 1, day);
-            if (!isNaN(dateObj.getTime())) {
-              return dateObj.toLocaleDateString('pt-BR');
-            }
-          }
-        }
-      }
-      
-      if (date instanceof Date) {
-        if (isNaN(date.getTime())) {
-          return '';
-        }
-        return date.toLocaleDateString('pt-BR');
-      }
-      
-      return String(date);
-    } catch (error) {
-      console.warn('Error formatting date:', date, error);
-      return '';
-    }
+/**
+ * Etiqueta térmica profissional para controle de validade.
+ * Layout fixo, alto contraste, otimizado para impressoras térmicas
+ * (Elgin / Bematech / Tanca / Control ID / genéricas).
+ */
+export function EtiquetaView({ product, largura = 52, altura = 50 }: EtiquetaViewProps) {
+  const preset = getPresetForWidth(largura);
+  // Sempre respeita o preset detectado para garantir compatibilidade com bobina.
+  const w = preset.largura;
+  const h = preset.altura;
+  const qrMm = preset.qrSize;
+
+  // Conversão para visualização em tela (1mm ≈ 3.78px @ 96dpi)
+  const px = (mm: number) => `${(mm * 3.78).toFixed(2)}px`;
+
+  const armaz = product.localArmazenamento;
+  const checkbox = (active: boolean) => (
+    <span
+      style={{
+        display: "inline-block",
+        width: px(2.2),
+        height: px(2.2),
+        border: "1px solid #000",
+        background: active ? "#000" : "#fff",
+        marginRight: px(0.8),
+        verticalAlign: "middle",
+      }}
+    />
+  );
+
+  const cellLabel: React.CSSProperties = {
+    fontSize: "7px",
+    fontWeight: 700,
+    lineHeight: 1,
+    color: "#000",
+    textTransform: "uppercase",
+    letterSpacing: "0.2px",
+  };
+  const cellContent: React.CSSProperties = {
+    fontSize: "8px",
+    fontWeight: 700,
+    lineHeight: 1.1,
+    color: "#000",
+    textTransform: "uppercase",
+    marginTop: "1px",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+  };
+  const cellBox: React.CSSProperties = {
+    border: "1px solid #000",
+    padding: "2px 3px",
+    minHeight: px(5),
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    overflow: "hidden",
   };
 
-  // Conversão otimizada para impressão térmica
-  const widthMm = largura;
-  const heightMm = altura;
-  
-  // Usar unidades CSS em mm para impressão precisa
-  const cssWidth = `${widthMm}mm`;
-  const cssHeight = `${heightMm}mm`;
-  
-  // Para visualização na tela (conversão aproximada: 1mm = 3.78px)
-  const screenWidth = `${widthMm * 3.78}px`;
-  const screenHeight = `${heightMm * 3.78}px`;
-
-  // Cálculo responsivo PROPORCIONAL - mantém layout idêntico independente do tamanho
-  // Base: etiqueta 70x50mm (proporção 7:5)
-  const baseWidth = 70;
-  const baseHeight = 50;
-  const baseFontSize = 10;
-  
-  // Escala proporcional uniforme baseada APENAS na largura para manter proporções exatas
-  // Isso garante que o layout permaneça idêntico, apenas maior ou menor
-  const scaleFactor = largura / baseWidth;
-  
-  // Todos os tamanhos escalam proporcionalmente com o mesmo fator
-  const fontSize = baseFontSize * scaleFactor;
-  const spacing = 1.2 * scaleFactor;
-  const padding = 3 * scaleFactor;
-  const lineHeight = fontSize + (1.5 * scaleFactor);
-  const nameFontSize = fontSize * 1.55;
-  const nameLineHeight = nameFontSize + (2 * scaleFactor);
-  const qrSize = Math.max(28, fontSize * 3);
-
   return (
-    <Card 
-      className="etiqueta-termica border-2 border-gray-400 bg-white overflow-hidden"
-      style={{ 
-        // Usar px para visualização na tela
-        width: screenWidth,
-        height: screenHeight,
-        // CSS custom properties para impressão
-        '--etiqueta-width': cssWidth,
-        '--etiqueta-height': cssHeight,
-        '--etiqueta-font-size': `${fontSize}px`,
-        '--etiqueta-spacing': `${spacing}px`,
-        '--etiqueta-padding': `${padding}px`,
-        '--etiqueta-line-height': `${lineHeight}px`
-      } as React.CSSProperties}
+    <div
+      className="etiqueta-termica"
+      style={{
+        width: px(w),
+        height: px(h),
+        background: "#fff",
+        color: "#000",
+        fontFamily: "Arial, Helvetica, sans-serif",
+        border: "1px solid #000",
+        padding: "3px",
+        boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        gap: "2px",
+        overflow: "hidden",
+      }}
     >
-      <CardContent 
-        className="font-sans h-full"
-        style={{ 
-          padding: `${padding}px`,
-          fontSize: `${fontSize}px`,
-          lineHeight: `${fontSize + 2}px`
+      {/* Cabeçalho - Nome do produto */}
+      <div
+        style={{
+          background: "#000",
+          color: "#fff",
+          textAlign: "center",
+          fontWeight: 900,
+          fontSize: "11px",
+          lineHeight: 1.1,
+          textTransform: "uppercase",
+          letterSpacing: "0.4px",
+          padding: "3px 4px",
+          border: "1px solid #000",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          textOverflow: "ellipsis",
         }}
       >
-        <div className="h-full flex flex-col" style={{ gap: `${spacing * 0.5}px` }}>
-          
-          {/* Nome do Produto - DESTAQUE */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.5}px` }}>
-            <div
-              className="w-full bg-black text-white flex items-center justify-center font-black uppercase tracking-wide overflow-hidden"
-              style={{
-                height: `${nameLineHeight * 1.4}px`,
-                fontSize: `${nameFontSize}px`,
-                lineHeight: 1,
-                padding: `0 ${spacing}px`,
-                letterSpacing: '0.5px',
-              }}
-            >
-              <span className="truncate text-center w-full">{product.nome || ''}</span>
-            </div>
-          </div>
+        {product.nome || "—"}
+      </div>
 
+      {/* Lote */}
+      <div style={cellBox}>
+        <span style={cellLabel}>Lote</span>
+        <span style={cellContent}>{product.lote || ""}</span>
+      </div>
 
-          {/* Lote e Marca - mesma linha */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
-            <div className="flex items-center" style={{ gap: `${spacing * 2}px` }}>
-              <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Lote nº:</span>
-                <div 
-                  className="flex-1 border-b-2 border-black relative"
-                  style={{ height: `${lineHeight}px` }}
-                >
-                  <span 
-                    className="absolute left-1 top-0 font-bold text-black uppercase overflow-hidden"
-                    style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
-                  >
-                    {product.lote || ''}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Marca:</span>
-                <div 
-                  className="flex-1 border-b-2 border-black relative"
-                  style={{ height: `${lineHeight}px` }}
-                >
-                  <span 
-                    className="absolute left-1 top-0 font-bold text-black uppercase overflow-hidden"
-                    style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
-                  >
-                    {product.marca || ''}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Marca */}
+      <div style={cellBox}>
+        <span style={cellLabel}>Marca</span>
+        <span style={cellContent}>{product.marca || ""}</span>
+      </div>
 
-          {/* Abertura e Usar até - mesma linha */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
-            <div className="flex items-center" style={{ gap: `${spacing * 2}px` }}>
-              <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Abertura:</span>
-                <div 
-                  className="flex-1 border-b-2 border-black relative"
-                  style={{ height: `${lineHeight}px` }}
-                >
-                  <span 
-                    className="absolute left-1 top-0 font-bold text-black overflow-hidden"
-                    style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
-                  >
-                    {formatDate(product.dataAbertura) || ''}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center flex-1">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Usar até:</span>
-                <div 
-                  className="flex-1 border-b-2 border-black relative"
-                  style={{ height: `${lineHeight}px` }}
-                >
-                  <span 
-                    className="absolute left-1 top-0 font-bold text-black overflow-hidden"
-                    style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
-                  >
-                    {formatDate(product.utilizarAte) || ''}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Checkboxes - REF / CON / AMB */}
-          <div className="flex-none" style={{ marginBottom: `${spacing * 0.4}px` }}>
-            <div className="flex items-center justify-start" style={{ gap: `${spacing * 4}px` }}>
-              {[
-                { key: 'refrigerado', label: 'REF' },
-                { key: 'congelado', label: 'CON' },
-                { key: 'ambiente', label: 'AMB' },
-              ].map(({ key, label }) => {
-                const active = product.localArmazenamento === key;
-                return (
-                  <label key={key} className="flex items-center" style={{ gap: `${spacing * 0.8}px` }}>
-                    <div
-                      className="border-2 border-black flex-shrink-0"
-                      style={{
-                        width: `${fontSize * 1.2}px`,
-                        height: `${fontSize * 1.2}px`,
-                        background: active ? '#000' : '#fff',
-                      }}
-                    />
-                    <span className="font-bold text-black whitespace-nowrap">{label}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-
-          {/* Responsável e QR Code - linha final */}
-          <div className="flex-1 min-h-0">
-            <div className="flex h-full items-end gap-2">
-              <div className="flex items-center flex-1 min-w-0 pb-0.5">
-                <span className="font-bold text-black" style={{ marginRight: `${spacing}px`, whiteSpace: 'nowrap' }}>Responsável:</span>
-                <div
-                  className="flex-1 border-b-2 border-black relative"
-                  style={{ height: `${lineHeight}px` }}
-                >
-                  <span
-                    className="absolute left-1 top-0 font-bold text-black uppercase overflow-hidden"
-                    style={{ fontSize: `${fontSize * 0.95}px`, lineHeight: `${lineHeight}px` }}
-                  >
-                    {product.responsavel || ''}
-                  </span>
-                </div>
-              </div>
-              <div
-                className="flex-shrink-0 bg-white flex items-center justify-center"
-                style={{ width: `${qrSize}px`, height: `${qrSize}px` }}
-              >
-                <QRCodeSVG
-                  value={buildEtiquetaQrPayload(product)}
-                  size={qrSize}
-                  level="L"
-                  marginSize={2}
-                  style={{ width: '100%', height: '100%', display: 'block' }}
-                />
-              </div>
-            </div>
-          </div>
-
+      {/* Fabricação / Validade */}
+      <div style={{ display: "flex", gap: "2px" }}>
+        <div style={{ ...cellBox, flex: 1 }}>
+          <span style={cellLabel}>Fabric.</span>
+          <span style={cellContent}>{formatEtiquetaDate(product.dataFabricacao)}</span>
         </div>
-      </CardContent>
-    </Card>
+        <div style={{ ...cellBox, flex: 1 }}>
+          <span style={cellLabel}>Valid.</span>
+          <span style={cellContent}>{formatEtiquetaDate(product.validade)}</span>
+        </div>
+      </div>
+
+      {/* Abertura / Usar até */}
+      <div style={{ display: "flex", gap: "2px" }}>
+        <div style={{ ...cellBox, flex: 1 }}>
+          <span style={cellLabel}>Abertura</span>
+          <span style={cellContent}>{formatEtiquetaDate(product.dataAbertura)}</span>
+        </div>
+        <div style={{ ...cellBox, flex: 1 }}>
+          <span style={cellLabel}>Usar até</span>
+          <span style={cellContent}>{formatEtiquetaDate(product.utilizarAte)}</span>
+        </div>
+      </div>
+
+      {/* Armazenamento */}
+      <div
+        style={{
+          ...cellBox,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-around",
+          fontSize: "8px",
+          fontWeight: 800,
+        }}
+      >
+        <span style={{ display: "inline-flex", alignItems: "center" }}>
+          {checkbox(armaz === "refrigerado")} REF
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "center" }}>
+          {checkbox(armaz === "congelado")} CON
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "center" }}>
+          {checkbox(armaz === "ambiente")} AMB
+        </span>
+      </div>
+
+      {/* Responsável + QR Code */}
+      <div style={{ display: "flex", gap: "2px", flex: 1, minHeight: 0 }}>
+        <div style={{ ...cellBox, flex: 1 }}>
+          <span style={cellLabel}>Responsável</span>
+          <span style={cellContent}>{product.responsavel || ""}</span>
+        </div>
+        <div
+          style={{
+            width: px(qrMm),
+            height: px(qrMm),
+            border: "1px solid #000",
+            background: "#fff",
+            padding: "1px",
+            boxSizing: "border-box",
+            flexShrink: 0,
+          }}
+        >
+          <QRCodeSVG
+            value={buildEtiquetaQrPayload(product)}
+            size={qrMm * 3.78 - 2}
+            level="M"
+            marginSize={0}
+            style={{ width: "100%", height: "100%", display: "block" }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

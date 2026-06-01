@@ -17,6 +17,7 @@ import { EtiquetaEditor } from "@/components/EtiquetaEditor";
 import { Product } from "@/types/product";
 import QRCode from "qrcode";
 import { buildEtiquetaQrPayload } from "@/lib/qrcode";
+import { buildEtiquetaPrintHTML } from "@/lib/etiquetaPrintTemplate";
 
 async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
   const map = new Map<string, string>();
@@ -43,9 +44,9 @@ const ImpressaoEtiquetas = () => {
   const [productQuantities, setProductQuantities] = useState<Record<string, number>>({});
   const [quickPrintQuantities, setQuickPrintQuantities] = useState<Record<string, number>>({});
   
-  // Configurações manuais de tamanho (em mm)
+  // Configurações de tamanho (em mm) - Padrão: bobina 57mm (52x50mm útil)
   const [largura, setLargura] = useState(() => {
-    return parseInt(localStorage.getItem('etiqueta-largura') || '70');
+    return parseInt(localStorage.getItem('etiqueta-largura') || '52');
   });
   const [altura, setAltura] = useState(() => {
     return parseInt(localStorage.getItem('etiqueta-altura') || '50');
@@ -240,242 +241,26 @@ const ImpressaoEtiquetas = () => {
   const handleEditorPrint = async (editedProduct: Product, editedResponsavel: string, quantity: number) => {
     const expandedProducts = Array(quantity).fill(editedProduct);
     const qrMap = await buildQrMap([editedProduct]);
-    const qrImg = qrMap.get(String(editedProduct.id)) || '';
-    
+
+    const html = buildEtiquetaPrintHTML({
+      products: expandedProducts,
+      largura,
+      altura,
+      responsavel: editedResponsavel,
+      qrMap,
+      title: `Etiquetas - ${editedProduct.nome || ''} (${quantity}x)`,
+    });
+
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Etiquetas - ${escapeHtml(editedProduct.nome || '')} (${quantity}x) - ${escapeHtml(largura.toString())}x${escapeHtml(altura.toString())}mm</title>
-            <style>
-              @page {
-                size: A4;
-                margin: 0.5cm;
-              }
-              body { 
-                font-family: 'Courier New', 'Liberation Mono', monospace; 
-                margin: 0; 
-                padding: 0;
-                line-height: 1.1;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              .etiqueta {
-                position: relative;
-                border: 3px solid #000;
-                width: ${config.width};
-                height: ${config.height};
-                margin: 8px;
-                padding: ${config.padding};
-                float: left;
-                font-size: ${config.fontSize};
-                page-break-inside: avoid;
-                background: white;
-                font-weight: 600;
-                color: #000;
-                box-sizing: border-box;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                overflow: hidden;
-              }
-              .campo {
-                margin-bottom: ${Math.max(2, parseInt(config.spacing) * 0.4)}px;
-                border-bottom: 2px solid #333;
-                padding-bottom: 2px;
-                min-height: ${config.compactMode ? '12px' : '16px'};
-                font-weight: bold;
-                flex-shrink: 0;
-                overflow: hidden;
-              }
-              .label {
-                font-weight: 900;
-                font-size: ${config.labelSize};
-                color: #000;
-                text-transform: uppercase;
-                line-height: 1;
-              }
-              .content {
-                font-weight: 800;
-                font-size: ${config.contentSize};
-                color: #000;
-                text-transform: uppercase;
-                margin-top: 2px;
-                word-wrap: break-word;
-                overflow: hidden;
-                line-height: 1.1;
-                max-height: ${config.compactMode ? '24px' : '32px'};
-              }
-              .grid {
-                display: ${config.showGrid ? 'grid' : 'block'};
-                grid-template-columns: ${config.showGrid ? '1fr 1fr' : '1fr'};
-                gap: ${config.showGrid ? '4px' : '0'};
-                margin-bottom: ${config.spacing};
-              }
-              .checkbox-row {
-                display: ${config.compactMode ? 'flex' : 'grid'};
-                ${config.compactMode ? 'justify-content: space-between' : 'grid-template-columns: 1fr 1fr 1fr'};
-                gap: ${config.compactMode ? '2px' : '4px'};
-                font-size: ${config.labelSize};
-                margin-bottom: ${config.spacing};
-                font-weight: 900;
-                flex-wrap: wrap;
-              }
-              .checkbox-item {
-                display: flex;
-                align-items: center;
-                font-weight: 900;
-                color: #000;
-                ${config.compactMode ? 'font-size: ' + (parseInt(config.labelSize) - 1) + 'px' : ''};
-              }
-              .checkbox-mark {
-                font-size: ${config.compactMode ? '10px' : '12px'};
-                font-weight: 900;
-                margin-right: 2px;
-              }
-
-              .bottom-row {
-                display: flex;
-                align-items: stretch;
-                gap: 4px;
-                margin-top: auto;
-              }
-              .bottom-row .campo {
-                flex: 1;
-                margin-bottom: 0;
-                min-width: 0;
-              }
-              .bottom-row.qr-only {
-                justify-content: flex-end;
-              }
-              .qr-img {
-                width: 15mm;
-                height: 15mm;
-                flex-shrink: 0;
-                background: white;
-                padding: 1.5mm;
-                box-sizing: border-box;
-                display: block;
-              }
-              .clearfix::after {
-                content: "";
-                display: table;
-                clear: both;
-              }
-              @media print {
-                .etiqueta {
-                  page-break-inside: avoid;
-                  -webkit-print-color-adjust: exact;
-                  print-color-adjust: exact;
-                }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="clearfix">
-              ${expandedProducts.map(prod => `
-                <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
-                  <div style="background:#000;color:#fff;text-align:center;font-weight:900;text-transform:uppercase;padding:3px 4px;margin-bottom:3px;font-size:calc(${config.fontSize} * 1.5);line-height:1.1;letter-spacing:0.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
-                    ${escapeHtml((prod.nome || '').toUpperCase())}
-                  </div>
-                  <div class="grid">
-                    <div class="campo">
-                      <div class="label">LOTE:</div>
-                      <div class="content">${escapeHtml((prod.lote || '').toUpperCase())}</div>
-                    </div>
-                    ${config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">MARCA:</div>
-                      <div class="content">${escapeHtml((prod.marca || '').toUpperCase())}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${!config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">MARCA:</div>
-                    <div class="content">${escapeHtml((prod.marca || '').toUpperCase())}</div>
-                  </div>
-                  ` : ''}
-                  ${prod.dataFabricacao || prod.validade ? `
-                  <div class="grid">
-                    ${prod.dataFabricacao ? `
-                    <div class="campo">
-                      <div class="label">FABRIC.:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(prod.dataFabricacao))}</div>
-                    </div>
-                    ` : ''}
-                    ${prod.validade && config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">VALID.:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(prod.validade))}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${prod.validade && !config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">VALID.:</div>
-                    <div class="content">${escapeHtml(formatDateSafe(prod.validade))}</div>
-                  </div>
-                  ` : ''}
-                  ` : ''}
-                  <div class="grid">
-                    <div class="campo">
-                      <div class="label">ABERTURA:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(prod.dataAbertura))}</div>
-                    </div>
-                    ${config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">USAR ATÉ:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(prod.utilizarAte))}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${!config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">USAR ATÉ:</div>
-                    <div class="content">${escapeHtml(formatDateSafe(prod.utilizarAte))}</div>
-                  </div>
-                  ` : ''}
-                  <div class="checkbox-row">
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${prod.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
-                      <span>REF</span>
-                    </div>
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${prod.localArmazenamento === 'congelado' ? '■' : '□'}</span>
-                      <span>CON</span>
-                    </div>
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${prod.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
-                      <span>AMB</span>
-                    </div>
-                  </div>
-                  ${!config.compactMode ? `
-                  <div class="bottom-row">
-                    <div class="campo">
-                      <div class="label">RESPONSÁVEL:</div>
-                      <div class="content">${escapeHtml(editedResponsavel.toUpperCase())}</div>
-                    </div>
-                    ${qrImg ? `<img class="qr-img" src="${qrImg}" alt="qr" />` : ''}
-                  </div>
-                  ` : (qrImg ? `<div class="bottom-row qr-only"><img class="qr-img" src="${qrImg}" alt="qr" /></div>` : '')}
-                </div>
-              `).join('')}
-            </div>
-          </body>
-        </html>
-      `);
+      printWindow.document.write(html);
       printWindow.document.close();
-      
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
+      setTimeout(() => printWindow.print(), 500);
     }
 
     toast({
       title: "Etiquetas enviadas para impressão",
-      description: `${quantity} etiqueta(s) de ${editedProduct.nome} (${largura}x${altura}mm) enviadas!`,
+      description: `${quantity} etiqueta(s) de ${editedProduct.nome} enviadas!`,
     });
 
     setShowEditor(false);
@@ -507,263 +292,31 @@ const ImpressaoEtiquetas = () => {
   const handlePrint = async () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
 
-    // Expandir produtos baseado nas quantidades
     const expandedProducts = selectedProductsData.flatMap(product => {
       const quantity = productQuantities[product.id] || 1;
       return Array(quantity).fill(product);
     });
 
     const qrMap = await buildQrMap(selectedProductsData);
+    const html = buildEtiquetaPrintHTML({
+      products: expandedProducts,
+      largura,
+      altura,
+      responsavel,
+      qrMap,
+      title: `Etiquetas Térmicas - ${expandedProducts.length} etiquetas`,
+    });
 
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      const totalLabels = expandedProducts.length;
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Etiquetas Térmicas - ${escapeHtml(totalLabels.toString())} etiquetas - ${escapeHtml(largura.toString())}x${escapeHtml(altura.toString())}mm</title>
-            <style>
-              @page {
-                size: A4;
-                margin: 0.5cm;
-              }
-              body { 
-                font-family: 'Courier New', 'Liberation Mono', monospace; 
-                margin: 0; 
-                padding: 0;
-                line-height: 1.1;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              .etiqueta { 
-                position: relative;
-                border: 3px solid #000;
-                width: ${config.width};
-                height: ${config.height};
-                margin: 8px;
-                padding: ${config.padding};
-                float: left;
-                font-size: ${config.fontSize};
-                page-break-inside: avoid;
-                background: white;
-                font-weight: 600;
-                color: #000;
-                box-sizing: border-box;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                overflow: hidden;
-              }
-              .campo {
-                margin-bottom: ${Math.max(2, parseInt(config.spacing) * 0.4)}px;
-                border-bottom: 2px solid #333;
-                padding-bottom: 2px;
-                min-height: ${config.compactMode ? '12px' : '16px'};
-                font-weight: bold;
-                flex-shrink: 0;
-                overflow: hidden;
-              }
-              .label {
-                font-weight: 900;
-                font-size: ${config.labelSize};
-                color: #000;
-                text-transform: uppercase;
-                line-height: 1;
-              }
-              .content {
-                font-weight: 800;
-                font-size: ${config.contentSize};
-                color: #000;
-                text-transform: uppercase;
-                margin-top: 2px;
-                word-wrap: break-word;
-                overflow: hidden;
-                line-height: 1.1;
-                max-height: ${config.compactMode ? '24px' : '32px'};
-              }
-              .grid {
-                display: ${config.showGrid ? 'grid' : 'block'};
-                grid-template-columns: ${config.showGrid ? '1fr 1fr' : '1fr'};
-                gap: ${config.showGrid ? '4px' : '0'};
-                margin-bottom: ${config.spacing};
-              }
-              .checkbox-row {
-                display: ${config.compactMode ? 'flex' : 'grid'};
-                ${config.compactMode ? 'justify-content: space-between' : 'grid-template-columns: 1fr 1fr 1fr'};
-                gap: ${config.compactMode ? '2px' : '4px'};
-                font-size: ${config.labelSize};
-                margin-bottom: ${config.spacing};
-                font-weight: 900;
-                flex-wrap: wrap;
-              }
-              .checkbox-item {
-                display: flex;
-                align-items: center;
-                font-weight: 900;
-                color: #000;
-                ${config.compactMode ? 'font-size: ' + (parseInt(config.labelSize) - 1) + 'px' : ''};
-              }
-              .checkbox-mark {
-                font-size: ${config.compactMode ? '10px' : '12px'};
-                font-weight: 900;
-                margin-right: 2px;
-              }
-              .compact .campo {
-                margin-bottom: ${Math.max(2, parseInt(config.spacing) / 2)}px;
-              }
-
-              .bottom-row {
-                display: flex;
-                align-items: stretch;
-                gap: 4px;
-                margin-top: auto;
-              }
-              .bottom-row .campo {
-                flex: 1;
-                margin-bottom: 0;
-                min-width: 0;
-              }
-              .bottom-row.qr-only {
-                justify-content: flex-end;
-              }
-              .qr-img {
-                width: 15mm;
-                height: 15mm;
-                flex-shrink: 0;
-                background: white;
-                padding: 1.5mm;
-                box-sizing: border-box;
-                display: block;
-              }
-              .clearfix::after {
-                content: "";
-                display: table;
-                clear: both;
-              }
-              @media print {
-                .etiqueta {
-                  page-break-inside: avoid;
-                  -webkit-print-color-adjust: exact;
-                  print-color-adjust: exact;
-                }
-                body {
-                  -webkit-print-color-adjust: exact;
-                  print-color-adjust: exact;
-                }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="clearfix">
-              ${expandedProducts.map(product => `
-                <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
-                  <div class="campo">
-                    <div class="label">PRODUTO:</div>
-                    <div class="content">${escapeHtml((product.nome || '').toUpperCase())}</div>
-                  </div>
-                  <div class="grid">
-                    <div class="campo">
-                      <div class="label">LOTE:</div>
-                      <div class="content">${escapeHtml((product.lote || '').toUpperCase())}</div>
-                    </div>
-                    ${config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">MARCA:</div>
-                      <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${!config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">MARCA:</div>
-                    <div class="content">${escapeHtml((product.marca || '').toUpperCase())}</div>
-                  </div>
-                  ` : ''}
-                  ${product.dataFabricacao || product.validade ? `
-                  <div class="grid">
-                    ${product.dataFabricacao ? `
-                    <div class="campo">
-                      <div class="label">FABRIC.:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(product.dataFabricacao))}</div>
-                    </div>
-                    ` : ''}
-                    ${product.validade && config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">VALID.:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${product.validade && !config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">VALID.:</div>
-                    <div class="content">${escapeHtml(formatDateSafe(product.validade))}</div>
-                  </div>
-                  ` : ''}
-                  ` : ''}
-                  <div class="grid">
-                    <div class="campo">
-                      <div class="label">ABERTURA:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(product.dataAbertura))}</div>
-                    </div>
-                    ${config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">USAR ATÉ:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(product.utilizarAte))}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${!config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">USAR ATÉ:</div>
-                    <div class="content">${escapeHtml(formatDateSafe(product.utilizarAte))}</div>
-                  </div>
-                  ` : ''}
-                  <div class="checkbox-row">
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${product.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
-                      <span>REF</span>
-                    </div>
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${product.localArmazenamento === 'congelado' ? '■' : '□'}</span>
-                      <span>CON</span>
-                    </div>
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${product.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
-                      <span>AMB</span>
-                    </div>
-                  </div>
-                   ${(() => {
-                     const u = qrMap.get(String(product.id));
-                     const qrTag = u ? `<img class="qr-img" src="${u}" alt="qr" />` : '';
-                     if (!config.compactMode) {
-                       return `<div class="bottom-row">
-                         <div class="campo">
-                           <div class="label">RESPONSÁVEL:</div>
-                           <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
-                         </div>
-                         ${qrTag}
-                       </div>`;
-                     }
-                     return qrTag ? `<div class="bottom-row qr-only">${qrTag}</div>` : '';
-                   })()}
-                </div>
-              `).join('')}
-            </div>
-          </body>
-        </html>
-      `);
+      printWindow.document.write(html);
       printWindow.document.close();
-      
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
+      setTimeout(() => printWindow.print(), 500);
     }
 
-    const totalLabels = expandedProducts.length;
     toast({
       title: "Etiquetas enviadas para impressão",
-      description: `${totalLabels} etiqueta(s) ${largura}x${altura}mm enviadas!`,
+      description: `${expandedProducts.length} etiqueta(s) enviadas!`,
     });
   };
 
@@ -771,251 +324,26 @@ const ImpressaoEtiquetas = () => {
     const quantity = product.quickPrintQuantity || 1;
     const expandedProducts = Array(quantity).fill(product);
     const qrMap = await buildQrMap([product]);
-    
+
+    const html = buildEtiquetaPrintHTML({
+      products: expandedProducts,
+      largura,
+      altura,
+      responsavel,
+      qrMap,
+      title: `Etiquetas - ${product.nome || ''} (${quantity}x)`,
+    });
+
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Etiquetas - ${escapeHtml(product.nome || '')} (${quantity}x) - ${escapeHtml(largura.toString())}x${escapeHtml(altura.toString())}mm</title>
-            <style>
-              @page {
-                size: A4;
-                margin: 0.5cm;
-              }
-              body { 
-                font-family: 'Courier New', 'Liberation Mono', monospace; 
-                margin: 0; 
-                padding: 0;
-                line-height: 1.1;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              .etiqueta {
-                position: relative;
-                border: 3px solid #000;
-                width: ${config.width};
-                height: ${config.height};
-                margin: 8px;
-                padding: ${config.padding};
-                float: left;
-                font-size: ${config.fontSize};
-                page-break-inside: avoid;
-                background: white;
-                font-weight: 600;
-                color: #000;
-                box-sizing: border-box;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                overflow: hidden;
-              }
-              .campo {
-                margin-bottom: ${Math.max(2, parseInt(config.spacing) * 0.4)}px;
-                border-bottom: 2px solid #333;
-                padding-bottom: 2px;
-                min-height: ${config.compactMode ? '12px' : '16px'};
-                font-weight: bold;
-                flex-shrink: 0;
-                overflow: hidden;
-              }
-              .label {
-                font-weight: 900;
-                font-size: ${config.labelSize};
-                color: #000;
-                text-transform: uppercase;
-                line-height: 1;
-              }
-              .content {
-                font-weight: 800;
-                font-size: ${config.contentSize};
-                color: #000;
-                text-transform: uppercase;
-                margin-top: 2px;
-                word-wrap: break-word;
-                overflow: hidden;
-                line-height: 1.1;
-                max-height: ${config.compactMode ? '24px' : '32px'};
-              }
-              .grid {
-                display: ${config.showGrid ? 'grid' : 'block'};
-                grid-template-columns: ${config.showGrid ? '1fr 1fr' : '1fr'};
-                gap: ${config.showGrid ? '4px' : '0'};
-                margin-bottom: ${config.spacing};
-              }
-              .checkbox-row {
-                display: ${config.compactMode ? 'flex' : 'grid'};
-                ${config.compactMode ? 'justify-content: space-between' : 'grid-template-columns: 1fr 1fr 1fr'};
-                gap: ${config.compactMode ? '2px' : '4px'};
-                font-size: ${config.labelSize};
-                margin-bottom: ${config.spacing};
-                font-weight: 900;
-                flex-wrap: wrap;
-              }
-              .checkbox-item {
-                display: flex;
-                align-items: center;
-                font-weight: 900;
-                color: #000;
-                ${config.compactMode ? 'font-size: ' + (parseInt(config.labelSize) - 1) + 'px' : ''};
-              }
-              .checkbox-mark {
-                font-size: ${config.compactMode ? '10px' : '12px'};
-                font-weight: 900;
-                margin-right: 2px;
-              }
-
-              .bottom-row {
-                display: flex;
-                align-items: stretch;
-                gap: 4px;
-                margin-top: auto;
-              }
-              .bottom-row .campo {
-                flex: 1;
-                margin-bottom: 0;
-                min-width: 0;
-              }
-              .bottom-row.qr-only {
-                justify-content: flex-end;
-              }
-              .qr-img {
-                width: 15mm;
-                height: 15mm;
-                flex-shrink: 0;
-                background: white;
-                padding: 1.5mm;
-                box-sizing: border-box;
-                display: block;
-              }
-              .clearfix::after {
-                content: "";
-                display: table;
-                clear: both;
-              }
-              @media print {
-                .etiqueta {
-                  page-break-inside: avoid;
-                  -webkit-print-color-adjust: exact;
-                  print-color-adjust: exact;
-                }
-                body {
-                  -webkit-print-color-adjust: exact;
-                  print-color-adjust: exact;
-                }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="clearfix">
-              ${expandedProducts.map(prod => `
-                <div class="etiqueta ${config.compactMode ? 'compact' : ''}">
-                  <div class="campo">
-                    <div class="label">PRODUTO:</div>
-                    <div class="content">${escapeHtml((prod.nome || '').toUpperCase())}</div>
-                  </div>
-                  <div class="grid">
-                    <div class="campo">
-                      <div class="label">LOTE:</div>
-                      <div class="content">${escapeHtml((prod.lote || '').toUpperCase())}</div>
-                    </div>
-                    ${config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">MARCA:</div>
-                      <div class="content">${escapeHtml((prod.marca || '').toUpperCase())}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${!config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">MARCA:</div>
-                    <div class="content">${escapeHtml((prod.marca || '').toUpperCase())}</div>
-                  </div>
-                  ` : ''}
-                  ${prod.dataFabricacao || prod.validade ? `
-                  <div class="grid">
-                    ${prod.dataFabricacao ? `
-                    <div class="campo">
-                      <div class="label">FABRIC.:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(prod.dataFabricacao))}</div>
-                    </div>
-                    ` : ''}
-                    ${prod.validade && config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">VALID.:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(prod.validade))}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${prod.validade && !config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">VALID.:</div>
-                    <div class="content">${escapeHtml(formatDateSafe(prod.validade))}</div>
-                  </div>
-                  ` : ''}
-                  ` : ''}
-                  <div class="grid">
-                    <div class="campo">
-                      <div class="label">ABERTURA:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(prod.dataAbertura))}</div>
-                    </div>
-                    ${config.showGrid ? `
-                    <div class="campo">
-                      <div class="label">USAR ATÉ:</div>
-                      <div class="content">${escapeHtml(formatDateSafe(prod.utilizarAte))}</div>
-                    </div>
-                    ` : ''}
-                  </div>
-                  ${!config.showGrid ? `
-                  <div class="campo">
-                    <div class="label">USAR ATÉ:</div>
-                    <div class="content">${escapeHtml(formatDateSafe(prod.utilizarAte))}</div>
-                  </div>
-                  ` : ''}
-                  <div class="checkbox-row">
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${prod.localArmazenamento === 'refrigerado' ? '■' : '□'}</span>
-                      <span>REF</span>
-                    </div>
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${prod.localArmazenamento === 'congelado' ? '■' : '□'}</span>
-                      <span>CON</span>
-                    </div>
-                    <div class="checkbox-item">
-                      <span class="checkbox-mark">${prod.localArmazenamento === 'ambiente' ? '■' : '□'}</span>
-                      <span>AMB</span>
-                    </div>
-                  </div>
-                   ${(() => {
-                     const u = qrMap.get(String(prod.id));
-                     const qrTag = u ? `<img class="qr-img" src="${u}" alt="qr" />` : '';
-                     if (!config.compactMode) {
-                       return `<div class="bottom-row">
-                         <div class="campo">
-                           <div class="label">RESPONSÁVEL:</div>
-                           <div class="content">${escapeHtml(responsavel.toUpperCase())}</div>
-                         </div>
-                         ${qrTag}
-                       </div>`;
-                     }
-                     return qrTag ? `<div class="bottom-row qr-only">${qrTag}</div>` : '';
-                   })()}
-                </div>
-              `).join('')}
-            </div>
-          </body>
-        </html>
-      `);
+      printWindow.document.write(html);
       printWindow.document.close();
-      
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
+      setTimeout(() => printWindow.print(), 500);
     }
 
     toast({
       title: "Etiquetas enviadas para impressão",
-      description: `${quantity} etiqueta(s) de ${product.nome} (${largura}x${altura}mm) enviadas!`,
+      description: `${quantity} etiqueta(s) de ${product.nome} enviadas!`,
     });
   };
 
@@ -1068,7 +396,30 @@ const ImpressaoEtiquetas = () => {
                         </DialogHeader>
                         <div className="space-y-4 pt-4">
                           <div>
-                        <Label htmlFor="largura" className="text-sm font-medium text-foreground mb-2 block">
+                            <Label className="text-sm font-medium text-foreground mb-2 block">
+                              Preset de Bobina Térmica
+                            </Label>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button
+                                type="button"
+                                variant={largura <= 60 ? 'default' : 'outline'}
+                                onClick={() => { handleLarguraChange('52'); handleAlturaChange('50'); }}
+                                size="sm"
+                              >
+                                Bobina 57mm<br />(52×50mm)
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={largura > 60 ? 'default' : 'outline'}
+                                onClick={() => { handleLarguraChange('72'); handleAlturaChange('50'); }}
+                                size="sm"
+                              >
+                                Bobina 80mm<br />(72×50mm)
+                              </Button>
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="largura" className="text-sm font-medium text-foreground mb-2 block">
                               Largura (mm)
                             </Label>
                             <Input id="largura" type="number" min="30" max="150" value={largura} onChange={(e) => handleLarguraChange(e.target.value)} className="text-center" />
@@ -1079,18 +430,9 @@ const ImpressaoEtiquetas = () => {
                             </Label>
                             <Input id="altura" type="number" min="20" max="100" value={altura} onChange={(e) => handleAlturaChange(e.target.value)} className="text-center" />
                           </div>
-                          <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
-                            <div className="text-sm text-muted-foreground mb-2">Preview:</div>
-                            <div 
-                              className="border-2 border-border bg-card flex items-center justify-center text-xs font-bold text-muted-foreground"
-                              style={{ width: `${Math.min(80, largura * 0.8)}px`, height: `${Math.min(60, altura * 0.8)}px` }}
-                            >
-                              {largura}×{altura}mm
-                            </div>
-                          </div>
                           <div className="alert-banner-info">
                             <Settings className="w-4 h-4 flex-shrink-0" />
-                            <span className="text-sm">Layout se adapta automaticamente · Salvo automaticamente</span>
+                            <span className="text-sm">Detecta automaticamente o preset · Compatível com Elgin, Bematech, Tanca, Control ID</span>
                           </div>
                         </div>
                       </DialogContent>
