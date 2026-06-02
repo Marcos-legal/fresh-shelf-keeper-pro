@@ -403,18 +403,18 @@ const ImpressaoEtiquetas = () => {
                               <Button
                                 type="button"
                                 variant={largura <= 60 ? 'default' : 'outline'}
-                                onClick={() => { handleLarguraChange('52'); handleAlturaChange('50'); }}
+                                onClick={() => { handleLarguraChange('52'); handleAlturaChange('80'); }}
                                 size="sm"
                               >
-                                Bobina 57mm<br />(52×50mm)
+                                Bobina 57mm<br />(52×80mm vertical)
                               </Button>
                               <Button
                                 type="button"
                                 variant={largura > 60 ? 'default' : 'outline'}
-                                onClick={() => { handleLarguraChange('72'); handleAlturaChange('50'); }}
+                                onClick={() => { handleLarguraChange('72'); handleAlturaChange('100'); }}
                                 size="sm"
                               >
-                                Bobina 80mm<br />(72×50mm)
+                                Bobina 80mm<br />(72×100mm vertical)
                               </Button>
                             </div>
                           </div>

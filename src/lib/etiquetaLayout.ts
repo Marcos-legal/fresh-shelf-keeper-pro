@@ -1,9 +1,9 @@
 /**
- * Layout compartilhado das etiquetas térmicas.
+ * Layout compartilhado das etiquetas térmicas — orientação VERTICAL (retrato).
  *
- * Padrões oficiais (área útil dentro da bobina):
- *   - Bobina 57mm → 52 x 50 mm (margem de segurança 2,5mm lateral)
- *   - Bobina 80mm → 72 x 50 mm (margem de segurança 4mm lateral)
+ * Padrões oficiais (área útil dentro da bobina, com margem lateral):
+ *   - Bobina 57mm → 52 x 80 mm (margem 2,5mm lateral) · QR 20mm
+ *   - Bobina 80mm → 72 x 100 mm (margem 4mm lateral)  · QR 28mm
  *
  * Compatível com impressoras térmicas: Elgin, Bematech, Tanca, Control ID
  * e modelos térmicos genéricos.
@@ -15,6 +15,7 @@ export interface BobinaPreset {
   largura: number;
   altura: number;
   qrSize: number; // mm
+  nomeFontSize: number; // px
   description: string;
 }
 
@@ -22,18 +23,20 @@ export const BOBINA_57: BobinaPreset = {
   id: "57mm",
   bobina: 57,
   largura: 52,
-  altura: 50,
-  qrSize: 12,
-  description: "Bobina 57mm · área útil 52×50mm",
+  altura: 80,
+  qrSize: 20,
+  nomeFontSize: 11,
+  description: "Bobina 57mm · área útil 52×80mm (vertical)",
 };
 
 export const BOBINA_80: BobinaPreset = {
   id: "80mm",
   bobina: 80,
   largura: 72,
-  altura: 50,
-  qrSize: 15,
-  description: "Bobina 80mm · área útil 72×50mm",
+  altura: 100,
+  qrSize: 28,
+  nomeFontSize: 14,
+  description: "Bobina 80mm · área útil 72×100mm (vertical)",
 };
 
 export const BOBINA_PRESETS: BobinaPreset[] = [BOBINA_57, BOBINA_80];
@@ -54,7 +57,7 @@ export function formatEtiquetaDate(date: Date | string | undefined | null): stri
   if (!date) return "";
   try {
     if (typeof date === "string") {
-      if (date.includes("/")) return date; // já formatado
+      if (date.includes("/")) return date;
       const [year, month, day] = date.split("-").map(Number);
       if (year && month && day) {
         const d = new Date(year, month - 1, day);
