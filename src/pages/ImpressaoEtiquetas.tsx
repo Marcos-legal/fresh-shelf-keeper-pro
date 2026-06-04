@@ -420,15 +420,15 @@ const ImpressaoEtiquetas = () => {
                           </div>
                           <div>
                             <Label htmlFor="largura" className="text-sm font-medium text-foreground mb-2 block">
-                              Largura (mm)
+                              Largura (mm) — travada pelo preset
                             </Label>
-                            <Input id="largura" type="number" min="30" max="150" value={largura} onChange={(e) => handleLarguraChange(e.target.value)} className="text-center" />
+                            <Input id="largura" type="number" value={largura} disabled className="text-center bg-muted" />
                           </div>
                           <div>
                             <Label htmlFor="altura" className="text-sm font-medium text-foreground mb-2 block">
-                              Altura (mm)
+                              Altura (mm) — ajustável
                             </Label>
-                            <Input id="altura" type="number" min="20" max="100" value={altura} onChange={(e) => handleAlturaChange(e.target.value)} className="text-center" />
+                            <Input id="altura" type="number" min="40" max="150" value={altura} onChange={(e) => handleAlturaChange(e.target.value)} className="text-center" />
                           </div>
                           <div className="alert-banner-info">
                             <Settings className="w-4 h-4 flex-shrink-0" />
