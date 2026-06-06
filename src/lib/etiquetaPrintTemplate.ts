@@ -27,7 +27,7 @@ export function buildEtiquetaPrintHTML({
   const preset = getPresetForWidth(largura);
   const w = preset.largura;
   const h = altura && altura > 20 ? altura : preset.altura;
-  const qrMm = preset.qrSize;
+  const qrMm = Math.max(14, Math.min(w - 28, h * 0.28, preset.qrSize * 1.6));
   const nomeSize = preset.nomeFontSize;
 
   const labelHtml = (p: Product) => {
@@ -77,6 +77,8 @@ export function buildEtiquetaPrintHTML({
           <span class="chk">${cb(armaz === "congelado")} CON</span>
           <span class="chk">${cb(armaz === "ambiente")} AMB</span>
         </div>
+
+        <div class="spacer"></div>
 
         <div class="bottom">
           <div class="cell resp">
@@ -135,14 +137,12 @@ export function buildEtiquetaPrintHTML({
         word-break: break-word;
         white-space: normal;
         overflow-wrap: break-word;
-        hyphens: auto;
       }
       .row { display: flex; gap: 2px; }
       .row > .cell { flex: 1; min-width: 0; }
       .cell {
         border: 1px solid #000;
         padding: 3px 4px;
-        min-height: 6mm;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -178,21 +178,29 @@ export function buildEtiquetaPrintHTML({
         width: 2.6mm; height: 2.6mm;
         border: 1px solid #000;
       }
+      .spacer { flex: 1; min-height: 0; }
       .bottom {
         display: flex;
         gap: 2px;
-        flex: 1;
-        min-height: ${qrMm + 4}mm;
+        align-items: stretch;
+        height: ${qrMm}mm;
       }
-      .bottom .resp { flex: 1; min-width: 0; }
+      .bottom .resp {
+        flex: 1;
+        min-width: 0;
+        padding: 2px 4px;
+        height: ${qrMm}mm;
+      }
       .qr-box {
         width: ${qrMm}mm;
         height: ${qrMm}mm;
         border: 1px solid #000;
         padding: 0.5mm;
         background: #fff;
-        align-self: center;
         flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       .qr-box img { width: 100%; height: 100%; display: block; }
       @media print {

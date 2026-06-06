@@ -5,23 +5,31 @@ import { formatEtiquetaDate, getPresetForWidth } from "@/lib/etiquetaLayout";
 
 interface EtiquetaViewProps {
   product: Product;
-  /** Largura em mm. ≤60 → preset 57mm. >60 → preset 80mm. (Largura é fixa pelo preset.) */
+  /** Largura em mm (travada pelo preset: ≤60 → 52mm · >60 → 72mm). */
   largura?: number;
-  /** Altura customizável em mm. Padrão do preset se não informada. */
+  /** Altura em mm (ajustável). Se omitida usa a altura padrão do preset. */
   altura?: number;
 }
 
 /**
- * Etiqueta térmica VERTICAL profissional para controle de validade.
- * Largura travada pelo preset de bobina. Altura ajustável pelo usuário.
- * QR Code posicionado à direita do Responsável (modelo de referência).
+ * Etiqueta térmica VERTICAL profissional.
+ * - Largura fixa pelo preset de bobina
+ * - Altura ajustável pelo usuário
+ * - QR Code escala proporcionalmente à largura e altura desejadas
+ * - Bloco "Responsável" compacto (altura mínima) para permitir reduzir a etiqueta
+ * - Compatível com Chrome e Edge (sem propriedades não-padrão)
  */
 export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProps) {
   const preset = getPresetForWidth(largura);
   const w = preset.largura;
   const h = altura && altura > 20 ? altura : preset.altura;
-  const qrMm = preset.qrSize;
   const nomeSize = preset.nomeFontSize;
+
+  // QR proporcional: cabe na largura útil e ~28% da altura. Mínimo 14mm.
+  const qrMm = Math.max(
+    14,
+    Math.min(w - 28, h * 0.28, preset.qrSize * 1.6)
+  );
 
   const px = (mm: number) => `${(mm * 3.78).toFixed(2)}px`;
 
@@ -62,7 +70,6 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
   const cellBox: React.CSSProperties = {
     border: "1px solid #000",
     padding: "3px 4px",
-    minHeight: px(6),
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -87,7 +94,7 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
         overflow: "hidden",
       }}
     >
-      {/* Cabeçalho — Nome do produto COMPLETO (com quebra de linha) */}
+      {/* Cabeçalho — Nome do produto COMPLETO */}
       <div
         style={{
           background: "#000",
@@ -103,49 +110,43 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
           wordBreak: "break-word",
           whiteSpace: "normal",
           overflowWrap: "break-word",
-          hyphens: "auto",
         }}
       >
         {product.nome || "—"}
       </div>
 
-      {/* Lote */}
       <div style={cellBox}>
         <span style={cellLabel}>LOTE:</span>
         <span style={cellContent}>{product.lote || ""}</span>
       </div>
 
-      {/* Marca */}
       <div style={cellBox}>
         <span style={cellLabel}>MARCA:</span>
         <span style={cellContent}>{product.marca || ""}</span>
       </div>
 
-      {/* Fabricação / Validade */}
       <div style={{ display: "flex", gap: "2px" }}>
-        <div style={{ ...cellBox, flex: 1 }}>
+        <div style={{ ...cellBox, flex: 1, minWidth: 0 }}>
           <span style={cellLabel}>FABRIC.:</span>
           <span style={cellContent}>{formatEtiquetaDate(product.dataFabricacao)}</span>
         </div>
-        <div style={{ ...cellBox, flex: 1 }}>
+        <div style={{ ...cellBox, flex: 1, minWidth: 0 }}>
           <span style={cellLabel}>VALID.:</span>
           <span style={cellContent}>{formatEtiquetaDate(product.validade)}</span>
         </div>
       </div>
 
-      {/* Abertura / Usar até */}
       <div style={{ display: "flex", gap: "2px" }}>
-        <div style={{ ...cellBox, flex: 1 }}>
+        <div style={{ ...cellBox, flex: 1, minWidth: 0 }}>
           <span style={cellLabel}>ABERTURA:</span>
           <span style={cellContent}>{formatEtiquetaDate(product.dataAbertura)}</span>
         </div>
-        <div style={{ ...cellBox, flex: 1 }}>
+        <div style={{ ...cellBox, flex: 1, minWidth: 0 }}>
           <span style={cellLabel}>USAR ATÉ:</span>
           <span style={cellContent}>{formatEtiquetaDate(product.utilizarAte)}</span>
         </div>
       </div>
 
-      {/* Armazenamento */}
       <div
         style={{
           ...cellBox,
@@ -154,6 +155,7 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
           justifyContent: "space-around",
           fontSize: "10px",
           fontWeight: 800,
+          padding: "2px 4px",
         }}
       >
         <span style={{ display: "inline-flex", alignItems: "center" }}>
@@ -167,9 +169,20 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
         </span>
       </div>
 
-      {/* Responsável + QR Code (lado a lado, conforme modelo) */}
-      <div style={{ display: "flex", gap: "2px", flex: 1, minHeight: px(qrMm + 4) }}>
-        <div style={{ ...cellBox, flex: 1, minWidth: 0 }}>
+      {/* Espaçador flexível para permitir altura variável sem distorcer */}
+      <div style={{ flex: 1, minHeight: 0 }} />
+
+      {/* Responsável (compacto) + QR Code */}
+      <div style={{ display: "flex", gap: "2px", alignItems: "stretch" }}>
+        <div
+          style={{
+            ...cellBox,
+            flex: 1,
+            minWidth: 0,
+            padding: "2px 4px",
+            height: px(qrMm),
+          }}
+        >
           <span style={cellLabel}>RESPONSÁVEL:</span>
           <span style={cellContent}>{product.responsavel || ""}</span>
         </div>
@@ -182,12 +195,14 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
             padding: "1px",
             boxSizing: "border-box",
             flexShrink: 0,
-            alignSelf: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <QRCodeSVG
             value={buildEtiquetaQrPayload(product)}
-            size={qrMm * 3.78 - 2}
+            size={Math.max(40, qrMm * 3.78 - 2)}
             level="M"
             marginSize={0}
             style={{ width: "100%", height: "100%", display: "block" }}
