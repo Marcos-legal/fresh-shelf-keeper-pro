@@ -13,8 +13,10 @@ interface BuildOptions {
 
 /**
  * HTML completo de impressão térmica VERTICAL.
- * Largura travada pelo preset (57mm → 52mm · 80mm → 72mm).
- * Altura customizável. QR Code ao lado do Responsável.
+ * - Largura travada pelo preset (57mm → 52mm · 80mm → 72mm)
+ * - Altura customizável (fontes e QR escalam proporcionalmente)
+ * - Sem espaçador entre checkboxes e bloco do responsável
+ * - Compatível com Chrome e Edge (usa apenas CSS padrão)
  */
 export function buildEtiquetaPrintHTML({
   products,
@@ -27,8 +29,13 @@ export function buildEtiquetaPrintHTML({
   const preset = getPresetForWidth(largura);
   const w = preset.largura;
   const h = altura && altura > 20 ? altura : preset.altura;
-  const qrMm = Math.max(14, Math.min(w - 28, h * 0.28, preset.qrSize * 1.6));
-  const nomeSize = preset.nomeFontSize;
+
+  const scale = Math.max(0.7, Math.min(1.25, h / preset.altura));
+  const nomeSize = Math.max(8, preset.nomeFontSize * scale);
+  const lblSize = Math.max(6, 8 * scale);
+  const valSize = Math.max(7, 9 * scale);
+  const chkSize = Math.max(7, 9 * scale);
+  const qrMm = Math.max(12, Math.min(w - 30, h * 0.22, 22));
 
   const labelHtml = (p: Product) => {
     const qr = qrMap.get(String(p.id));
@@ -78,8 +85,6 @@ export function buildEtiquetaPrintHTML({
           <span class="chk">${cb(armaz === "ambiente")} AMB</span>
         </div>
 
-        <div class="spacer"></div>
-
         <div class="bottom">
           <div class="cell resp">
             <div class="lbl">RESPONSÁVEL:</div>
@@ -108,7 +113,6 @@ export function buildEtiquetaPrintHTML({
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
-      body { padding: 0; }
       .etiqueta {
         width: ${w}mm;
         height: ${h}mm;
@@ -132,7 +136,7 @@ export function buildEtiquetaPrintHTML({
         line-height: 1.15;
         text-transform: uppercase;
         letter-spacing: 0.4px;
-        padding: 5px 4px;
+        padding: 4px 4px;
         border: 1px solid #000;
         word-break: break-word;
         white-space: normal;
@@ -142,25 +146,25 @@ export function buildEtiquetaPrintHTML({
       .row > .cell { flex: 1; min-width: 0; }
       .cell {
         border: 1px solid #000;
-        padding: 3px 4px;
+        padding: 2px 4px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         overflow: hidden;
       }
       .lbl {
-        font-size: 8px;
+        font-size: ${lblSize}px;
         font-weight: 800;
         line-height: 1;
         text-transform: uppercase;
         letter-spacing: 0.3px;
       }
       .val {
-        font-size: 9px;
+        font-size: ${valSize}px;
         font-weight: 700;
         line-height: 1.15;
         text-transform: uppercase;
-        margin-top: 2px;
+        margin-top: 1px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -169,16 +173,15 @@ export function buildEtiquetaPrintHTML({
         flex-direction: row;
         align-items: center;
         justify-content: space-around;
-        font-size: 10px;
+        font-size: ${chkSize}px;
         font-weight: 800;
       }
       .chk { display: inline-flex; align-items: center; gap: 3px; }
       .cb {
         display: inline-block;
-        width: 2.6mm; height: 2.6mm;
+        width: 2.4mm; height: 2.4mm;
         border: 1px solid #000;
       }
-      .spacer { flex: 1; min-height: 0; }
       .bottom {
         display: flex;
         gap: 2px;
@@ -194,6 +197,7 @@ export function buildEtiquetaPrintHTML({
       .qr-box {
         width: ${qrMm}mm;
         height: ${qrMm}mm;
+        min-width: ${qrMm}mm;
         border: 1px solid #000;
         padding: 0.5mm;
         background: #fff;
@@ -204,7 +208,6 @@ export function buildEtiquetaPrintHTML({
       }
       .qr-box img { width: 100%; height: 100%; display: block; }
       @media print {
-        body { padding: 0; }
         .etiqueta { margin: 0; }
       }
     </style>

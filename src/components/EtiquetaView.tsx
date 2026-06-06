@@ -14,21 +14,27 @@ interface EtiquetaViewProps {
 /**
  * Etiqueta térmica VERTICAL profissional.
  * - Largura fixa pelo preset de bobina
- * - Altura ajustável pelo usuário
- * - QR Code escala proporcionalmente à largura e altura desejadas
- * - Bloco "Responsável" compacto (altura mínima) para permitir reduzir a etiqueta
- * - Compatível com Chrome e Edge (sem propriedades não-padrão)
+ * - Altura ajustável (fontes e QR escalam proporcionalmente)
+ * - Sem espaçador entre checkboxes e responsável (layout compacto)
+ * - Compatível com Chrome e Edge (somente propriedades CSS padrão)
  */
 export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProps) {
   const preset = getPresetForWidth(largura);
   const w = preset.largura;
   const h = altura && altura > 20 ? altura : preset.altura;
-  const nomeSize = preset.nomeFontSize;
 
-  // QR proporcional: cabe na largura útil e ~28% da altura. Mínimo 14mm.
+  // Fator de escala proporcional à altura (referência: altura padrão do preset)
+  const scale = Math.max(0.7, Math.min(1.25, h / preset.altura));
+
+  const nomeSize = Math.max(8, preset.nomeFontSize * scale);
+  const lblSize = Math.max(6, 8 * scale);
+  const valSize = Math.max(7, 9 * scale);
+  const chkSize = Math.max(7, 9 * scale);
+
+  // QR menor: cabe na largura útil e ~22% da altura. Mínimo 12mm, máximo 22mm.
   const qrMm = Math.max(
-    14,
-    Math.min(w - 28, h * 0.28, preset.qrSize * 1.6)
+    12,
+    Math.min(w - 30, h * 0.22, 22)
   );
 
   const px = (mm: number) => `${(mm * 3.78).toFixed(2)}px`;
@@ -38,18 +44,18 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
     <span
       style={{
         display: "inline-block",
-        width: px(2.6),
-        height: px(2.6),
+        width: px(2.4),
+        height: px(2.4),
         border: "1px solid #000",
         background: active ? "#000" : "#fff",
-        marginRight: px(1.2),
+        marginRight: px(1),
         verticalAlign: "middle",
       }}
     />
   );
 
   const cellLabel: React.CSSProperties = {
-    fontSize: "8px",
+    fontSize: `${lblSize}px`,
     fontWeight: 800,
     lineHeight: 1,
     color: "#000",
@@ -57,19 +63,19 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
     letterSpacing: "0.3px",
   };
   const cellContent: React.CSSProperties = {
-    fontSize: "9px",
+    fontSize: `${valSize}px`,
     fontWeight: 700,
     lineHeight: 1.15,
     color: "#000",
     textTransform: "uppercase",
-    marginTop: "2px",
+    marginTop: "1px",
     overflow: "hidden",
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
   };
   const cellBox: React.CSSProperties = {
     border: "1px solid #000",
-    padding: "3px 4px",
+    padding: "2px 4px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -94,7 +100,6 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
         overflow: "hidden",
       }}
     >
-      {/* Cabeçalho — Nome do produto COMPLETO */}
       <div
         style={{
           background: "#000",
@@ -105,7 +110,7 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
           lineHeight: 1.15,
           textTransform: "uppercase",
           letterSpacing: "0.4px",
-          padding: "5px 4px",
+          padding: "4px 4px",
           border: "1px solid #000",
           wordBreak: "break-word",
           whiteSpace: "normal",
@@ -153,7 +158,7 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-around",
-          fontSize: "10px",
+          fontSize: `${chkSize}px`,
           fontWeight: 800,
           padding: "2px 4px",
         }}
@@ -169,11 +174,8 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
         </span>
       </div>
 
-      {/* Espaçador flexível para permitir altura variável sem distorcer */}
-      <div style={{ flex: 1, minHeight: 0 }} />
-
-      {/* Responsável (compacto) + QR Code */}
-      <div style={{ display: "flex", gap: "2px", alignItems: "stretch" }}>
+      {/* Responsável (compacto) + QR Code — sem espaçador acima */}
+      <div style={{ display: "flex", gap: "2px", alignItems: "stretch", height: px(qrMm) }}>
         <div
           style={{
             ...cellBox,
@@ -190,6 +192,7 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
           style={{
             width: px(qrMm),
             height: px(qrMm),
+            minWidth: px(qrMm),
             border: "1px solid #000",
             background: "#fff",
             padding: "1px",
@@ -202,7 +205,7 @@ export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProp
         >
           <QRCodeSVG
             value={buildEtiquetaQrPayload(product)}
-            size={Math.max(40, qrMm * 3.78 - 2)}
+            size={Math.max(36, qrMm * 3.78 - 2)}
             level="M"
             marginSize={0}
             style={{ width: "100%", height: "100%", display: "block" }}
