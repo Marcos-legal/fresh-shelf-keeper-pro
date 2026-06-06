@@ -27,7 +27,7 @@ export function buildEtiquetaPrintHTML({
   const preset = getPresetForWidth(largura);
   const w = preset.largura;
   const h = altura && altura > 20 ? altura : preset.altura;
-  const qrMm = preset.qrSize;
+  const qrMm = Math.max(14, Math.min(w - 28, h * 0.28, preset.qrSize * 1.6));
   const nomeSize = preset.nomeFontSize;
 
   const labelHtml = (p: Product) => {
