@@ -129,11 +129,12 @@ export function useProductsSupabase() {
         responsible: data.responsavel || '',
         status: 'active',
         user_id: user.id,
+        preco_custo: data.precoCusto ?? null,
       };
 
       const { error } = await supabase
         .from('products')
-        .insert([productData]);
+        .insert([productData as never]);
 
       if (error) {
         console.error('Error adding product:', error);

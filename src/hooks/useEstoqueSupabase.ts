@@ -90,7 +90,7 @@ export function useEstoqueSupabase() {
     try {
       const { data: newProduct, error } = await supabase
         .from('produtos_estoque')
-        .insert([data])
+        .insert([data as never])
         .select()
         .single();
 
@@ -240,7 +240,7 @@ export function useEstoqueSupabase() {
 
       const { data: newContagem, error } = await supabase
         .from('contagens_estoque')
-        .insert([contagemData])
+        .insert([contagemData as never])
         .select()
         .single();
 
