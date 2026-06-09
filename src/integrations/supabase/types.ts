@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           created_at: string
           data_contagem: string
+          empresa_id: string
           id: string
           observacoes: string | null
           produto_id: string
@@ -31,6 +32,7 @@ export type Database = {
         Insert: {
           created_at?: string
           data_contagem?: string
+          empresa_id: string
           id?: string
           observacoes?: string | null
           produto_id: string
@@ -44,6 +46,7 @@ export type Database = {
         Update: {
           created_at?: string
           data_contagem?: string
+          empresa_id?: string
           id?: string
           observacoes?: string | null
           produto_id?: string
@@ -56,6 +59,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "contagens_estoque_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "contagens_estoque_produto_id_fkey"
             columns: ["produto_id"]
             isOneToOne: false
@@ -64,11 +74,68 @@ export type Database = {
           },
         ]
       }
+      empresa_members: {
+        Row: {
+          created_at: string
+          empresa_id: string
+          id: string
+          role: Database["public"]["Enums"]["empresa_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          empresa_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["empresa_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["empresa_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresa_members_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      empresas: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome?: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           brand: string
           created_at: string | null
           days_valid: number | null
+          empresa_id: string
           expiry_date: string | null
           expiry_date_entered: boolean | null
           id: number
@@ -87,6 +154,7 @@ export type Database = {
           brand?: string
           created_at?: string | null
           days_valid?: number | null
+          empresa_id: string
           expiry_date?: string | null
           expiry_date_entered?: boolean | null
           id?: never
@@ -105,6 +173,7 @@ export type Database = {
           brand?: string
           created_at?: string | null
           days_valid?: number | null
+          empresa_id?: string
           expiry_date?: string | null
           expiry_date_entered?: boolean | null
           id?: never
@@ -119,11 +188,20 @@ export type Database = {
           use_by_date?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       produtos_estoque: {
         Row: {
           created_at: string
+          empresa_id: string
           id: string
           nome: string
           quantidade_por_unidade: number
@@ -134,6 +212,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          empresa_id: string
           id?: string
           nome: string
           quantidade_por_unidade?: number
@@ -144,6 +223,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          empresa_id?: string
           id?: string
           nome?: string
           quantidade_por_unidade?: number
@@ -152,7 +232,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "produtos_estoque_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -179,6 +267,7 @@ export type Database = {
         Row: {
           created_at: string
           current_period_end: string | null
+          empresa_id: string | null
           id: string
           mp_subscription_id: string | null
           payment_id: string | null
@@ -193,6 +282,7 @@ export type Database = {
         Insert: {
           created_at?: string
           current_period_end?: string | null
+          empresa_id?: string | null
           id?: string
           mp_subscription_id?: string | null
           payment_id?: string | null
@@ -207,6 +297,7 @@ export type Database = {
         Update: {
           created_at?: string
           current_period_end?: string | null
+          empresa_id?: string | null
           id?: string
           mp_subscription_id?: string | null
           payment_id?: string | null
@@ -218,7 +309,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -243,6 +342,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_empresa_ativa: { Args: { _user: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -250,9 +350,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_empresa_admin: {
+        Args: { _empresa: string; _user: string }
+        Returns: boolean
+      }
+      is_empresa_member: {
+        Args: { _empresa: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      empresa_role: "owner" | "admin" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -381,6 +490,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      empresa_role: ["owner", "admin", "staff"],
     },
   },
 } as const
