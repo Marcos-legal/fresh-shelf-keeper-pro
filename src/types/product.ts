@@ -15,6 +15,7 @@ export interface Product {
   utilizarAte?: Date;
   localArmazenamento?: StorageLocation;
   responsavel?: string;
+  precoCusto?: number;
   status: ProductStatus;
   criadoEm: Date;
   atualizadoEm: Date;
@@ -31,6 +32,7 @@ export interface ProductFormData {
   diasParaVencer?: number;
   localArmazenamento?: StorageLocation;
   responsavel?: string;
+  precoCusto?: number;
   showOptionalDates?: boolean;
 }
 
