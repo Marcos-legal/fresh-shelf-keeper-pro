@@ -389,6 +389,8 @@ const Relatorios = () => {
                 </CardContent>
               </Card>
             )}
+        </TabsContent>
+      </Tabs>
     </PageLayout>
   );
 };
