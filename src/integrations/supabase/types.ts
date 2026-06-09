@@ -130,6 +130,60 @@ export type Database = {
         }
         Relationships: []
       }
+      product_events: {
+        Row: {
+          created_at: string
+          custo_snapshot: number | null
+          empresa_id: string
+          id: string
+          motivo: string | null
+          product_id: number | null
+          product_lote: string | null
+          product_nome: string | null
+          tipo: Database["public"]["Enums"]["product_event_type"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          custo_snapshot?: number | null
+          empresa_id: string
+          id?: string
+          motivo?: string | null
+          product_id?: number | null
+          product_lote?: string | null
+          product_nome?: string | null
+          tipo: Database["public"]["Enums"]["product_event_type"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          custo_snapshot?: number | null
+          empresa_id?: string
+          id?: string
+          motivo?: string | null
+          product_id?: number | null
+          product_lote?: string | null
+          product_nome?: string | null
+          tipo?: Database["public"]["Enums"]["product_event_type"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_events_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_events_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand: string
@@ -144,6 +198,7 @@ export type Database = {
           manufacture_date_entered: boolean | null
           name: string
           opening_date: string | null
+          preco_custo: number | null
           responsible: string
           status: string
           storage: string
@@ -163,6 +218,7 @@ export type Database = {
           manufacture_date_entered?: boolean | null
           name?: string
           opening_date?: string | null
+          preco_custo?: number | null
           responsible?: string
           status?: string
           storage?: string
@@ -182,6 +238,7 @@ export type Database = {
           manufacture_date_entered?: boolean | null
           name?: string
           opening_date?: string | null
+          preco_custo?: number | null
           responsible?: string
           status?: string
           storage?: string
@@ -337,6 +394,50 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_alerts_config: {
+        Row: {
+          created_at: string
+          daily_hour: number
+          empresa_id: string
+          enabled: boolean
+          from_number: string | null
+          id: string
+          last_sent_at: string | null
+          phone_e164: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_hour?: number
+          empresa_id: string
+          enabled?: boolean
+          from_number?: string | null
+          id?: string
+          last_sent_at?: string | null
+          phone_e164?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_hour?: number
+          empresa_id?: string
+          enabled?: boolean
+          from_number?: string | null
+          id?: string
+          last_sent_at?: string | null
+          phone_e164?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_alerts_config_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: true
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -362,6 +463,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user"
       empresa_role: "owner" | "admin" | "staff"
+      product_event_type: "consumido" | "descartado" | "vencido"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -491,6 +593,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user"],
       empresa_role: ["owner", "admin", "staff"],
+      product_event_type: ["consumido", "descartado", "vencido"],
     },
   },
 } as const

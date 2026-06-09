@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { PackageSearch, FileDown, XCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PackageSearch, FileDown, XCircle, TrendingDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
 import { DatePicker } from "@/components/ui/date-picker";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { DesperdicioSection } from "@/components/DesperdicioSection";
 
 const Relatorios = () => {
   const { products } = useProductsSupabase();
@@ -245,6 +247,19 @@ const Relatorios = () => {
       description="Visualize e exporte os dados dos seus produtos"
       icon={PackageSearch}
     >
+      <Tabs defaultValue="produtos" className="w-full">
+        <TabsList className="grid grid-cols-2 w-full max-w-md mb-4">
+          <TabsTrigger value="produtos">Produtos</TabsTrigger>
+          <TabsTrigger value="desperdicio">
+            <TrendingDown className="w-4 h-4 mr-1.5" /> Desperdício
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="desperdicio">
+          <DesperdicioSection />
+        </TabsContent>
+
+        <TabsContent value="produtos">
 
             {/* Filtros e Exportação */}
             <Card className="mb-6">
@@ -374,6 +389,8 @@ const Relatorios = () => {
                 </CardContent>
               </Card>
             )}
+        </TabsContent>
+      </Tabs>
     </PageLayout>
   );
 };

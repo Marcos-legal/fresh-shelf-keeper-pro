@@ -4,11 +4,13 @@ import { PageLayout } from "@/components/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { QrCode, Camera, CameraOff, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { QrCode, Camera, CameraOff, Trash2, CheckCircle2, XCircle, Check } from "lucide-react";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
+import { useProductEvents } from "@/hooks/useProductEvents";
 import { parseEtiquetaQrPayload, EtiquetaQrData } from "@/lib/qrcode";
 import { toast } from "@/hooks/use-toast";
 import { EtiquetaView } from "@/components/EtiquetaView";
+import { RegistrarBaixaDialog } from "@/components/RegistrarBaixaDialog";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/product";
 
@@ -24,6 +26,7 @@ interface ScanItem {
 
 export default function LeitorQrCode() {
   const { products } = useProductsSupabase();
+  const { registerEvent } = useProductEvents();
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const productsRef = useRef(products);
   const startingRef = useRef(false);
@@ -32,14 +35,15 @@ export default function LeitorQrCode() {
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scans, setScans] = useState<ScanItem[]>([]);
+  const [discardTarget, setDiscardTarget] = useState<ScanItem | null>(null);
 
   useEffect(() => {
     productsRef.current = products;
     setScans((prev) =>
       prev.map((scan) => {
-        if (scan.product || !scan.parsed?.id) return scan;
+        if (!scan.parsed?.id) return scan;
         const product = products.find((p) => String(p.id) === String(scan.parsed?.id)) || null;
-        return product ? { ...scan, product } : scan;
+        return { ...scan, product };
       })
     );
   }, [products]);
@@ -50,15 +54,11 @@ export default function LeitorQrCode() {
       : product.validade instanceof Date
         ? product.validade
         : undefined;
-
     if (!targetDate || isNaN(targetDate.getTime())) return true;
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     const validityDay = new Date(targetDate);
     validityDay.setHours(0, 0, 0, 0);
-
     return validityDay >= today;
   };
 
@@ -103,9 +103,7 @@ export default function LeitorQrCode() {
             description: product ? product.nome : "Etiqueta registrada na lista.",
           });
         },
-        () => {
-          // ignore per-frame failures
-        }
+        () => {}
       );
       if (mountedRef.current) setScanning(true);
     } catch (err: unknown) {
@@ -127,6 +125,34 @@ export default function LeitorQrCode() {
     setScans((prev) => prev.filter((s) => s.key !== key));
   };
 
+  const handleConsumido = async (scan: ScanItem) => {
+    if (!scan.product) return;
+    const ok = await registerEvent({
+      productId: scan.product.id,
+      productNome: scan.product.nome,
+      productLote: scan.product.lote,
+      tipo: "consumido",
+      precoCusto: scan.product.precoCusto,
+    });
+    if (ok) removeScan(scan.key);
+  };
+
+  const handleDescarteConfirm = async (motivo: string) => {
+    if (!discardTarget?.product) return;
+    const p = discardTarget.product;
+    const tipo = isProductWithinValidity(p) ? "descartado" : "vencido";
+    const ok = await registerEvent({
+      productId: p.id,
+      productNome: p.nome,
+      productLote: p.lote,
+      tipo,
+      motivo,
+      precoCusto: p.precoCusto,
+    });
+    if (ok) removeScan(discardTarget.key);
+    setDiscardTarget(null);
+  };
+
   useEffect(() => {
     mountedRef.current = true;
     start();
@@ -140,7 +166,7 @@ export default function LeitorQrCode() {
   return (
     <PageLayout
       title="Leitor de QR Code"
-      description="Escaneie várias etiquetas em sequência sem fechar a câmera"
+      description="Escaneie várias etiquetas em sequência e registre consumo ou descarte"
       icon={QrCode}
     >
       <div className="space-y-4 sm:space-y-6">
@@ -150,9 +176,7 @@ export default function LeitorQrCode() {
               <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
                 <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
                 Câmera
-                {scanning && (
-                  <Badge variant="secondary" className="text-xs">Lendo...</Badge>
-                )}
+                {scanning && <Badge variant="secondary" className="text-xs">Lendo...</Badge>}
               </CardTitle>
               <div className="flex gap-2">
                 {scanning ? (
@@ -177,9 +201,7 @@ export default function LeitorQrCode() {
               id={READER_ID}
               className="w-full max-w-md mx-auto rounded-lg overflow-hidden bg-muted/30 aspect-square"
             />
-            {error && (
-              <p className="mt-3 text-sm text-destructive text-center">{error}</p>
-            )}
+            {error && <p className="mt-3 text-sm text-destructive text-center">{error}</p>}
             {scanning && (
               <p className="mt-3 text-xs text-muted-foreground text-center">
                 Aponte para cada etiqueta. Já lidas são ignoradas automaticamente.
@@ -226,25 +248,39 @@ export default function LeitorQrCode() {
                         ) : (
                           <Badge variant="outline" className="text-xs">Não cadastrada</Badge>
                         )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeScan(scan.key)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => removeScan(scan.key)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </CardHeader>
-                    <CardContent className="p-3 sm:p-4 pt-0">
+                    <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
                       {product ? (
-                        <div
-                          className={cn(
-                            "flex justify-center rounded-lg border-4 p-2 bg-white",
-                            isWithinValidity ? "border-success" : "border-destructive"
-                          )}
-                        >
-                          <EtiquetaView product={product} />
-                        </div>
+                        <>
+                          <div
+                            className={cn(
+                              "flex justify-center rounded-lg border-4 p-2 bg-white",
+                              isWithinValidity ? "border-success" : "border-destructive"
+                            )}
+                          >
+                            <EtiquetaView product={product} />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              className="bg-success hover:bg-success/90 text-success-foreground"
+                              onClick={() => handleConsumido(scan)}
+                            >
+                              <Check className="w-4 h-4 mr-1.5" />
+                              Dar Baixa (Consumido)
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() => setDiscardTarget(scan)}
+                            >
+                              <Trash2 className="w-4 h-4 mr-1.5" />
+                              Descartar
+                            </Button>
+                          </div>
+                        </>
                       ) : scan.parsed?.id ? (
                         <p className="text-sm text-muted-foreground">
                           Etiqueta identificada (id: {scan.parsed.id}), mas não está no cadastro atual.
@@ -262,6 +298,13 @@ export default function LeitorQrCode() {
           </div>
         )}
       </div>
+
+      <RegistrarBaixaDialog
+        open={!!discardTarget}
+        onOpenChange={(o) => !o && setDiscardTarget(null)}
+        productName={discardTarget?.product?.nome ?? ""}
+        onConfirm={handleDescarteConfirm}
+      />
     </PageLayout>
   );
 }
