@@ -35,6 +35,9 @@ export function useProductsSupabase() {
       utilizarAte: parseDate(row.use_by_date),
       localArmazenamento: row.storage as StorageLocation || 'ambiente',
       responsavel: row.responsible || '',
+      precoCusto: (row as { preco_custo?: number | string | null }).preco_custo != null
+        ? Number((row as { preco_custo: number | string }).preco_custo)
+        : undefined,
       status: 'valido',
       criadoEm: new Date(row.created_at),
       atualizadoEm: new Date(row.created_at),
@@ -212,6 +215,10 @@ export function useProductsSupabase() {
       if (data.diasParaVencer !== undefined) updateData.days_valid = data.diasParaVencer;
       if (data.localArmazenamento !== undefined) updateData.storage = data.localArmazenamento;
       if (data.responsavel !== undefined) updateData.responsible = data.responsavel;
+      if (data.precoCusto !== undefined) {
+        (updateData as { preco_custo?: number | null }).preco_custo =
+          data.precoCusto === null || Number.isNaN(data.precoCusto) ? null : data.precoCusto;
+      }
 
       const { error } = await supabase
         .from('products')

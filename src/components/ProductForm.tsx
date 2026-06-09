@@ -41,6 +41,7 @@ export function ProductForm({
     dataAbertura: initialData?.dataAbertura || '',
     diasParaVencer: initialData?.diasParaVencer || undefined,
     localArmazenamento: initialData?.localArmazenamento || undefined,
+    precoCusto: initialData?.precoCusto,
     showOptionalDates: initialData?.showOptionalDates ?? false,
   });
 
@@ -207,6 +208,32 @@ export function ProductForm({
               placeholder="Selecione o local"
               required={false}
             />
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="precoCusto">
+                Preço de Custo (R$) — opcional
+              </label>
+              <input
+                id="precoCusto"
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min={0}
+                value={formData.precoCusto ?? ''}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setFormData((p) => ({
+                    ...p,
+                    precoCusto: v === '' ? undefined : Number(v),
+                  }));
+                }}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                placeholder="Ex.: 12.90"
+              />
+              <p className="text-xs text-muted-foreground">
+                Usado para calcular prejuízo financeiro em descartes/vencimentos.
+              </p>
+            </div>
           </div>
 
           <div className="flex justify-end pt-6 border-t">
