@@ -135,6 +135,7 @@ export function useProductsSupabase() {
         responsible: data.responsavel || '',
         status: 'active',
         user_id: user.id,
+        empresa_id: activeEmpresaId,
         preco_custo: data.precoCusto ?? null,
       };
 
