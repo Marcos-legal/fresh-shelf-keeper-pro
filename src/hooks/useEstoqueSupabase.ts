@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProdutoEstoque, ContagemEstoque, EstoqueFormData, ContagemFormData } from '@/types/estoque';
+import { useEmpresa } from '@/contexts/EmpresaContext';
 
 // Re-export types for components
 export type { ProdutoEstoque, ContagemEstoque, EstoqueFormData, ContagemFormData };
@@ -10,13 +11,16 @@ export function useEstoqueSupabase() {
   const [produtos, setProdutos] = useState<ProdutoEstoque[]>([]);
   const [contagens, setContagens] = useState<ContagemEstoque[]>([]);
   const [loading, setLoading] = useState(true);
+  const { activeEmpresaId } = useEmpresa();
 
   // Carregar produtos do Supabase
   const loadProdutos = async () => {
+    if (!activeEmpresaId) { setProdutos([]); return; }
     try {
       const { data, error } = await supabase
         .from('produtos_estoque')
         .select('*')
+        .eq('empresa_id', activeEmpresaId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -42,10 +46,12 @@ export function useEstoqueSupabase() {
 
   // Carregar contagens do Supabase
   const loadContagens = async () => {
+    if (!activeEmpresaId) { setContagens([]); return; }
     try {
       const { data, error } = await supabase
         .from('contagens_estoque')
         .select('*')
+        .eq('empresa_id', activeEmpresaId)
         .order('data_contagem', { ascending: false });
 
       if (error) {
@@ -83,7 +89,8 @@ export function useEstoqueSupabase() {
     };
 
     loadData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeEmpresaId]);
 
   // Adicionar produto de estoque
   const addProdutoEstoque = async (data: EstoqueFormData) => {

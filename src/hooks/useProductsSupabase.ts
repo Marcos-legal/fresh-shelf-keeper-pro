@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEmpresa } from '@/contexts/EmpresaContext';
 import { Product, ProductFormData, StorageLocation } from '@/types/product';
 import { toast } from '@/hooks/use-toast';
 import { parseValidadeDate } from '@/utils/productValidation';
@@ -13,6 +14,7 @@ export function useProductsSupabase() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { activeEmpresaId } = useEmpresa();
 
   // Convert database row to Product interface
   const mapDbRowToProduct = (row: SupabaseProductRow): Product => {
@@ -47,7 +49,7 @@ export function useProductsSupabase() {
 
   // Load products from Supabase
   const loadProducts = async () => {
-    if (!user) {
+    if (!user || !activeEmpresaId) {
       setProducts([]);
       setLoading(false);
       return;
@@ -57,7 +59,7 @@ export function useProductsSupabase() {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('empresa_id', activeEmpresaId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -84,10 +86,11 @@ export function useProductsSupabase() {
     }
   };
 
-  // Load products when user changes
+  // Load products when user or active empresa changes
   useEffect(() => {
     loadProducts();
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, activeEmpresaId]);
 
   // Add product to Supabase
   const addProduct = async (data: ProductFormData) => {
@@ -132,6 +135,7 @@ export function useProductsSupabase() {
         responsible: data.responsavel || '',
         status: 'active',
         user_id: user.id,
+        empresa_id: activeEmpresaId,
         preco_custo: data.precoCusto ?? null,
       };
 

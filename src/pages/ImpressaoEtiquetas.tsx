@@ -434,6 +434,15 @@ const ImpressaoEtiquetas = () => {
                             <Settings className="w-4 h-4 flex-shrink-0" />
                             <span className="text-sm">Detecta automaticamente o preset · Compatível com Elgin, Bematech, Tanca, Control ID</span>
                           </div>
+                          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 p-3 text-xs text-amber-900 dark:text-amber-100 space-y-1">
+                            <p className="font-semibold">💡 Dica para Chrome/Edge</p>
+                            <p>No diálogo de impressão, expanda <strong>Mais configurações</strong> e defina:</p>
+                            <ul className="list-disc ml-4 space-y-0.5">
+                              <li><strong>Margens:</strong> Nenhuma (None)</li>
+                              <li><strong>Escala:</strong> Padrão / 100%</li>
+                              <li><strong>Cabeçalho e rodapé:</strong> desmarcado</li>
+                            </ul>
+                          </div>
                         </div>
                       </DialogContent>
                     </Dialog>
