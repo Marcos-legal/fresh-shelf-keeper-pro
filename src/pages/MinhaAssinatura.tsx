@@ -207,12 +207,6 @@ export default function MinhaAssinatura() {
               <CardTitle className="text-base">Detalhes da assinatura</CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2 text-muted-foreground">
-              {subscription.created_at && (
-                <div className="flex justify-between">
-                  <span>Conta criada em</span>
-                  <span className="text-foreground font-medium">{format(new Date(subscription.created_at), "dd/MM/yyyy")}</span>
-                </div>
-              )}
               {subscription.mp_subscription_id && (
                 <div className="flex justify-between">
                   <span>ID Mercado Pago</span>
