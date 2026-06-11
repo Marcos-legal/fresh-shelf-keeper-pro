@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { UserMenu } from "./UserMenu";
+import { EmpresaSwitcher } from "./EmpresaSwitcher";
 
 const navSections = [
   {
@@ -92,8 +93,13 @@ export function AppSidebar() {
           </div>
         </div>
 
+        {/* Empresa Switcher */}
+        <div className="mt-4 pt-3 border-t border-sidebar-border">
+          <EmpresaSwitcher />
+        </div>
+
         {/* User Menu */}
-        <div className="mt-4 flex items-center justify-between pt-3 border-t border-sidebar-border">
+        <div className="mt-3 flex items-center justify-between">
           <span className="text-xs text-sidebar-foreground/50">Conta</span>
           <UserMenu />
         </div>
