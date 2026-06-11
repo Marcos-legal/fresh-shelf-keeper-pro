@@ -37,7 +37,7 @@ export function EmpresaProvider({ children }: { children: React.ReactNode }) {
     }
     setLoading(true);
     // Aceitar convites pendentes silenciosamente
-    await supabase.rpc("claim_pending_invites" as never).catch(() => null);
+    try { await (supabase.rpc as any)("claim_pending_invites"); } catch (_) { /* noop */ }
 
     const { data, error } = await supabase
       .from("empresa_members")
