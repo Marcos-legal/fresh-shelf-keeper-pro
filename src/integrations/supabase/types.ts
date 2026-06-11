@@ -74,6 +74,44 @@ export type Database = {
           },
         ]
       }
+      empresa_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          empresa_id: string
+          id: string
+          invited_by: string | null
+          role: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          empresa_id: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          empresa_id?: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresa_invites_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresa_members: {
         Row: {
           created_at: string
@@ -443,6 +481,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_pending_invites: { Args: never; Returns: number }
       get_empresa_ativa: { Args: { _user: string }; Returns: string }
       has_role: {
         Args: {
@@ -451,6 +490,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      invite_empresa_member: {
+        Args: { _email: string; _empresa: string; _role?: string }
+        Returns: Json
+      }
       is_empresa_admin: {
         Args: { _empresa: string; _user: string }
         Returns: boolean
@@ -458,6 +501,38 @@ export type Database = {
       is_empresa_member: {
         Args: { _empresa: string; _user: string }
         Returns: boolean
+      }
+      list_empresa_invites: {
+        Args: { _empresa: string }
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+          role: string
+        }[]
+      }
+      list_empresa_members: {
+        Args: { _empresa: string }
+        Returns: {
+          created_at: string
+          email: string
+          first_name: string
+          last_name: string
+          role: string
+          user_id: string
+        }[]
+      }
+      remove_empresa_member: {
+        Args: { _empresa: string; _user: string }
+        Returns: undefined
+      }
+      rename_empresa: {
+        Args: { _empresa: string; _nome: string }
+        Returns: undefined
+      }
+      update_empresa_member_role: {
+        Args: { _empresa: string; _role: string; _user: string }
+        Returns: undefined
       }
     }
     Enums: {
