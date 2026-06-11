@@ -30,11 +30,12 @@ interface RegisterParams {
 
 export function useProductEvents() {
   const { user } = useAuth();
+  const { activeEmpresaId } = useEmpresa();
   const [events, setEvents] = useState<ProductEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadEvents = useCallback(async () => {
-    if (!user) {
+    if (!user || !activeEmpresaId) {
       setEvents([]);
       setLoading(false);
       return;
@@ -43,6 +44,7 @@ export function useProductEvents() {
     const { data, error } = await supabase
       .from("product_events")
       .select("*")
+      .eq("empresa_id", activeEmpresaId)
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) {
@@ -51,7 +53,7 @@ export function useProductEvents() {
       setEvents((data ?? []) as ProductEvent[]);
     }
     setLoading(false);
-  }, [user]);
+  }, [user, activeEmpresaId]);
 
   useEffect(() => {
     loadEvents();
