@@ -49,7 +49,7 @@ export default function ConfiguracoesEmpresa() {
     setLoading(true);
     const [m, i] = await Promise.all([
       supabase.rpc("list_empresa_members" as never, { _empresa: activeEmpresaId } as never),
-      isAdmin
+      isOwner
         ? supabase.rpc("list_empresa_invites" as never, { _empresa: activeEmpresaId } as never)
         : Promise.resolve({ data: [], error: null } as any),
     ]);
@@ -59,7 +59,7 @@ export default function ConfiguracoesEmpresa() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [activeEmpresaId, isAdmin]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [activeEmpresaId, isOwner]);
 
   const handleRename = async () => {
     if (!activeEmpresaId || !nome.trim()) return;
@@ -77,7 +77,7 @@ export default function ConfiguracoesEmpresa() {
     const { data, error } = await supabase.rpc("invite_empresa_member" as never, {
       _empresa: activeEmpresaId,
       _email: inviteEmail.trim(),
-      _role: inviteRole,
+      _role: "member",
     } as never);
     setBusy(false);
     if (error) return toast({ title: "Erro ao convidar", description: error.message, variant: "destructive" });
@@ -85,11 +85,10 @@ export default function ConfiguracoesEmpresa() {
     toast({
       title: status === "added" ? "Membro adicionado" : "Convite enviado",
       description: status === "added"
-        ? "Usuário já tinha conta e foi adicionado à empresa."
+        ? "Usuário já tinha conta e foi adicionado à empresa. O acesso é liberado sob sua assinatura."
         : "O usuário receberá acesso assim que se cadastrar com este e-mail.",
     });
     setInviteEmail("");
-    setInviteRole("member");
     await load();
   };
 
@@ -98,13 +97,6 @@ export default function ConfiguracoesEmpresa() {
     const { error } = await supabase.rpc("remove_empresa_member" as never, { _empresa: activeEmpresaId, _user: userId } as never);
     if (error) return toast({ title: "Erro", description: error.message, variant: "destructive" });
     toast({ title: "Membro removido" });
-    await load();
-  };
-
-  const handleChangeRole = async (userId: string, role: string) => {
-    if (!activeEmpresaId) return;
-    const { error } = await supabase.rpc("update_empresa_member_role" as never, { _empresa: activeEmpresaId, _user: userId, _role: role } as never);
-    if (error) return toast({ title: "Erro", description: error.message, variant: "destructive" });
     await load();
   };
 
@@ -134,19 +126,23 @@ export default function ConfiguracoesEmpresa() {
           <CardContent className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="nome">Nome</Label>
-              <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} disabled={!isAdmin || busy} />
+              <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} disabled={!isOwner || busy} />
             </div>
-            <Button onClick={handleRename} disabled={!isAdmin || busy || nome === activeEmpresa.nome} className="w-full">
+            <Button onClick={handleRename} disabled={!isOwner || busy || nome === activeEmpresa.nome} className="w-full">
               Salvar
             </Button>
-            {!isAdmin && <p className="text-xs text-muted-foreground">Apenas administradores podem alterar.</p>}
+            {!isOwner && <p className="text-xs text-muted-foreground">Apenas o proprietário pode alterar.</p>}
           </CardContent>
         </Card>
 
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2"><UserPlus className="w-4 h-4" /> Convidar membro</CardTitle>
-            <CardDescription>Se a pessoa já tem conta, é adicionada na hora. Senão, fica como convite pendente.</CardDescription>
+            <CardDescription>
+              {isOwner
+                ? "Apenas você (proprietário) pode convidar. Os membros convidados terão acesso liberado sob a sua assinatura, sem pagar mensalidade separada."
+                : "Somente o proprietário da empresa pode convidar novos membros."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -156,17 +152,10 @@ export default function ConfiguracoesEmpresa() {
                   placeholder="email@exemplo.com"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  disabled={!isAdmin || busy}
+                  disabled={!isOwner || busy}
                 />
               </div>
-              <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as "member" | "admin")} disabled={!isAdmin || busy}>
-                <SelectTrigger className="w-full sm:w-36"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="member">Membro</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button onClick={handleInvite} disabled={!isAdmin || busy || !inviteEmail.trim()}>
+              <Button onClick={handleInvite} disabled={!isOwner || busy || !inviteEmail.trim()}>
                 Convidar
               </Button>
             </div>
@@ -184,7 +173,7 @@ export default function ConfiguracoesEmpresa() {
               <div className="divide-y">
                 {members.map((m) => {
                   const isSelf = m.user_id === user?.id;
-                  const isOwner = m.role === "owner";
+                  const isMemberOwner = m.role === "owner";
                   return (
                     <div key={m.user_id} className="py-3 flex items-center gap-3">
                       <div className="flex-1 min-w-0">
@@ -194,39 +183,33 @@ export default function ConfiguracoesEmpresa() {
                         </div>
                         <div className="text-xs text-muted-foreground truncate">{m.email}</div>
                       </div>
-                      {isOwner ? (
+                      {isMemberOwner ? (
                         <Badge variant="default">Proprietário</Badge>
-                      ) : isAdmin && !isSelf ? (
-                        <>
-                          <Select value={m.role} onValueChange={(v) => handleChangeRole(m.user_id, v)}>
-                            <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="member">Membro</SelectItem>
-                              <SelectItem value="admin">Administrador</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Remover membro?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  {m.email} perderá acesso aos dados desta empresa.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleRemoveMember(m.user_id)}>Remover</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </>
                       ) : (
-                        <Badge variant="secondary">{m.role === "admin" ? "Administrador" : "Membro"}</Badge>
+                        <>
+                          <Badge variant="secondary">Membro</Badge>
+                          {isOwner && !isSelf && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Remover membro?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {m.email} perderá acesso aos dados desta empresa.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleRemoveMember(m.user_id)}>Remover</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </>
                       )}
                     </div>
                   );
@@ -236,7 +219,7 @@ export default function ConfiguracoesEmpresa() {
           </CardContent>
         </Card>
 
-        {isAdmin && invites.length > 0 && (
+        {isOwner && invites.length > 0 && (
           <Card className="lg:col-span-3">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2"><Mail className="w-4 h-4" /> Convites pendentes ({invites.length})</CardTitle>
@@ -251,13 +234,14 @@ export default function ConfiguracoesEmpresa() {
                         Convidado em {new Date(inv.created_at).toLocaleDateString("pt-BR")}
                       </div>
                     </div>
-                    <Badge variant="outline">{inv.role === "admin" ? "Administrador" : "Membro"}</Badge>
+                    <Badge variant="outline">Membro</Badge>
                     <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleCancelInvite(inv.id)}>
                       Cancelar
                     </Button>
                   </div>
                 ))}
               </div>
+
             </CardContent>
           </Card>
         )}
