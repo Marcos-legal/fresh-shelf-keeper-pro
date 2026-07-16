@@ -482,6 +482,21 @@ export type Database = {
     }
     Functions: {
       claim_pending_invites: { Args: never; Returns: number }
+      get_effective_subscription: {
+        Args: never
+        Returns: {
+          current_period_end: string
+          is_inherited: boolean
+          mp_subscription_id: string
+          owner_user_id: string
+          payment_id: string
+          payment_provider: string
+          plan: string
+          status: string
+          trial_end: string
+          trial_start: string
+        }[]
+      }
       get_empresa_ativa: { Args: { _user: string }; Returns: string }
       has_role: {
         Args: {
@@ -499,6 +514,10 @@ export type Database = {
         Returns: boolean
       }
       is_empresa_member: {
+        Args: { _empresa: string; _user: string }
+        Returns: boolean
+      }
+      is_empresa_owner: {
         Args: { _empresa: string; _user: string }
         Returns: boolean
       }

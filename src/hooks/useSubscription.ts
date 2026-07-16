@@ -11,6 +11,8 @@ export interface SubscriptionData {
   payment_id: string | null;
   current_period_end: string | null;
   mp_subscription_id: string | null;
+  is_inherited?: boolean;
+  owner_user_id?: string | null;
 }
 
 export interface SubscriptionState {
@@ -21,6 +23,7 @@ export interface SubscriptionState {
   isExpired: boolean;
   isDefaulting: boolean;
   isCancelled: boolean;
+  isInherited: boolean;
   daysRemaining: number;
   canEdit: boolean;
   currentPeriodEnd: Date | null;
@@ -39,17 +42,15 @@ export function useSubscription(): SubscriptionState {
       return;
     }
     setLoading(true);
-    const { data, error } = await (supabase as any)
-      .from('subscriptions')
-      .select('status, trial_start, trial_end, plan, payment_provider, payment_id, current_period_end, mp_subscription_id')
-      .eq('user_id', user.id)
-      .maybeSingle();
+    const { data, error } = await (supabase.rpc as any)("get_effective_subscription");
 
     if (error) {
       console.error('Error fetching subscription:', error);
+      setSubscription(null);
+    } else {
+      const row = Array.isArray(data) ? data[0] : data;
+      setSubscription(row ?? null);
     }
-
-    setSubscription(data);
     setLoading(false);
   };
 
@@ -86,6 +87,7 @@ export function useSubscription(): SubscriptionState {
     isExpired,
     isDefaulting,
     isCancelled,
+    isInherited: !!subscription?.is_inherited,
     daysRemaining,
     canEdit,
     currentPeriodEnd,
