@@ -87,6 +87,7 @@ export function useSubscription(): SubscriptionState {
     isExpired,
     isDefaulting,
     isCancelled,
+    isInherited: !!subscription?.is_inherited,
     daysRemaining,
     canEdit,
     currentPeriodEnd,
