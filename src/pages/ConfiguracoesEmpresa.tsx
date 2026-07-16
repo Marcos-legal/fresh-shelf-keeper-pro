@@ -36,10 +36,9 @@ export default function ConfiguracoesEmpresa() {
   const [loading, setLoading] = useState(true);
   const [nome, setNome] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"member" | "admin">("member");
   const [busy, setBusy] = useState(false);
 
-  const isAdmin = activeEmpresa?.role === "owner" || activeEmpresa?.role === "admin";
+  const isOwner = activeEmpresa?.role === "owner";
 
   useEffect(() => {
     if (activeEmpresa) setNome(activeEmpresa.nome);
