@@ -85,7 +85,7 @@ export default function ConfiguracoesEmpresa() {
     toast({
       title: status === "added" ? "Membro adicionado" : "Convite enviado",
       description: status === "added"
-        ? "Usuário já tinha conta e foi adicionado à empresa. O acesso é liberado sob sua assinatura."
+        ? "Usuário já tinha conta e foi adicionado à empresa."
         : "O usuário receberá acesso assim que se cadastrar com este e-mail.",
     });
     setInviteEmail("");
@@ -140,7 +140,7 @@ export default function ConfiguracoesEmpresa() {
             <CardTitle className="text-base flex items-center gap-2"><UserPlus className="w-4 h-4" /> Convidar membro</CardTitle>
             <CardDescription>
               {isOwner
-                ? "Apenas você (proprietário) pode convidar. Os membros convidados terão acesso liberado sob a sua assinatura, sem pagar mensalidade separada."
+                ? "Apenas você (proprietário) pode convidar novos membros para a empresa."
                 : "Somente o proprietário da empresa pode convidar novos membros."}
             </CardDescription>
           </CardHeader>
