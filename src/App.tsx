@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ResponsaveisProvider } from "@/contexts/ResponsaveisContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { EmpresaProvider } from "@/contexts/EmpresaContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -24,8 +23,6 @@ import ImpressaoEtiquetas from "./pages/ImpressaoEtiquetas";
 import VisualizarEtiquetas from "./pages/VisualizarEtiquetas";
 import ContagemEstoque from "./pages/ContagemEstoque";
 import ResetPassword from "./pages/ResetPassword";
-import Planos from "./pages/Planos";
-import MinhaAssinatura from "./pages/MinhaAssinatura";
 import LeitorQrCode from "./pages/LeitorQrCode";
 import ConfiguracoesEmpresa from "./pages/ConfiguracoesEmpresa";
 
@@ -42,7 +39,6 @@ const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <AuthProvider>
-        <SubscriptionProvider>
         <EmpresaProvider>
         <ResponsaveisProvider>
           <TooltipProvider>
@@ -64,8 +60,6 @@ const App: React.FC = () => (
                 <Route path="/visualizar-etiquetas" element={<ProtectedRoute><VisualizarEtiquetas /></ProtectedRoute>} />
                 <Route path="/contagem-estoque" element={<ProtectedRoute><ContagemEstoque /></ProtectedRoute>} />
                 <Route path="/leitor-qrcode" element={<ProtectedRoute><LeitorQrCode /></ProtectedRoute>} />
-                <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
-                <Route path="/minha-assinatura" element={<ProtectedRoute><MinhaAssinatura /></ProtectedRoute>} />
                 <Route path="/configuracoes/empresa" element={<ProtectedRoute><ConfiguracoesEmpresa /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
@@ -75,7 +69,6 @@ const App: React.FC = () => (
           </TooltipProvider>
         </ResponsaveisProvider>
         </EmpresaProvider>
-        </SubscriptionProvider>
       </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
