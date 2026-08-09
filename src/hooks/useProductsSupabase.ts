@@ -103,6 +103,15 @@ export function useProductsSupabase() {
       return;
     }
 
+    if (!activeEmpresaId) {
+      toast({
+        title: "Empresa não selecionada",
+        description: "Aguarde o carregamento da empresa ou selecione uma antes de cadastrar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       // Parse validade date if provided
       let expiryDate = null;
@@ -147,7 +156,7 @@ export function useProductsSupabase() {
         console.error('Error adding product:', error);
         toast({
           title: "Erro ao adicionar produto",
-          description: "Não foi possível adicionar o produto.",
+          description: error.message || "Não foi possível adicionar o produto.",
           variant: "destructive",
         });
         return;
@@ -227,8 +236,7 @@ export function useProductsSupabase() {
       const { error } = await supabase
         .from('products')
         .update(updateData)
-        .eq('id', parseInt(id))
-        .eq('user_id', user.id);
+        .eq('id', parseInt(id));
 
       if (error) {
         console.error('Error updating product:', error);
@@ -260,8 +268,7 @@ export function useProductsSupabase() {
       const { error } = await supabase
         .from('products')
         .delete()
-        .eq('id', parseInt(id))
-        .eq('user_id', user.id);
+        .eq('id', parseInt(id));
 
       if (error) {
         console.error('Error deleting product:', error);
