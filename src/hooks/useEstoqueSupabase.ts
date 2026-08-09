@@ -94,10 +94,18 @@ export function useEstoqueSupabase() {
 
   // Adicionar produto de estoque
   const addProdutoEstoque = async (data: EstoqueFormData) => {
+    if (!activeEmpresaId) {
+      toast({
+        title: "Empresa não selecionada",
+        description: "Selecione uma empresa antes de cadastrar produtos.",
+        variant: "destructive",
+      });
+      return;
+    }
     try {
       const { data: newProduct, error } = await supabase
         .from('produtos_estoque')
-        .insert([data as never])
+        .insert([{ ...data, empresa_id: activeEmpresaId } as never])
         .select()
         .single();
 
@@ -247,7 +255,7 @@ export function useEstoqueSupabase() {
 
       const { data: newContagem, error } = await supabase
         .from('contagens_estoque')
-        .insert([contagemData as never])
+        .insert([{ ...contagemData, empresa_id: activeEmpresaId } as never])
         .select()
         .single();
 
