@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-// Limpeza de PWA: em preview/iframe/dev, remove qualquer service worker e cache antigo
-// que possa servir arquivos obsoletos e travar a pré-visualização.
+// Nunca permita que o antigo app-shell PWA controle o preview/desenvolvimento.
+// O worker de mensagens (caso seja adicionado no futuro) não deve ser removido aqui.
 const isPreviewLike = (() => {
   try {
     const host = window.location.hostname;
@@ -15,9 +15,11 @@ const isPreviewLike = (() => {
       host.startsWith('preview--') ||
       host === 'lovableproject.com' ||
       host.endsWith('.lovableproject.com') ||
-      host === 'lovable.app' ||
-      host.endsWith('.lovable.app') ||
-      new URLSearchParams(window.location.search).has('sw')
+      host === 'lovableproject-dev.com' ||
+      host.endsWith('.lovableproject-dev.com') ||
+      host === 'beta.lovable.dev' ||
+      host.endsWith('.beta.lovable.dev') ||
+      new URLSearchParams(window.location.search).get('sw') === 'off'
     );
   } catch {
     return true;
@@ -27,15 +29,20 @@ const isPreviewLike = (() => {
 if (isPreviewLike && 'serviceWorker' in navigator) {
   navigator.serviceWorker
     .getRegistrations()
-    .then((registrations) => Promise.all(registrations.map((r) => r.unregister())))
+    .then((registrations) =>
+      Promise.all(
+        registrations
+          .filter((registration) => {
+            const scriptURL = registration.active?.scriptURL
+              ?? registration.waiting?.scriptURL
+              ?? registration.installing?.scriptURL
+              ?? '';
+            return new URL(scriptURL, window.location.origin).pathname === '/sw.js';
+          })
+          .map((registration) => registration.unregister()),
+      ),
+    )
     .catch(() => { /* noop */ });
-
-  if ('caches' in window) {
-    caches
-      .keys()
-      .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
-      .catch(() => { /* noop */ });
-  }
 }
 
 
