@@ -88,14 +88,69 @@ export function DesperdicioSection() {
     }
     printWindow.opener = null;
 
-    const rows = perdas.map((event) => `
+    const tipoLabel = (t: string) =>
+      t === "vencido" ? "Vencido" : t === "descartado" ? "Descartado" : t;
+
+    const totalGeral = perdas.reduce((acc, e) => acc + Number(e.custo_snapshot ?? 0), 0);
+
+    const porTipo = perdas.reduce<Record<string, { qtd: number; valor: number }>>((acc, e) => {
+      const k = e.tipo;
+      acc[k] = acc[k] || { qtd: 0, valor: 0 };
+      acc[k].qtd += 1;
+      acc[k].valor += Number(e.custo_snapshot ?? 0);
+      return acc;
+    }, {});
+
+    const porProduto = Object.entries(
+      perdas.reduce<Record<string, { qtd: number; valor: number }>>((acc, e) => {
+        const k = e.product_nome || "Sem nome";
+        acc[k] = acc[k] || { qtd: 0, valor: 0 };
+        acc[k].qtd += 1;
+        acc[k].valor += Number(e.custo_snapshot ?? 0);
+        return acc;
+      }, {})
+    ).sort((a, b) => b[1].valor - a[1].valor);
+
+    const rows = perdas
+      .map((event, i) => {
+        const d = new Date(event.created_at);
+        return `
       <tr>
-        <td>${escapeHtml(new Date(event.created_at).toLocaleDateString("pt-BR"))}</td>
+        <td>${i + 1}</td>
+        <td>${escapeHtml(d.toLocaleDateString("pt-BR"))}<br><small>${escapeHtml(
+          d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+        )}</small></td>
         <td>${escapeHtml(event.product_nome || "—")}</td>
         <td>${escapeHtml(event.product_lote || "—")}</td>
-        <td>${escapeHtml(event.motivo || event.tipo)}</td>
+        <td>${escapeHtml(tipoLabel(event.tipo))}</td>
+        <td>${escapeHtml(event.motivo || "—")}</td>
         <td class="amount">${escapeHtml(fmtBRL(Number(event.custo_snapshot ?? 0)))}</td>
-      </tr>`).join("");
+      </tr>`;
+      })
+      .join("");
+
+    const rowsTipo = Object.entries(porTipo)
+      .map(
+        ([tipo, v]) => `
+      <tr>
+        <td>${escapeHtml(tipoLabel(tipo))}</td>
+        <td class="amount">${v.qtd}</td>
+        <td class="amount">${escapeHtml(fmtBRL(v.valor))}</td>
+      </tr>`
+      )
+      .join("");
+
+    const rowsProduto = porProduto
+      .map(
+        ([nome, v]) => `
+      <tr>
+        <td>${escapeHtml(nome)}</td>
+        <td class="amount">${v.qtd}</td>
+        <td class="amount">${escapeHtml(fmtBRL(v.valor))}</td>
+        <td class="amount">${totalGeral > 0 ? ((v.valor / totalGeral) * 100).toFixed(1) : "0.0"}%</td>
+      </tr>`
+      )
+      .join("");
 
     const generatedAt = new Date().toLocaleString("pt-BR");
     printWindow.document.open();
@@ -111,41 +166,61 @@ export function DesperdicioSection() {
             body { margin: 0; color: #111827; font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
             header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 10px; border-bottom: 2px solid #111827; }
             h1 { margin: 0 0 4px; font-size: 21px; }
+            h2 { margin: 16px 0 6px; font-size: 13px; }
             p { margin: 0; color: #4b5563; }
+            small { color: #6b7280; }
             .generated { text-align: right; font-size: 10px; }
-            .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
+            .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0; }
             .metric { border: 1px solid #d1d5db; padding: 10px; break-inside: avoid; }
             .metric span { display: block; margin-bottom: 5px; color: #6b7280; font-size: 9px; text-transform: uppercase; }
-            .metric strong { font-size: 16px; }
+            .metric strong { font-size: 15px; }
             table { width: 100%; border-collapse: collapse; }
-            caption { padding: 8px 0; text-align: left; font-size: 13px; font-weight: 700; }
-            th, td { padding: 7px 6px; border: 1px solid #d1d5db; text-align: left; vertical-align: top; }
+            th, td { padding: 6px; border: 1px solid #d1d5db; text-align: left; vertical-align: top; }
             th { background: #f3f4f6; font-size: 9px; text-transform: uppercase; }
+            tfoot td { background: #f3f4f6; font-weight: 700; }
             tr { break-inside: avoid; }
+            thead { display: table-header-group; }
             .amount { text-align: right; white-space: nowrap; }
-            footer { margin-top: 10px; color: #6b7280; font-size: 9px; }
+            footer { margin-top: 12px; padding-top: 6px; border-top: 1px solid #d1d5db; color: #6b7280; font-size: 9px; }
             @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
           </style>
         </head>
         <body>
           <header>
-            <div><h1>Relatório de desperdício</h1><p>ValiControl — descartes e produtos vencidos</p></div>
+            <div><h1>Relatório detalhado de desperdício</h1><p>ValiControl — produtos dados baixa como descarte ou vencimento</p></div>
             <p class="generated">Gerado em<br><strong>${escapeHtml(generatedAt)}</strong></p>
           </header>
           <section class="summary">
             <div class="metric"><span>Prejuízo no mês</span><strong>${escapeHtml(fmtBRL(mesAtual))}</strong></div>
             <div class="metric"><span>Prejuízo no ano</span><strong>${escapeHtml(fmtBRL(ano))}</strong></div>
-            <div class="metric"><span>Total de descartes</span><strong>${totalEventos}</strong></div>
+            <div class="metric"><span>Prejuízo total</span><strong>${escapeHtml(fmtBRL(totalGeral))}</strong></div>
+            <div class="metric"><span>Total de baixas</span><strong>${totalEventos}</strong></div>
           </section>
+
+          <h2>Resumo por tipo de baixa</h2>
           <table>
-            <caption>Últimos descartes</caption>
-            <thead><tr><th>Data</th><th>Produto</th><th>Lote</th><th>Motivo</th><th class="amount">Valor</th></tr></thead>
-            <tbody>${rows}</tbody>
+            <thead><tr><th>Tipo</th><th class="amount">Qtd.</th><th class="amount">Valor</th></tr></thead>
+            <tbody>${rowsTipo}</tbody>
           </table>
-          <footer>Relatório com ${perdas.length} registro(s) de descarte ou vencimento.</footer>
+
+          <h2>Resumo por produto</h2>
+          <table>
+            <thead><tr><th>Produto</th><th class="amount">Qtd.</th><th class="amount">Valor</th><th class="amount">% do total</th></tr></thead>
+            <tbody>${rowsProduto}</tbody>
+          </table>
+
+          <h2>Detalhamento das baixas</h2>
+          <table>
+            <thead><tr><th>#</th><th>Data / hora</th><th>Produto</th><th>Lote</th><th>Tipo</th><th>Motivo</th><th class="amount">Valor</th></tr></thead>
+            <tbody>${rows}</tbody>
+            <tfoot><tr><td colspan="6">Total</td><td class="amount">${escapeHtml(fmtBRL(totalGeral))}</td></tr></tfoot>
+          </table>
+
+          <footer>Relatório com ${perdas.length} registro(s) de descarte ou vencimento — ValiControl.</footer>
           <script>window.addEventListener('load', () => { window.print(); });<\/script>
         </body>
       </html>`);
+
     printWindow.document.close();
   };
 
