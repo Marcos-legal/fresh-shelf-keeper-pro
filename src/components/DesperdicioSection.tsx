@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingDown, AlertTriangle, Trash2 } from "lucide-react";
+import { TrendingDown, AlertTriangle, Trash2, Printer } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 import { useProductEvents } from "@/hooks/useProductEvents";
 import {
   BarChart,
@@ -15,10 +17,18 @@ import {
 const fmtBRL = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+const escapeHtml = (value: unknown) =>
+  String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
 export function DesperdicioSection() {
   const { events, loading } = useProductEvents();
 
-  const { mesAtual, ano, ultimos12, recentes, totalEventos } = useMemo(() => {
+  const { mesAtual, ano, ultimos12, recentes, perdas, totalEventos } = useMemo(() => {
     const losses = events.filter((e) => e.tipo === "descartado" || e.tipo === "vencido");
     const now = new Date();
     const startMes = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -52,9 +62,92 @@ export function DesperdicioSection() {
       ano: sum(losses.filter((e) => new Date(e.created_at) >= startAno)),
       ultimos12: ultimos12Arr,
       recentes: losses.slice(0, 20),
+      perdas: losses,
       totalEventos: losses.length,
     };
   }, [events]);
+
+  const imprimirRelatorio = () => {
+    if (perdas.length === 0) {
+      toast({
+        title: "Nenhum desperdício para imprimir",
+        description: "Registre um descarte ou vencimento para gerar o relatório.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast({
+        title: "Não foi possível abrir a impressão",
+        description: "Permita pop-ups para este site e tente novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    printWindow.opener = null;
+
+    const rows = perdas.map((event) => `
+      <tr>
+        <td>${escapeHtml(new Date(event.created_at).toLocaleDateString("pt-BR"))}</td>
+        <td>${escapeHtml(event.product_nome || "—")}</td>
+        <td>${escapeHtml(event.product_lote || "—")}</td>
+        <td>${escapeHtml(event.motivo || event.tipo)}</td>
+        <td class="amount">${escapeHtml(fmtBRL(Number(event.custo_snapshot ?? 0)))}</td>
+      </tr>`).join("");
+
+    const generatedAt = new Date().toLocaleString("pt-BR");
+    printWindow.document.open();
+    printWindow.document.write(`<!doctype html>
+      <html lang="pt-BR">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Relatório de desperdício — ValiControl</title>
+          <style>
+            @page { size: A4 portrait; margin: 14mm; }
+            * { box-sizing: border-box; }
+            body { margin: 0; color: #111827; font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
+            header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 10px; border-bottom: 2px solid #111827; }
+            h1 { margin: 0 0 4px; font-size: 21px; }
+            p { margin: 0; color: #4b5563; }
+            .generated { text-align: right; font-size: 10px; }
+            .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
+            .metric { border: 1px solid #d1d5db; padding: 10px; break-inside: avoid; }
+            .metric span { display: block; margin-bottom: 5px; color: #6b7280; font-size: 9px; text-transform: uppercase; }
+            .metric strong { font-size: 16px; }
+            table { width: 100%; border-collapse: collapse; }
+            caption { padding: 8px 0; text-align: left; font-size: 13px; font-weight: 700; }
+            th, td { padding: 7px 6px; border: 1px solid #d1d5db; text-align: left; vertical-align: top; }
+            th { background: #f3f4f6; font-size: 9px; text-transform: uppercase; }
+            tr { break-inside: avoid; }
+            .amount { text-align: right; white-space: nowrap; }
+            footer { margin-top: 10px; color: #6b7280; font-size: 9px; }
+            @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+          </style>
+        </head>
+        <body>
+          <header>
+            <div><h1>Relatório de desperdício</h1><p>ValiControl — descartes e produtos vencidos</p></div>
+            <p class="generated">Gerado em<br><strong>${escapeHtml(generatedAt)}</strong></p>
+          </header>
+          <section class="summary">
+            <div class="metric"><span>Prejuízo no mês</span><strong>${escapeHtml(fmtBRL(mesAtual))}</strong></div>
+            <div class="metric"><span>Prejuízo no ano</span><strong>${escapeHtml(fmtBRL(ano))}</strong></div>
+            <div class="metric"><span>Total de descartes</span><strong>${totalEventos}</strong></div>
+          </section>
+          <table>
+            <caption>Últimos descartes</caption>
+            <thead><tr><th>Data</th><th>Produto</th><th>Lote</th><th>Motivo</th><th class="amount">Valor</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <footer>Relatório com ${perdas.length} registro(s) de descarte ou vencimento.</footer>
+          <script>window.addEventListener('load', () => { window.print(); });<\/script>
+        </body>
+      </html>`);
+    printWindow.document.close();
+  };
 
   if (loading) {
     return (
@@ -68,6 +161,12 @@ export function DesperdicioSection() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button onClick={imprimirRelatorio} variant="outline" disabled={perdas.length === 0}>
+          <Printer className="w-4 h-4 mr-2" />
+          Imprimir relatório
+        </Button>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card>
           <CardHeader className="pb-2">
