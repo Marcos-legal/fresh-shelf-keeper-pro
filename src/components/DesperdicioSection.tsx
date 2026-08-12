@@ -28,7 +28,7 @@ const escapeHtml = (value: unknown) =>
 export function DesperdicioSection() {
   const { events, loading } = useProductEvents();
 
-  const { mesAtual, ano, ultimos12, recentes, totalEventos } = useMemo(() => {
+  const { mesAtual, ano, ultimos12, recentes, perdas, totalEventos } = useMemo(() => {
     const losses = events.filter((e) => e.tipo === "descartado" || e.tipo === "vencido");
     const now = new Date();
     const startMes = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -62,12 +62,13 @@ export function DesperdicioSection() {
       ano: sum(losses.filter((e) => new Date(e.created_at) >= startAno)),
       ultimos12: ultimos12Arr,
       recentes: losses.slice(0, 20),
+      perdas: losses,
       totalEventos: losses.length,
     };
   }, [events]);
 
   const imprimirRelatorio = () => {
-    if (recentes.length === 0) {
+    if (perdas.length === 0) {
       toast({
         title: "Nenhum desperdício para imprimir",
         description: "Registre um descarte ou vencimento para gerar o relatório.",
@@ -76,7 +77,7 @@ export function DesperdicioSection() {
       return;
     }
 
-    const printWindow = window.open("", "_blank", "noopener,noreferrer");
+    const printWindow = window.open("", "_blank");
     if (!printWindow) {
       toast({
         title: "Não foi possível abrir a impressão",
@@ -85,8 +86,9 @@ export function DesperdicioSection() {
       });
       return;
     }
+    printWindow.opener = null;
 
-    const rows = recentes.map((event) => `
+    const rows = perdas.map((event) => `
       <tr>
         <td>${escapeHtml(new Date(event.created_at).toLocaleDateString("pt-BR"))}</td>
         <td>${escapeHtml(event.product_nome || "—")}</td>
@@ -140,7 +142,7 @@ export function DesperdicioSection() {
             <thead><tr><th>Data</th><th>Produto</th><th>Lote</th><th>Motivo</th><th class="amount">Valor</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
-          <footer>Relatório com os ${recentes.length} registros mais recentes exibidos no sistema.</footer>
+          <footer>Relatório com ${perdas.length} registro(s) de descarte ou vencimento.</footer>
           <script>window.addEventListener('load', () => { window.print(); });<\/script>
         </body>
       </html>`);
@@ -160,7 +162,7 @@ export function DesperdicioSection() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={imprimirRelatorio} variant="outline" disabled={recentes.length === 0}>
+        <Button onClick={imprimirRelatorio} variant="outline" disabled={perdas.length === 0}>
           <Printer className="w-4 h-4 mr-2" />
           Imprimir relatório
         </Button>
