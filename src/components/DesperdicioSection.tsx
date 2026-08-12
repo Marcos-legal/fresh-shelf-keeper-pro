@@ -237,11 +237,12 @@ export function DesperdicioSection() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={imprimirRelatorio} variant="outline" disabled={perdas.length === 0}>
+        <Button onClick={imprimirRelatorio} className="gradient-blue text-white">
           <Printer className="w-4 h-4 mr-2" />
-          Imprimir relatório
+          Imprimir relatório de desperdício
         </Button>
       </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card>
           <CardHeader className="pb-2">
