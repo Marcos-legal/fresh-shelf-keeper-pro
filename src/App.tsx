@@ -10,6 +10,7 @@ import { EmpresaProvider } from "@/contexts/EmpresaContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -36,17 +37,18 @@ const queryClient = new QueryClient({
 });
 
 const App: React.FC = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <AuthProvider>
-        <EmpresaProvider>
-        <ResponsaveisProvider>
-          <TooltipProvider>
-            <SidebarProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-              <Routes>
+  <AppErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <AuthProvider>
+          <EmpresaProvider>
+          <ResponsaveisProvider>
+            <TooltipProvider>
+              <SidebarProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -63,15 +65,16 @@ const App: React.FC = () => (
                 <Route path="/configuracoes/empresa" element={<ProtectedRoute><ConfiguracoesEmpresa /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-            </SidebarProvider>
-          </TooltipProvider>
-        </ResponsaveisProvider>
-        </EmpresaProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+                </Routes>
+              </BrowserRouter>
+              </SidebarProvider>
+            </TooltipProvider>
+          </ResponsaveisProvider>
+          </EmpresaProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </AppErrorBoundary>
 );
 
 export default App;
