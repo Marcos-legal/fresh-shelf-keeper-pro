@@ -21,10 +21,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    const sessionTimeout = window.setTimeout(() => {
+      if (!mounted) return;
+      console.warn('A verificação da sessão excedeu o tempo limite; iniciando sem sessão.');
+      setSession(null);
+      setUser(null);
+      setLoading(false);
+    }, 10000);
 
     const clearInvalidSession = async () => {
       await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
       if (mounted) {
+        window.clearTimeout(sessionTimeout);
         setSession(null);
         setUser(null);
         setLoading(false);
@@ -35,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mounted) return;
+        window.clearTimeout(sessionTimeout);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -62,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         if (!mounted) return;
+        window.clearTimeout(sessionTimeout);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -70,6 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       mounted = false;
+      window.clearTimeout(sessionTimeout);
       subscription.unsubscribe();
     };
   }, []);
