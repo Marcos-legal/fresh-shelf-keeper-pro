@@ -159,7 +159,7 @@ const VisualizarEtiquetas = () => {
               <div className="p-4 sm:p-5 border-b border-border/40">
                 <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <RefreshCw className="w-4 h-4 text-muted-foreground" />
-                  Atualizar Datas "Utilizar até"
+                  &nbsp;✨ GERAR NOVAS ETIQUETAS
                 </h3>
               </div>
               <div className="p-4 sm:p-5 space-y-4">
