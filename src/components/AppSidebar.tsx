@@ -1,9 +1,8 @@
-
-import { 
-  LayoutDashboard, 
-  Snowflake, 
-  Thermometer, 
-  Home, 
+import {
+  LayoutDashboard,
+  Snowflake,
+  Thermometer,
+  Home,
   Refrigerator,
   Package,
   FileText,
@@ -14,7 +13,6 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
-import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -34,9 +32,7 @@ import { EmpresaSwitcher } from "./EmpresaSwitcher";
 const navSections = [
   {
     label: "Visão Geral",
-    items: [
-      { title: "Dashboard", url: "/", icon: LayoutDashboard },
-    ],
+    items: [{ title: "Dashboard", url: "/", icon: LayoutDashboard }],
   },
   {
     label: "Armazenamento",
@@ -63,7 +59,7 @@ const navSections = [
 export function AppSidebar() {
   const location = useLocation();
   const { stats } = useProductsSupabase();
-  
+
   const getCategoryCount = (category: string) => stats.porCategoria[category] || 0;
   const isActive = (path: string) => location.pathname === path;
 
@@ -77,38 +73,33 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="hidden lg:block border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="p-5 pb-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
+    <Sidebar className="hidden lg:block border-r border-sidebar-border/70 bg-sidebar">
+      <SidebarHeader className="p-4 pb-3">
+        <div className="flex items-center gap-3 px-1">
+          <div className="relative w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm">
             <Package className="w-5 h-5 text-primary-foreground" />
+            <span className="absolute -right-0.5 -bottom-0.5 w-2.5 h-2.5 rounded-full bg-success border-2 border-sidebar" />
           </div>
-          <div>
-            <h1 className="text-base font-bold text-sidebar-foreground tracking-tight">
-              ValiControl
-            </h1>
-            <p className="text-[11px] text-sidebar-foreground/50">
-              Controle de Validades
-            </p>
+          <div className="min-w-0">
+            <h1 className="text-base font-bold text-sidebar-foreground tracking-tight">ValiControl</h1>
+            <p className="text-[10px] text-sidebar-foreground/50 truncate">Controle de Validades</p>
           </div>
         </div>
 
-        {/* Empresa Switcher */}
-        <div className="mt-4 pt-3 border-t border-sidebar-border">
+        <div className="mt-4 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/30 p-2.5">
           <EmpresaSwitcher />
         </div>
 
-        {/* User Menu */}
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-xs text-sidebar-foreground/50">Conta</span>
+        <div className="mt-2.5 flex items-center justify-between px-1.5">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-sidebar-foreground/35">Conta</span>
           <UserMenu />
         </div>
       </SidebarHeader>
-      
-      <SidebarContent>
+
+      <SidebarContent className="px-1">
         {navSections.map((section) => (
-          <SidebarGroup key={section.label}>
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-sidebar-foreground/40 font-semibold px-4">
+          <SidebarGroup key={section.label} className="py-2">
+            <SidebarGroupLabel className="h-7 text-[9px] uppercase tracking-[0.14em] text-sidebar-foreground/35 font-bold px-3">
               {section.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -116,35 +107,35 @@ export function AppSidebar() {
                 {section.items.map((item) => {
                   const isCurrentPage = isActive(item.url);
                   const badgeCount = getBadgeCount(item.url);
-                  
+
                   return (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        asChild 
+                      <SidebarMenuButton
+                        asChild
                         className={cn(
-                          "transition-all duration-200 rounded-lg mx-2",
-                          isCurrentPage 
-                            ? "bg-primary/10 text-primary font-semibold" 
-                            : "hover:bg-sidebar-accent text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                          "h-10 transition-all duration-200 rounded-xl mx-1",
+                          isCurrentPage
+                            ? "bg-primary/10 text-primary font-semibold shadow-sm"
+                            : "text-sidebar-foreground/65 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                         )}
                       >
                         <Link to={item.url} className="flex items-center justify-between py-2 px-3">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
                             <item.icon className={cn(
-                              "w-4 h-4",
-                              isCurrentPage ? "text-primary" : "text-sidebar-foreground/50"
+                              "w-[17px] h-[17px] shrink-0",
+                              isCurrentPage ? "text-primary" : "text-sidebar-foreground/45"
                             )} />
-                            <span className="text-sm">{item.title}</span>
+                            <span className="text-sm truncate">{item.title}</span>
                           </div>
-                          
+
                           {badgeCount > 0 && (
                             <span className={cn(
-                              "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-                              isCurrentPage 
-                                ? "bg-primary/20 text-primary" 
-                                : "bg-sidebar-accent text-sidebar-foreground/50"
+                              "text-[9px] font-bold min-w-5 h-5 px-1.5 rounded-full inline-flex items-center justify-center",
+                              isCurrentPage
+                                ? "bg-primary/15 text-primary"
+                                : "bg-sidebar-accent text-sidebar-foreground/45"
                             )}>
-                              {badgeCount}
+                              {badgeCount > 999 ? '999+' : badgeCount}
                             </span>
                           )}
                         </Link>
@@ -157,21 +148,19 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      
-      <SidebarFooter className="p-4">
-        <div className="grid grid-cols-2 gap-2">
-          <div className="p-2.5 rounded-lg bg-success/8 text-center">
-            <div className="text-lg font-bold text-success">{stats.validos}</div>
-            <div className="text-[10px] text-muted-foreground">Válidos</div>
+
+      <SidebarFooter className="p-3">
+        <div className="grid grid-cols-2 gap-2 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/20 p-2">
+          <div className="p-2 rounded-lg bg-success/8 text-center">
+            <div className="text-lg font-bold text-success leading-none">{stats.validos}</div>
+            <div className="text-[9px] font-medium text-muted-foreground mt-1">Válidos</div>
           </div>
-          <div className="p-2.5 rounded-lg bg-destructive/8 text-center">
-            <div className="text-lg font-bold text-destructive">{stats.vencidos}</div>
-            <div className="text-[10px] text-muted-foreground">Vencidos</div>
+          <div className="p-2 rounded-lg bg-destructive/8 text-center">
+            <div className="text-lg font-bold text-destructive leading-none">{stats.vencidos}</div>
+            <div className="text-[9px] font-medium text-muted-foreground mt-1">Vencidos</div>
           </div>
         </div>
-        <div className="text-center text-[10px] text-sidebar-foreground/30 mt-3">
-          © 2024 ValiControl v2.0
-        </div>
+        <div className="text-center text-[9px] text-sidebar-foreground/25 mt-2">ValiControl · v2.0</div>
       </SidebarFooter>
     </Sidebar>
   );
