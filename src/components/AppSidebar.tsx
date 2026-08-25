@@ -73,33 +73,33 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="hidden lg:block border-r border-sidebar-border/70 bg-sidebar">
-      <SidebarHeader className="p-4 pb-3">
+    <Sidebar className="hidden lg:block border-r border-slate-200 bg-slate-50 text-slate-700">
+      <SidebarHeader className="p-4 pb-3 bg-white">
         <div className="flex items-center gap-3 px-1">
           <div className="relative w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm">
             <Package className="w-5 h-5 text-primary-foreground" />
-            <span className="absolute -right-0.5 -bottom-0.5 w-2.5 h-2.5 rounded-full bg-success border-2 border-sidebar" />
+            <span className="absolute -right-0.5 -bottom-0.5 w-2.5 h-2.5 rounded-full bg-success border-2 border-white" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-base font-bold text-sidebar-foreground tracking-tight">ValiControl</h1>
-            <p className="text-[10px] text-sidebar-foreground/50 truncate">Controle de Validades</p>
+            <h1 className="text-base font-bold text-slate-800 tracking-tight">ValiControl</h1>
+            <p className="text-[10px] text-slate-500 truncate">Controle de Validades</p>
           </div>
         </div>
 
-        <div className="mt-4 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/30 p-2.5">
+        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-2.5">
           <EmpresaSwitcher />
         </div>
 
         <div className="mt-2.5 flex items-center justify-between px-1.5">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-sidebar-foreground/35">Conta</span>
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">Conta</span>
           <UserMenu />
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-1">
+      <SidebarContent className="px-1 bg-slate-50">
         {navSections.map((section) => (
           <SidebarGroup key={section.label} className="py-2">
-            <SidebarGroupLabel className="h-7 text-[9px] uppercase tracking-[0.14em] text-sidebar-foreground/35 font-bold px-3">
+            <SidebarGroupLabel className="h-7 text-[9px] uppercase tracking-[0.14em] text-slate-400 font-bold px-3">
               {section.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -116,14 +116,14 @@ export function AppSidebar() {
                           "h-10 transition-all duration-200 rounded-xl mx-1",
                           isCurrentPage
                             ? "bg-primary/10 text-primary font-semibold shadow-sm"
-                            : "text-sidebar-foreground/65 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                            : "text-slate-600 hover:bg-white hover:text-slate-900"
                         )}
                       >
                         <Link to={item.url} className="flex items-center justify-between py-2 px-3">
                           <div className="flex items-center gap-3 min-w-0">
                             <item.icon className={cn(
                               "w-[17px] h-[17px] shrink-0",
-                              isCurrentPage ? "text-primary" : "text-sidebar-foreground/45"
+                              isCurrentPage ? "text-primary" : "text-slate-400"
                             )} />
                             <span className="text-sm truncate">{item.title}</span>
                           </div>
@@ -133,7 +133,7 @@ export function AppSidebar() {
                               "text-[9px] font-bold min-w-5 h-5 px-1.5 rounded-full inline-flex items-center justify-center",
                               isCurrentPage
                                 ? "bg-primary/15 text-primary"
-                                : "bg-sidebar-accent text-sidebar-foreground/45"
+                                : "bg-slate-200 text-slate-500"
                             )}>
                               {badgeCount > 999 ? '999+' : badgeCount}
                             </span>
@@ -149,18 +149,18 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
-        <div className="grid grid-cols-2 gap-2 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/20 p-2">
+      <SidebarFooter className="p-3 bg-slate-50">
+        <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-200 bg-white p-2">
           <div className="p-2 rounded-lg bg-success/8 text-center">
             <div className="text-lg font-bold text-success leading-none">{stats.validos}</div>
-            <div className="text-[9px] font-medium text-muted-foreground mt-1">Válidos</div>
+            <div className="text-[9px] font-medium text-slate-500 mt-1">Válidos</div>
           </div>
           <div className="p-2 rounded-lg bg-destructive/8 text-center">
             <div className="text-lg font-bold text-destructive leading-none">{stats.vencidos}</div>
-            <div className="text-[9px] font-medium text-muted-foreground mt-1">Vencidos</div>
+            <div className="text-[9px] font-medium text-slate-500 mt-1">Vencidos</div>
           </div>
         </div>
-        <div className="text-center text-[9px] text-sidebar-foreground/25 mt-2">ValiControl · v2.0</div>
+        <div className="text-center text-[9px] text-slate-400 mt-2">ValiControl · v2.0</div>
       </SidebarFooter>
     </Sidebar>
   );
