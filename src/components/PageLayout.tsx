@@ -24,18 +24,18 @@ export function PageLayout({
 }: PageLayoutProps) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-muted/20">
         <MobileDrawer />
         <AppSidebar />
         <main className="flex-1 w-full min-w-0 overflow-x-hidden">
-          <div className="px-3.5 sm:px-6 lg:px-8 py-3 sm:py-6 lg:py-8 max-w-[1440px] mx-auto w-full">
-            <header className="sticky top-0 z-20 -mx-3.5 sm:-mx-6 lg:-mx-8 px-3.5 sm:px-6 lg:px-8 py-3 sm:py-4 mb-5 sm:mb-7 bg-background/90 backdrop-blur-xl border-b border-border/40">
-              <div className="flex items-center justify-between gap-3 max-w-[1440px] mx-auto">
+          <div className="px-3.5 sm:px-6 lg:px-8 py-3 sm:py-5 lg:py-7 max-w-[1520px] mx-auto w-full">
+            <header className="sticky top-0 z-20 -mx-3.5 sm:-mx-6 lg:-mx-8 px-3.5 sm:px-6 lg:px-8 py-3 sm:py-4 mb-5 sm:mb-7 bg-background/90 backdrop-blur-xl border-b border-border/40 shadow-[0_1px_0_rgba(0,0,0,0.02)]">
+              <div className="flex items-center justify-between gap-3 max-w-[1520px] mx-auto">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                  <SidebarTrigger className="hidden lg:flex h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors rounded-lg" />
+                  <SidebarTrigger className="hidden lg:flex h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors rounded-xl" />
                   {Icon && (
                     <div className={cn(
-                      "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm",
+                      "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm ring-1 ring-black/5",
                       iconClassName || "bg-primary/10"
                     )}>
                       <Icon className={cn("w-[18px] h-[18px] sm:w-5 sm:h-5", iconClassName ? "" : "text-primary")} />
@@ -61,7 +61,9 @@ export function PageLayout({
               </div>
             </header>
 
-            {children}
+            <section className="relative">
+              {children}
+            </section>
           </div>
         </main>
       </div>
