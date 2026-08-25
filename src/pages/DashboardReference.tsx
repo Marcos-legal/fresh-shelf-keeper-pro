@@ -19,14 +19,13 @@ import {
   Tag,
   ThermometerSnowflake,
   Truck,
-  XCircle,
 } from "lucide-react";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Product, ProductFormData } from "@/types/product";
 import { ProductForm } from "@/components/ProductForm";
 import { ProductTable } from "@/components/ProductTable";
-import { Button } from "@/components/ui/button";
 import { AppSidebar } from "@/components/AppSidebar";
+import { DashboardChart } from "@/components/DashboardChart";
 import { MobileDrawer } from "@/components/MobileDrawer";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { toast } from "@/hooks/use-toast";
@@ -68,7 +67,7 @@ function productTargetDate(product: Product) {
 
 export default function DashboardReference() {
   const navigate = useNavigate();
-  const { products, loading, addProduct, updateProduct, deleteProduct, stats } = useProductsSupabase();
+  const { products, addProduct, updateProduct, deleteProduct, stats } = useProductsSupabase();
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -119,16 +118,11 @@ export default function DashboardReference() {
         <MobileDrawer />
         <AppSidebar />
 
-        <main className="lg:pl-0 min-w-0">
+        <main className="min-w-0 lg:pl-64 transition-[padding] duration-300">
           <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
-            <div className="mx-auto flex h-[76px] max-w-[1536px] items-center justify-between px-4 sm:px-6 lg:px-7">
+            <div className="mx-auto flex h-[76px] max-w-[1536px] items-center justify-between px-4 sm:px-6 lg:px-8">
               <div className="flex items-center gap-4 min-w-0">
-                <button
-                  type="button"
-                  aria-label="Abrir menu"
-                  onClick={() => setMobileMenuOpen(true)}
-                  className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
-                >
+                <button type="button" aria-label="Abrir menu" onClick={() => setMobileMenuOpen(true)} className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden">
                   <Menu className="h-6 w-6" />
                 </button>
                 <div className="hidden lg:block h-8 w-px bg-slate-200" />
@@ -154,7 +148,7 @@ export default function DashboardReference() {
             </div>
           </header>
 
-          <div className="mx-auto max-w-[1536px] px-4 py-5 sm:px-6 lg:px-7 lg:py-7">
+          <div className="mx-auto w-full max-w-[1536px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
             {showForm && (
               <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
                 <ProductForm
@@ -166,7 +160,7 @@ export default function DashboardReference() {
               </div>
             )}
 
-            <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+            <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5">
               <KpiCard title="Total de Produtos" value={stats.total} description="Todos os itens cadastrados" icon={Box} tone="blue" />
               <KpiCard title="A Vencer (30 dias)" value={stats.proximoVencimento} description="Requer atenção em breve" icon={Clock3} tone="amber" />
               <KpiCard title="Vencidos" value={stats.vencidos} description="Itens vencidos" icon={AlertTriangle} tone="red" />
@@ -177,7 +171,7 @@ export default function DashboardReference() {
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-slate-900">Produtos por Armazenamento</h2>
               </div>
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
                 {storageConfig.map((item) => {
                   const count = stats.porCategoria[item.key] || 0;
                   const tone = toneClasses[item.tone];
@@ -185,43 +179,33 @@ export default function DashboardReference() {
                   return (
                     <button key={item.key} onClick={() => navigate(`/${item.key}`)} className="group rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm">
                       <div className="flex items-start justify-between gap-2">
-                        <div className={cn("flex h-11 w-11 items-center justify-center rounded-full", tone.icon)}>
-                          <item.icon className="h-6 w-6" />
-                        </div>
+                        <div className={cn("flex h-11 w-11 items-center justify-center rounded-full", tone.icon)}><item.icon className="h-6 w-6" /></div>
                       </div>
                       <p className="mt-3 text-sm font-medium text-slate-700">{item.label}</p>
                       <p className="mt-1 text-2xl font-bold text-slate-900">{count}</p>
                       <p className="text-xs text-slate-500">Itens</p>
-                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
-                        <div className={cn("h-full rounded-full", tone.bar)} style={{ width: `${percentage}%` }} />
-                      </div>
+                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className={cn("h-full rounded-full", tone.bar)} style={{ width: `${percentage}%` }} /></div>
                     </button>
                   );
                 })}
               </div>
             </section>
 
+            <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-slate-900">Visão dos Indicadores</h2>
+                <p className="mt-1 text-sm text-slate-500">Distribuição dos produtos por armazenamento e situação de validade.</p>
+              </div>
+              <DashboardChart categoryData={stats.porCategoria} statusData={{ validos: stats.validos, proximoVencimento: stats.proximoVencimento, vencidos: stats.vencidos }} />
+            </section>
+
             <section className="mt-5 grid gap-5 lg:grid-cols-2">
-              <ProductListCard
-                title="Próximos a vencer"
-                items={upcoming}
-                empty="Nenhum produto vencendo nos próximos dias."
-                variant="warning"
-                onViewAll={() => navigate("/relatorios")}
-              />
-              <ProductListCard
-                title="Produtos vencidos"
-                items={expired}
-                empty="Nenhum produto vencido."
-                variant="danger"
-                onViewAll={() => navigate("/relatorios")}
-              />
+              <ProductListCard title="Próximos a vencer" items={upcoming} empty="Nenhum produto vencendo nos próximos dias." variant="warning" onViewAll={() => navigate("/relatorios")} />
+              <ProductListCard title="Produtos vencidos" items={expired} empty="Nenhum produto vencido." variant="danger" onViewAll={() => navigate("/relatorios")} />
             </section>
 
             <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900">Ações Rápidas</h2>
-              </div>
+              <div className="mb-4 flex items-center justify-between"><h2 className="text-lg font-semibold text-slate-900">Ações Rápidas</h2></div>
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <QuickAction icon={Plus} label="Novo Produto" onClick={openNew} tone="blue" />
                 <QuickAction icon={Tag} label="Gerar Etiquetas" onClick={() => navigate("/impressao-etiquetas")} tone="green" />
@@ -231,33 +215,14 @@ export default function DashboardReference() {
             </section>
 
             <section className="mt-5">
-              <ProductTable
-                products={products}
-                title="Todos os Produtos"
-                onEdit={openEdit}
-                onDelete={(id) => {
-                  deleteProduct(id);
-                  toast({ title: "Produto excluído", description: "Produto excluído com sucesso." });
-                }}
-              />
+              <ProductTable products={products} title="Todos os Produtos" onEdit={openEdit} onDelete={(id) => { deleteProduct(id); toast({ title: "Produto excluído", description: "Produto excluído com sucesso." }); }} />
             </section>
 
-            <footer className="flex flex-col gap-2 py-6 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-              <span>ValiControl - Controle de Validades</span>
-              <span>Versão 2.0.0</span>
-            </footer>
+            <footer className="flex flex-col gap-2 py-6 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between"><span>ValiControl - Controle de Validades</span><span>Versão 2.0.0</span></footer>
           </div>
         </main>
 
-        <button
-          type="button"
-          onClick={openNew}
-          className="fixed bottom-20 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 transition hover:bg-blue-700 lg:hidden"
-          aria-label="Novo produto"
-        >
-          <Plus className="h-7 w-7" />
-        </button>
-
+        <button type="button" onClick={openNew} className="fixed bottom-20 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 transition hover:bg-blue-700 lg:hidden" aria-label="Novo produto"><Plus className="h-7 w-7" /></button>
         <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/98 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-4px_20px_rgba(15,23,42,0.06)] lg:hidden">
           <div className="mx-auto grid max-w-lg grid-cols-4">
             <MobileNav icon={Home} label="Dashboard" active onClick={() => navigate("/")} />
@@ -272,55 +237,12 @@ export default function DashboardReference() {
 }
 
 function KpiCard({ title, value, description, icon: Icon, tone }: { title: string; value: number; description: string; icon: typeof Box; tone: "blue" | "amber" | "red" | "green" }) {
-  const styles = {
-    blue: { icon: "bg-blue-50 text-blue-600", value: "text-slate-900" },
-    amber: { icon: "bg-amber-50 text-amber-500", value: "text-slate-900" },
-    red: { icon: "bg-red-50 text-red-500", value: "text-slate-900" },
-    green: { icon: "bg-green-50 text-green-600", value: "text-slate-900" },
-  }[tone];
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="flex items-start gap-3">
-        <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-full", styles.icon)}><Icon className="h-6 w-6" /></div>
-        <div className="min-w-0">
-          <p className="truncate text-xs font-medium text-slate-600 sm:text-sm">{title}</p>
-          <p className={cn("mt-1 text-2xl font-bold sm:text-[28px]", styles.value)}>{value}</p>
-          <p className="mt-1 hidden text-xs text-slate-500 sm:block">{description}</p>
-        </div>
-      </div>
-    </div>
-  );
+  const styles = { blue: { icon: "bg-blue-50 text-blue-600", value: "text-slate-900" }, amber: { icon: "bg-amber-50 text-amber-500", value: "text-slate-900" }, red: { icon: "bg-red-50 text-red-500", value: "text-slate-900" }, green: { icon: "bg-green-50 text-green-600", value: "text-slate-900" } }[tone];
+  return <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><div className="flex items-start gap-3"><div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-full", styles.icon)}><Icon className="h-6 w-6" /></div><div className="min-w-0"><p className="truncate text-xs font-medium text-slate-600 sm:text-sm">{title}</p><p className={cn("mt-1 text-2xl font-bold sm:text-[28px]", styles.value)}>{value}</p><p className="mt-1 hidden text-xs text-slate-500 sm:block">{description}</p></div></div></div>;
 }
 
 function ProductListCard({ title, items, empty, variant, onViewAll }: { title: string; items: { product: Product; days: number | null }[]; empty: string; variant: "warning" | "danger"; onViewAll: () => void }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-        <button onClick={onViewAll} className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700">Ver todos <ChevronRight className="h-4 w-4" /></button>
-      </div>
-      <div className="divide-y divide-slate-100">
-        {items.length === 0 && <p className="py-8 text-center text-sm text-slate-400">{empty}</p>}
-        {items.map(({ product, days }) => (
-          <div key={product.id} className="flex items-center gap-3 py-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-500">
-              <Package className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-slate-800">{product.nome || "Produto sem nome"}</p>
-              <p className={cn("text-xs", variant === "danger" ? "text-red-500" : "text-amber-500")}>
-                {variant === "danger" ? `Vencido há ${Math.max(1, Math.abs(days || 0))} dias` : `Vence em ${days} dias`}
-              </p>
-            </div>
-            <div className="hidden text-right sm:block">
-              <span className="rounded-full bg-blue-50 px-2 py-1 text-[11px] font-medium text-blue-600">{product.localArmazenamento === "camara-fria" ? "Câmara Fria" : product.localArmazenamento === "congelado" ? "Congelado" : product.localArmazenamento === "ambiente" ? "Ambiente" : "Refrigerado"}</span>
-              <p className="mt-1 text-xs text-slate-500">{formatDate(productTargetDate(product))}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  return <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><div className="mb-3 flex items-center justify-between"><h2 className="text-lg font-semibold text-slate-900">{title}</h2><button onClick={onViewAll} className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700">Ver todos <ChevronRight className="h-4 w-4" /></button></div><div className="divide-y divide-slate-100">{items.length === 0 && <p className="py-8 text-center text-sm text-slate-400">{empty}</p>}{items.map(({ product, days }) => <div key={product.id} className="flex items-center gap-3 py-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-500"><Package className="h-5 w-5" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-slate-800">{product.nome || "Produto sem nome"}</p><p className={cn("text-xs", variant === "danger" ? "text-red-500" : "text-amber-500")}>{variant === "danger" ? `Vencido há ${Math.max(1, Math.abs(days || 0))} dias` : `Vence em ${days} dias`}</p></div><div className="hidden text-right sm:block"><span className="rounded-full bg-blue-50 px-2 py-1 text-[11px] font-medium text-blue-600">{product.localArmazenamento === "camara-fria" ? "Câmara Fria" : product.localArmazenamento === "congelado" ? "Congelado" : product.localArmazenamento === "ambiente" ? "Ambiente" : "Refrigerado"}</span><p className="mt-1 text-xs text-slate-500">{formatDate(productTargetDate(product))}</p></div></div>)}</div></div>;
 }
 
 function QuickAction({ icon: Icon, label, onClick, tone }: { icon: typeof Plus; label: string; onClick: () => void; tone: "blue" | "green" | "purple" | "amber" }) {
