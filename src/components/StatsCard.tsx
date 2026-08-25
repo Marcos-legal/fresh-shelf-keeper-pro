@@ -52,37 +52,40 @@ export function StatsCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group relative w-full overflow-hidden bg-card text-left rounded-2xl border p-4 sm:p-5 transition-all duration-200",
-        "shadow-sm hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+        "group relative w-full min-h-[112px] overflow-hidden bg-card text-left rounded-2xl border p-4 sm:p-5",
+        "transition-all duration-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
         onClick && "cursor-pointer active:scale-[0.985]",
         isActive
           ? cn("ring-2 shadow-lg border-transparent", styles.activeBorder, styles.activeGlow)
-          : "border-border/60 hover:border-border"
+          : "border-border/60 hover:border-primary/15"
       )}
       aria-pressed={isActive}
     >
       <div className={cn("absolute inset-x-0 top-0 h-0.5 opacity-70", styles.accent)} />
+      <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-muted/20 blur-2xl transition-opacity group-hover:opacity-80" />
 
-      <div className="flex items-start justify-between gap-3">
+      <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0">
           <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-[0.12em]">
             {title}
           </span>
-          <div className="mt-2 text-2xl sm:text-3xl font-bold text-foreground tracking-tight tabular-nums leading-none">
+          <div className="mt-2 text-2xl sm:text-[30px] font-bold text-foreground tracking-tight tabular-nums leading-none">
             {value.toLocaleString('pt-BR')}
           </div>
         </div>
 
         <div className={cn(
-          "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105",
+          "w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shrink-0",
+          "transition-transform duration-200 group-hover:scale-105",
           styles.iconBg
         )}>
-          <Icon className={cn("w-[18px] h-[18px] sm:w-5 sm:h-5", styles.iconColor)} />
+          <Icon className={cn("w-[19px] h-[19px] sm:w-5 sm:h-5", styles.iconColor)} />
         </div>
       </div>
 
       {description && (
-        <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-3 leading-relaxed truncate">
+        <p className="relative text-[10px] sm:text-[11px] text-muted-foreground mt-3 leading-relaxed truncate">
           {description}
         </p>
       )}
