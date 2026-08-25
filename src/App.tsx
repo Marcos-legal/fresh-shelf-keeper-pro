@@ -11,7 +11,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
-import Index from "./pages/Index";
+import DashboardReference from "./pages/DashboardReference";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Refrigerado from "./pages/Refrigerado";
@@ -31,7 +31,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
@@ -42,34 +42,33 @@ const App: React.FC = () => (
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <AuthProvider>
           <EmpresaProvider>
-          <ResponsaveisProvider>
-            <TooltipProvider>
-              <SidebarProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                <Routes>
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                <Route path="/refrigerado" element={<ProtectedRoute><Refrigerado /></ProtectedRoute>} />
-                <Route path="/congelado" element={<ProtectedRoute><Congelado /></ProtectedRoute>} />
-                <Route path="/ambiente" element={<ProtectedRoute><Ambiente /></ProtectedRoute>} />
-                <Route path="/camara-fria" element={<ProtectedRoute><CamaraFria /></ProtectedRoute>} />
-                <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
-                <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
-                <Route path="/impressao-etiquetas" element={<ProtectedRoute><ImpressaoEtiquetas /></ProtectedRoute>} />
-                <Route path="/visualizar-etiquetas" element={<ProtectedRoute><VisualizarEtiquetas /></ProtectedRoute>} />
-                <Route path="/contagem-estoque" element={<ProtectedRoute><ContagemEstoque /></ProtectedRoute>} />
-                <Route path="/leitor-qrcode" element={<ProtectedRoute><LeitorQrCode /></ProtectedRoute>} />
-                <Route path="/configuracoes/empresa" element={<ProtectedRoute><ConfiguracoesEmpresa /></ProtectedRoute>} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-              </SidebarProvider>
-            </TooltipProvider>
-          </ResponsaveisProvider>
+            <ResponsaveisProvider>
+              <TooltipProvider>
+                <SidebarProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path="/auth" element={<Auth />} />
+                      <Route path="/reset-password" element={<ResetPassword />} />
+                      <Route path="/" element={<ProtectedRoute><DashboardReference /></ProtectedRoute>} />
+                      <Route path="/refrigerado" element={<ProtectedRoute><Refrigerado /></ProtectedRoute>} />
+                      <Route path="/congelado" element={<ProtectedRoute><Congelado /></ProtectedRoute>} />
+                      <Route path="/ambiente" element={<ProtectedRoute><Ambiente /></ProtectedRoute>} />
+                      <Route path="/camara-fria" element={<ProtectedRoute><CamaraFria /></ProtectedRoute>} />
+                      <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
+                      <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
+                      <Route path="/impressao-etiquetas" element={<ProtectedRoute><ImpressaoEtiquetas /></ProtectedRoute>} />
+                      <Route path="/visualizar-etiquetas" element={<ProtectedRoute><VisualizarEtiquetas /></ProtectedRoute>} />
+                      <Route path="/contagem-estoque" element={<ProtectedRoute><ContagemEstoque /></ProtectedRoute>} />
+                      <Route path="/leitor-qrcode" element={<ProtectedRoute><LeitorQrCode /></ProtectedRoute>} />
+                      <Route path="/configuracoes/empresa" element={<ProtectedRoute><ConfiguracoesEmpresa /></ProtectedRoute>} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </BrowserRouter>
+                </SidebarProvider>
+              </TooltipProvider>
+            </ResponsaveisProvider>
           </EmpresaProvider>
         </AuthProvider>
       </ThemeProvider>
