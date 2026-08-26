@@ -54,7 +54,7 @@
     --sidebar-background: 222 47% 7%; --sidebar-foreground: 210 40% 90%;
     --sidebar-primary: 217 91% 60%; --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 217 33% 14%; --sidebar-accent-foreground: 210 40% 90%;
-    --sidebar-border: 217 33% 14%; --sidebar-ring: 217 91% 60%;
+    --sidebar-border: 217 33% 14%; --sidebar-ring: 217 33% 14%;
     --chart-1: 217 91% 60%; --chart-2: 142 71% 45%; --chart-3: 38 92% 50%;
     --chart-4: 180 55% 42%; --chart-5: 0 65% 52%;
   }
@@ -69,32 +69,37 @@
   }
 }
 
-/* Interface restrained: less decoration, clearer hierarchy, more like a mature business system. */
+/* ValiControl: restrained business-product visual language. Cards remain, but avoid the glossy template look. */
 .card-premium { @apply bg-card rounded-lg border border-border shadow-sm; transition: box-shadow .15s ease, border-color .15s ease; }
 .card-premium:hover { @apply shadow-sm; transform: none; }
 .card-premium-interactive { @apply card-premium cursor-pointer; }
 .card-premium-interactive:hover { @apply shadow-sm border-primary/20; transform: none; }
-
-/* Keep existing utility classes available without the glossy AI-style gradients. */
 .gradient-blue, .gradient-success, .gradient-warning, .gradient-danger { background: none; }
 .gradient-text { @apply text-foreground; background-image: none; }
-
 .alert-banner { @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium; }
 .alert-banner-danger { @apply alert-banner; background: hsl(0 84% 60% / .06); color: hsl(0 65% 40%); border: 1px solid hsl(0 60% 50% / .18); }
 .alert-banner-warning { @apply alert-banner; background: hsl(38 92% 50% / .07); color: hsl(38 70% 32%); border: 1px solid hsl(38 70% 45% / .18); }
 .alert-banner-success { @apply alert-banner; background: hsl(142 71% 45% / .06); color: hsl(142 55% 28%); border: 1px solid hsl(142 55% 40% / .18); }
 .alert-banner-info { @apply alert-banner; background: hsl(217 91% 60% / .06); color: hsl(217 65% 38%); border: 1px solid hsl(217 60% 50% / .18); }
-
-/* Remove excessive motion from business UI. */
 .animate-fade-in, .animate-fade-in-up, .animate-slide-in-right { animation: none !important; }
 
-/* Desktop: use the full canvas when the sidebar is hidden, without forcing a decorative shell. */
+/* Tone down the common Tailwind dashboard decorations while preserving all card-based content. */
+.rounded-2xl { border-radius: 10px !important; }
+.shadow-sm { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.045) !important; }
+.shadow-lg { box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10) !important; }
+
+/* The header should feel like application chrome, not a marketing hero. */
+header.backdrop-blur-xl { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background-color: rgba(255,255,255,.98) !important; }
+
+/* Keep interactive cards stable; no floating-on-hover effect. */
+button.group:hover { transform: none !important; }
+
 @media (min-width: 1024px) {
   main { transition: padding-left .2s ease; }
 }
 
-/* Mobile: avoid horizontal clipping from cards, charts and tables. */
 @media (max-width: 767px) {
   html, body, #root { max-width: 100%; overflow-x: hidden; }
   button, a { -webkit-tap-highlight-color: transparent; }
+  .rounded-2xl { border-radius: 9px !important; }
 }
