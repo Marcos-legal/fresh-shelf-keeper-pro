@@ -245,7 +245,7 @@ export default function Auth() {
 
     setIsLoading(false);
   };
-  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-6">
+  return <div className="min-h-screen min-h-[100dvh] w-full bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-6 md:p-8">
       <div className="w-full max-w-md mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
