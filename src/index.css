@@ -84,7 +84,7 @@ header.backdrop-blur-xl { backdrop-filter: none !important; -webkit-backdrop-fil
 button.group:hover { transform: none !important; }
 
 @media (min-width: 1024px) {
-  main { padding-left: var(--valicontrol-sidebar-width, 15rem) !important; transition: padding-left .2s ease; }
+  main { padding-left: var(--valicontrol-sidebar-width, 13.5rem) !important; transition: padding-left .2s ease; }
 }
 
 @media (max-width: 767px) {
