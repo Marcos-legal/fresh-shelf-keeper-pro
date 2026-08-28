@@ -40,7 +40,7 @@ export function AppSidebar() {
   useEffect(() => {
     document.documentElement.style.setProperty(
       "--valicontrol-sidebar-width",
-      isMobile ? "0px" : state === "expanded" ? "13.5rem" : "3.5rem"
+      isMobile ? "0px" : state === "expanded" ? "13.25rem" : "3.5rem"
     );
   }, [state, isMobile]);
 
@@ -58,7 +58,7 @@ export function AppSidebar() {
     <aside
       className={cn(
         "fixed inset-y-0 left-0 z-40 hidden lg:block transition-[width] duration-200 ease-out",
-        state === "expanded" ? "w-[13.5rem]" : "w-[3.5rem]"
+        state === "expanded" ? "w-[13.25rem]" : "w-[3.5rem]"
       )}
       aria-label="Navegação principal"
     >
