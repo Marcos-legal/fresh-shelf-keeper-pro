@@ -32,6 +32,8 @@ import ConfiguracoesEmpresa from "./pages/ConfiguracoesEmpresa";
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 5 * 60 * 1000 } } });
 
+const AdminArea = () => <AdminRoute><AdminPanel /></AdminRoute>;
+
 const App: React.FC = () => (
   <AppErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -40,30 +42,29 @@ const App: React.FC = () => (
           <EmpresaProvider>
             <ResponsaveisProvider>
               <TooltipProvider>
-                <SidebarProvider>
-                  <Toaster /><Sonner />
-                  <BrowserRouter>
-                    <Routes>
-                      <Route path="/" element={<HomeRouter />} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/reset-password" element={<ResetPassword />} />
-                      <Route path="/dashboard" element={<ProtectedRoute><DashboardReference /></ProtectedRoute>} />
-                      <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
-                      <Route path="/refrigerado" element={<ProtectedRoute><Refrigerado /></ProtectedRoute>} />
-                      <Route path="/congelado" element={<ProtectedRoute><Congelado /></ProtectedRoute>} />
-                      <Route path="/ambiente" element={<ProtectedRoute><Ambiente /></ProtectedRoute>} />
-                      <Route path="/camara-fria" element={<ProtectedRoute><CamaraFria /></ProtectedRoute>} />
-                      <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
-                      <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
-                      <Route path="/impressao-etiquetas" element={<ProtectedRoute><ImpressaoEtiquetas /></ProtectedRoute>} />
-                      <Route path="/visualizar-etiquetas" element={<ProtectedRoute><VisualizarEtiquetas /></ProtectedRoute>} />
-                      <Route path="/contagem-estoque" element={<ProtectedRoute><ContagemEstoque /></ProtectedRoute>} />
-                      <Route path="/leitor-qrcode" element={<ProtectedRoute><LeitorQrCode /></ProtectedRoute>} />
-                      <Route path="/configuracoes/empresa" element={<ProtectedRoute><ConfiguracoesEmpresa /></ProtectedRoute>} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </BrowserRouter>
-                </SidebarProvider>
+                <Toaster /><Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/admin" element={<AdminArea />} />
+                    <Route path="/painel/admin" element={<AdminArea />} />
+                    <Route path="/" element={<HomeRouter />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/dashboard" element={<ProtectedRoute><DashboardReference /></ProtectedRoute>} />
+                    <Route path="/refrigerado" element={<ProtectedRoute><Refrigerado /></ProtectedRoute>} />
+                    <Route path="/congelado" element={<ProtectedRoute><Congelado /></ProtectedRoute>} />
+                    <Route path="/ambiente" element={<ProtectedRoute><Ambiente /></ProtectedRoute>} />
+                    <Route path="/camara-fria" element={<ProtectedRoute><CamaraFria /></ProtectedRoute>} />
+                    <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
+                    <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
+                    <Route path="/impressao-etiquetas" element={<ProtectedRoute><ImpressaoEtiquetas /></ProtectedRoute>} />
+                    <Route path="/visualizar-etiquetas" element={<ProtectedRoute><VisualizarEtiquetas /></ProtectedRoute>} />
+                    <Route path="/contagem-estoque" element={<ProtectedRoute><ContagemEstoque /></ProtectedRoute>} />
+                    <Route path="/leitor-qrcode" element={<ProtectedRoute><LeitorQrCode /></ProtectedRoute>} />
+                    <Route path="/configuracoes/empresa" element={<ProtectedRoute><ConfiguracoesEmpresa /></ProtectedRoute>} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
               </TooltipProvider>
             </ResponsaveisProvider>
           </EmpresaProvider>
