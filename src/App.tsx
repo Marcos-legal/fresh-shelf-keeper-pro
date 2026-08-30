@@ -12,8 +12,8 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
+import HomeRouter from "./pages/HomeRouter";
 import DashboardReference from "./pages/DashboardReference";
-import LandingPage from "./pages/LandingPage";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -44,7 +44,7 @@ const App: React.FC = () => (
                   <Toaster /><Sonner />
                   <BrowserRouter>
                     <Routes>
-                      <Route path="/" element={<LandingPage />} />
+                      <Route path="/" element={<HomeRouter />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/reset-password" element={<ResetPassword />} />
                       <Route path="/dashboard" element={<ProtectedRoute><DashboardReference /></ProtectedRoute>} />
