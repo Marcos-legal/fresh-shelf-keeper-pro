@@ -10,8 +10,11 @@ import { EmpresaProvider } from "@/contexts/EmpresaContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AdminRoute } from "@/components/AdminRoute";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import DashboardReference from "./pages/DashboardReference";
+import LandingPage from "./pages/LandingPage";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Refrigerado from "./pages/Refrigerado";
@@ -27,14 +30,7 @@ import ResetPassword from "./pages/ResetPassword";
 import LeitorQrCode from "./pages/LeitorQrCode";
 import ConfiguracoesEmpresa from "./pages/ConfiguracoesEmpresa";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 5 * 60 * 1000,
-    },
-  },
-});
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 5 * 60 * 1000 } } });
 
 const App: React.FC = () => (
   <AppErrorBoundary>
@@ -45,13 +41,14 @@ const App: React.FC = () => (
             <ResponsaveisProvider>
               <TooltipProvider>
                 <SidebarProvider>
-                  <Toaster />
-                  <Sonner />
+                  <Toaster /><Sonner />
                   <BrowserRouter>
                     <Routes>
+                      <Route path="/" element={<LandingPage />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/reset-password" element={<ResetPassword />} />
-                      <Route path="/" element={<ProtectedRoute><DashboardReference /></ProtectedRoute>} />
+                      <Route path="/dashboard" element={<ProtectedRoute><DashboardReference /></ProtectedRoute>} />
+                      <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
                       <Route path="/refrigerado" element={<ProtectedRoute><Refrigerado /></ProtectedRoute>} />
                       <Route path="/congelado" element={<ProtectedRoute><Congelado /></ProtectedRoute>} />
                       <Route path="/ambiente" element={<ProtectedRoute><Ambiente /></ProtectedRoute>} />
