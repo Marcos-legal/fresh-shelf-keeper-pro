@@ -23,6 +23,50 @@ const meses = [
   'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
 ];
 
+function isValidDate(date: Date, year: number, month: number, day: number) {
+  return !Number.isNaN(date.getTime()) &&
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day;
+}
+
+function parseValueToDate(value: string, formato: 'DD/MM/AAAA' | 'MM/AAAA' | 'MES/ANO'): Date | undefined {
+  if (!value || !value.trim()) return undefined;
+
+  try {
+    if (formato === 'DD/MM/AAAA') {
+      const match = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+      if (!match) return undefined;
+      const day = Number(match[1]);
+      const month = Number(match[2]);
+      let year = Number(match[3]);
+      if (year < 100) year += 2000;
+      const date = new Date(year, month - 1, day);
+      return isValidDate(date, year, month, day) ? date : undefined;
+    }
+
+    if (formato === 'MM/AAAA') {
+      const match = value.match(/^(\d{1,2})\/(\d{4})$/);
+      if (!match) return undefined;
+      const month = Number(match[1]);
+      const year = Number(match[2]);
+      if (month < 1 || month > 12) return undefined;
+      const date = new Date(year, month - 1, 1);
+      return isValidDate(date, year, month, 1) ? date : undefined;
+    }
+
+    const match = value.match(/^([A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+)\/(\d{4})$/i);
+    if (!match) return undefined;
+    const mesIndex = meses.indexOf(match[1].toUpperCase());
+    const ano = Number(match[2]);
+    if (mesIndex === -1 || !ano) return undefined;
+    const date = new Date(ano, mesIndex, 1);
+    return isValidDate(date, ano, mesIndex + 1, 1) ? date : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function ValidadeField({
   label,
   value,
@@ -35,54 +79,44 @@ export function ValidadeField({
 
   const handleFormatoChange = (novoFormato: 'DD/MM/AAAA' | 'MM/AAAA' | 'MES/ANO') => {
     setFormato(novoFormato);
-    onChange(''); // Limpa o valor quando muda o formato
+    onChange('');
+    setCalendarOpen(false);
   };
 
   const handleInputChange = (inputValue: string) => {
     if (formato === 'MES/ANO') {
-      // Para formato MES/ANO, permitir texto livre mas converter para maiúsculo
-      const upperValue = inputValue.toUpperCase();
-      onChange(upperValue);
+      onChange(inputValue.toUpperCase());
       return;
     }
 
-    let formattedValue = inputValue.replace(/\D/g, ''); // Remove não dígitos
-    
+    let formattedValue = inputValue.replace(/\D/g, '');
     if (formato === 'DD/MM/AAAA') {
-      // Formato DD/MM/AAAA
       if (formattedValue.length >= 2) {
         formattedValue = formattedValue.substring(0, 2) + '/' + formattedValue.substring(2);
       }
       if (formattedValue.length >= 5) {
         formattedValue = formattedValue.substring(0, 5) + '/' + formattedValue.substring(5, 9);
       }
-    } else {
-      // Formato MM/AAAA
-      if (formattedValue.length >= 2) {
-        formattedValue = formattedValue.substring(0, 2) + '/' + formattedValue.substring(2, 6);
-      }
+    } else if (formattedValue.length >= 2) {
+      formattedValue = formattedValue.substring(0, 2) + '/' + formattedValue.substring(2, 6);
     }
-    
     onChange(formattedValue);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      let formattedDate = '';
-      
-      if (formato === 'DD/MM/AAAA') {
-        formattedDate = format(date, "dd/MM/yyyy", { locale: ptBR });
-      } else if (formato === 'MM/AAAA') {
-        formattedDate = format(date, "MM/yyyy", { locale: ptBR });
-      } else if (formato === 'MES/ANO') {
-        const mesNome = meses[date.getMonth()];
-        const ano = date.getFullYear();
-        formattedDate = `${mesNome}/${ano}`;
-      }
-      
-      onChange(formattedDate);
-      setCalendarOpen(false);
+    if (!date || Number.isNaN(date.getTime())) return;
+
+    let formattedDate = '';
+    if (formato === 'DD/MM/AAAA') {
+      formattedDate = format(date, "dd/MM/yyyy", { locale: ptBR });
+    } else if (formato === 'MM/AAAA') {
+      formattedDate = format(date, "MM/yyyy", { locale: ptBR });
+    } else {
+      formattedDate = `${meses[date.getMonth()]}/${date.getFullYear()}`;
     }
+
+    onChange(formattedDate);
+    setCalendarOpen(false);
   };
 
   const handleClearDate = () => {
@@ -91,85 +125,40 @@ export function ValidadeField({
   };
 
   const getPlaceholder = () => {
-    switch (formato) {
-      case 'DD/MM/AAAA':
-        return "30/10/2025";
-      case 'MM/AAAA':
-        return "10/2025";
-      case 'MES/ANO':
-        return "NOVEMBRO/2025";
-      default:
-        return "";
-    }
+    if (formato === 'DD/MM/AAAA') return '30/10/2025';
+    if (formato === 'MM/AAAA') return '10/2025';
+    return 'NOVEMBRO/2025';
   };
 
   const getMaxLength = () => {
-    switch (formato) {
-      case 'DD/MM/AAAA':
-        return 10;
-      case 'MM/AAAA':
-        return 7;
-      case 'MES/ANO':
-        return 20;
-      default:
-        return undefined;
-    }
+    if (formato === 'DD/MM/AAAA') return 10;
+    if (formato === 'MM/AAAA') return 7;
+    return 20;
   };
 
-  const parseValueToDate = () => {
-    if (!value || value.trim() === '') return undefined;
-    
-    try {
-      if (formato === 'DD/MM/AAAA' && /^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
-        const [day, month, year] = value.split('/').map(Number);
-        return new Date(year, month - 1, day);
-      }
-      
-      if (formato === 'MM/AAAA' && /^\d{2}\/\d{4}$/.test(value)) {
-        const [month, year] = value.split('/').map(Number);
-        return new Date(year, month - 1, 1);
-      }
-      
-      if (formato === 'MES/ANO' && /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+\/\d{4}$/.test(value)) {
-        const [mesTexto, anoTexto] = value.split('/');
-        const mesIndex = meses.indexOf(mesTexto.toUpperCase());
-        if (mesIndex !== -1) {
-          const ano = parseInt(anoTexto);
-          return new Date(ano, mesIndex, 1);
-        }
-      }
-    } catch (error) {
-      console.warn('Erro ao parsear valor para data:', value, error);
-    }
-    
-    return undefined;
-  };
-
-  // Helper function to display formatted value
   const getDisplayValue = () => {
     if (!value) return '';
-    
-    // If value is ISO (YYYY-MM-DD) and we are not in that mode, try to convert it for display
-    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-      const [y, m, d] = value.split('-').map(Number);
-      const date = new Date(y, m - 1, d);
-      
-      if (formato === 'DD/MM/AAAA') {
-        return format(date, "dd/MM/yyyy");
-      } else if (formato === 'MM/AAAA') {
-        return format(date, "MM/yyyy");
-      } else if (formato === 'MES/ANO') {
+
+    // Preserve legacy ISO values while showing them in the selected format.
+    const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoMatch) {
+      const date = new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+      if (!Number.isNaN(date.getTime())) {
+        if (formato === 'DD/MM/AAAA') return format(date, 'dd/MM/yyyy');
+        if (formato === 'MM/AAAA') return format(date, 'MM/yyyy');
         return `${meses[date.getMonth()]}/${date.getFullYear()}`;
       }
     }
-    
+
     return value;
   };
+
+  const selectedDate = parseValueToDate(getDisplayValue(), formato);
 
   return (
     <div className="space-y-2">
       <Label>{label} {required && '*'}</Label>
-      
+
       <div className="flex space-x-2">
         <Select value={formato} onValueChange={handleFormatoChange}>
           <SelectTrigger className="w-40">
@@ -181,7 +170,7 @@ export function ValidadeField({
             <SelectItem value="MES/ANO">MÊS/ANO</SelectItem>
           </SelectContent>
         </Select>
-        
+
         <Input
           value={getDisplayValue()}
           onChange={(e) => handleInputChange(e.target.value)}
@@ -189,16 +178,10 @@ export function ValidadeField({
           className={error ? 'border-destructive flex-1' : 'flex-1'}
           maxLength={getMaxLength()}
         />
-        
+
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "px-3",
-                error && "border-destructive"
-              )}
-            >
+            <Button type="button" variant="outline" className={cn('px-3', error && 'border-destructive')}>
               <CalendarIcon className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
@@ -206,18 +189,13 @@ export function ValidadeField({
             <div className="p-3">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-sm font-medium">Selecionar Data</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearDate}
-                  className="h-8 w-8 p-0"
-                >
+                <Button type="button" variant="ghost" size="sm" onClick={handleClearDate} className="h-8 w-8 p-0">
                   <X className="h-4 w-4" />
                 </Button>
               </div>
               <Calendar
                 mode="single"
-                selected={parseValueToDate()}
+                selected={selectedDate}
                 onSelect={handleDateSelect}
                 locale={ptBR}
                 initialFocus
@@ -227,17 +205,11 @@ export function ValidadeField({
           </PopoverContent>
         </Popover>
       </div>
-      
+
       {formato === 'MES/ANO' && (
-        <p className="text-xs text-muted-foreground">
-          Exemplo: NOVEMBRO/2025, DEZEMBRO/2024, etc.
-        </p>
+        <p className="text-xs text-muted-foreground">Exemplo: NOVEMBRO/2025, DEZEMBRO/2024, etc.</p>
       )}
-      
-      <p className="text-xs text-muted-foreground">
-        Digite manualmente ou use o calendário para selecionar a data
-      </p>
-      
+      <p className="text-xs text-muted-foreground">Digite manualmente ou use o calendário para selecionar a data</p>
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
