@@ -23,8 +23,8 @@ export function useProductsSupabase() {
       return new Date(year, month - 1, day);
     };
     return {
-      id: row.id.toString(), nome: row.name || '', lote: row.lot || '', brand: row.brand || '',
-      marca: row.brand || '', dataFabricacao: parseDate(row.manufacture_date), validade: parseDate(row.expiry_date),
+      id: row.id.toString(), nome: row.name || '', lote: row.lot || '', marca: row.brand || '',
+      dataFabricacao: parseDate(row.manufacture_date), validade: parseDate(row.expiry_date),
       dataAbertura: parseDate(row.opening_date), diasParaVencer: row.days_valid || 0, utilizarAte: parseDate(row.use_by_date),
       localArmazenamento: row.storage as StorageLocation || 'ambiente', responsavel: row.responsible || '',
       precoCusto: (row as { preco_custo?: number | string | null }).preco_custo != null ? Number((row as { preco_custo: number | string }).preco_custo) : undefined,
