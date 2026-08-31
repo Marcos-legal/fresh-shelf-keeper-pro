@@ -69,7 +69,9 @@
 .card-premium:hover { @apply shadow-sm; transform: none; }
 .card-premium-interactive { @apply card-premium cursor-pointer; }
 .card-premium-interactive:hover { @apply shadow-sm border-primary/20; transform: none; }
-.gradient-blue, .gradient-success, .gradient-warning, .gradient-danger { background: none; }
+.gradient-blue { @apply bg-primary text-primary-foreground; }
+.gradient-blue:disabled { opacity: .65; }
+.gradient-success, .gradient-warning, .gradient-danger { background: none; }
 .gradient-text { @apply text-foreground; background-image: none; }
 .alert-banner { @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium; }
 .alert-banner-danger { @apply alert-banner; background: hsl(0 84% 60% / .06); color: hsl(0 65% 40%); border: 1px solid hsl(0 60% 50% / .18); }
