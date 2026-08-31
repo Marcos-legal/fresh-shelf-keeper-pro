@@ -601,11 +601,24 @@ const ImpressaoEtiquetas = () => {
             {/* Seleção Multiple Tradicional */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
-                  <Checkbox className="mr-2" />
-                  <span className="hidden sm:inline">Seleção Múltipla - Para Impressão em Lote</span>
-                  <span className="sm:hidden">Seleção Múltipla</span>
-                </CardTitle>
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+                    <Checkbox className="mr-2" />
+                    <span className="hidden sm:inline">Seleção Múltipla - Para Impressão em Lote</span>
+                    <span className="sm:hidden">Seleção Múltipla</span>
+                  </CardTitle>
+                  <Button
+                    onClick={handlePrintRequest}
+                    disabled={selectedProducts.length === 0}
+                    className="flex-shrink-0 gradient-blue text-white text-sm"
+                    size="sm"
+                  >
+                    <Printer className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Imprimir selecionados</span>
+                    <span className="sm:hidden">Imprimir</span>
+                    {selectedProducts.length > 0 && ` (${Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)})`}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
