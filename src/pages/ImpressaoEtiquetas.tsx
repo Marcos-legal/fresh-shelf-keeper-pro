@@ -1,5 +1,4 @@
-
-import { useState, useRef, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { PageLayout } from "@/components/PageLayout";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,10 +7,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Printer, Package, Eye, FileText, Settings, Ruler, Edit, Search } from "lucide-react";
+import { Printer, Package, Eye, FileText, Settings, Ruler, Edit, Search, Minus, Plus, CheckCircle2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { escapeHtml } from "@/lib/security";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
 import { EtiquetaEditor } from "@/components/EtiquetaEditor";
 import { Product } from "@/types/product";
@@ -38,673 +36,328 @@ async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
   return map;
 }
 
+const clampQuantity = (value: number) => Math.max(1, Math.min(99, Number.isFinite(value) ? value : 1));
+
+const formatDate = (value: unknown) => {
+  if (!value) return "";
+  if (typeof value !== "string") return String(value);
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value) || /^\d{1,2}\/\d{4}$/.test(value)) return value;
+  const parts = value.split("-").map(Number);
+  if (parts.length === 3 && parts.every(Boolean)) {
+    return new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString("pt-BR");
+  }
+  return value;
+};
+
 const ImpressaoEtiquetas = () => {
   const { products } = useProductsSupabase();
+  const navigate = useNavigate();
+  const editorRef = useRef<HTMLDivElement>(null);
+
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [productQuantities, setProductQuantities] = useState<Record<string, number>>({});
   const [quickPrintQuantities, setQuickPrintQuantities] = useState<Record<string, number>>({});
-  
-  // Configurações de tamanho (em mm) - Padrão: bobina 57mm (52x50mm útil)
-  const [largura, setLargura] = useState(() => {
-    return parseInt(localStorage.getItem('etiqueta-largura') || '52');
-  });
-  const [altura, setAltura] = useState(() => {
-    return parseInt(localStorage.getItem('etiqueta-altura') || '50');
-  });
+  const [quickSearchTerm, setQuickSearchTerm] = useState("");
+  const [largura, setLargura] = useState(() => parseInt(localStorage.getItem("etiqueta-largura") || "52"));
+  const [altura, setAltura] = useState(() => parseInt(localStorage.getItem("etiqueta-altura") || "50"));
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [responsavel, setResponsavel] = useState('');
+  const [responsavel, setResponsavel] = useState("");
   const [showResponsavelDialog, setShowResponsavelDialog] = useState(false);
-  const [printAction, setPrintAction] = useState<'batch' | 'single' | null>(null);
-  const [singleProductToPrint, setSingleProductToPrint] = useState<any>(null);
+  const [printAction, setPrintAction] = useState<"batch" | "single" | null>(null);
+  const [singleProductToPrint, setSingleProductToPrint] = useState<Product | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showEditor, setShowEditor] = useState(false);
-  const [quickSearchTerm, setQuickSearchTerm] = useState('');
-  const editorRef = useRef<HTMLDivElement>(null);
-  
-  const navigate = useNavigate();
-  
-  // Scroll to editor when it opens
+
+  const selectedData = useMemo(
+    () => products.filter((product) => selectedProducts.includes(String(product.id))),
+    [products, selectedProducts]
+  );
+
+  const totalLabels = useMemo(
+    () => selectedData.reduce((sum, product) => sum + (productQuantities[String(product.id)] || 1), 0),
+    [selectedData, productQuantities]
+  );
+
+  const allSelected = products.length > 0 && selectedProducts.length === products.length;
+  const previewProduct = selectedData[0] || products[0];
+
   useEffect(() => {
     if (showEditor && editorRef.current) {
-      setTimeout(() => {
-        editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+      setTimeout(() => editorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     }
   }, [showEditor]);
 
-  const handleSelectProduct = (productId: string) => {
-    setSelectedProducts(prev => {
-      const newSelected = prev.includes(productId) 
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId];
-      
-      // Initialize quantity to 1 if selecting
-      if (!prev.includes(productId)) {
-        setProductQuantities(prevQty => ({
-          ...prevQty,
-          [productId]: prevQty[productId] || 1
-        }));
-      }
-      
-      return newSelected;
+  const setQuantity = (productId: string, quantity: number) => {
+    setProductQuantities((current) => ({ ...current, [productId]: clampQuantity(quantity) }));
+  };
+
+  const setQuickQuantity = (productId: string, quantity: number) => {
+    setQuickPrintQuantities((current) => ({ ...current, [productId]: clampQuantity(quantity) }));
+  };
+
+  const toggleProduct = (productId: string) => {
+    setSelectedProducts((current) => {
+      if (current.includes(productId)) return current.filter((id) => id !== productId);
+      setQuantity(productId, productQuantities[productId] || 1);
+      return [...current, productId];
     });
   };
 
-  const handleQuantityChange = (productId: string, quantity: number) => {
-    setProductQuantities(prev => ({
-      ...prev,
-      [productId]: Math.max(1, Math.min(99, quantity))
-    }));
-  };
-
-  const handleSelectAll = () => {
-    if (selectedProducts.length === products.length) {
+  const toggleAll = () => {
+    if (allSelected) {
       setSelectedProducts([]);
-    } else {
-      setSelectedProducts(products.map(p => p.id));
+      return;
     }
+    setSelectedProducts(products.map((product) => String(product.id)));
+    setProductQuantities((current) => {
+      const next = { ...current };
+      products.forEach((product) => { next[String(product.id)] = current[String(product.id)] || 1; });
+      return next;
+    });
   };
 
   const handleLarguraChange = (value: string) => {
-    const novaLargura = parseInt(value) || 50;
-    setLargura(novaLargura);
-    localStorage.setItem('etiqueta-largura', novaLargura.toString());
+    const next = parseInt(value) || 52;
+    setLargura(next);
+    localStorage.setItem("etiqueta-largura", String(next));
   };
 
   const handleAlturaChange = (value: string) => {
-    const novaAltura = parseInt(value) || 30;
-    setAltura(novaAltura);
-    localStorage.setItem('etiqueta-altura', novaAltura.toString());
+    const next = parseInt(value) || 50;
+    setAltura(next);
+    localStorage.setItem("etiqueta-altura", String(next));
   };
 
-  const formatDateSafe = (dateValue: any): string => {
-    if (!dateValue) return '';
-    
-    try {
-      let date: Date | null = null;
-      
-      if (dateValue instanceof Date) {
-        date = dateValue;
-      } else if (typeof dateValue === 'string') {
-        if (dateValue.includes('/')) {
-          if (dateValue.match(/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+\/\d{4}$/)) {
-            return dateValue;
-          } else if (dateValue.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
-            return dateValue;
-          } else if (dateValue.match(/^\d{1,2}\/\d{4}$/)) {
-            return dateValue;
-          }
-        } else {
-          const [year, month, day] = dateValue.split('-').map(Number);
-          if (year && month && day) {
-            date = new Date(year, month - 1, day);
-          }
-        }
-      }
-      
-      if (date && !isNaN(date.getTime())) {
-        return date.toLocaleDateString('pt-BR');
-      }
-      
-      return dateValue;
-    } catch (error) {
-      console.warn('Error formatting date:', dateValue, error);
-      return '';
-    }
-  };
-
-  // Calcular configurações responsivas baseadas no tamanho
-  const getResponsiveConfig = () => {
-    const area = largura * altura;
-    const aspectRatio = largura / altura;
-    
-    // Configurações base para diferentes tamanhos - AJUSTE MELHORADO
-    let fontSize, labelSize, contentSize, padding, spacing;
-    
-    if (area < 2000) { // Muito pequena (ex: 40x30)
-      fontSize = Math.max(7, Math.min(9, area / 280));
-      labelSize = Math.max(6, fontSize - 1);
-      contentSize = fontSize;
-      padding = Math.max(3, largura * 0.06);
-      spacing = Math.max(1.5, altura * 0.03);
-    } else if (area < 4000) { // Pequena (ex: 50x40, 70x50)
-      fontSize = Math.max(9, Math.min(11, area / 350));
-      labelSize = Math.max(7, fontSize - 1);
-      contentSize = fontSize;
-      padding = Math.max(5, largura * 0.07);
-      spacing = Math.max(2.5, altura * 0.05);
-    } else if (area < 8000) { // Média (ex: 80x70, 100x60)
-      fontSize = Math.max(10, Math.min(13, area / 450));
-      labelSize = Math.max(8, fontSize - 1);
-      contentSize = fontSize;
-      padding = Math.max(7, largura * 0.08);
-      spacing = Math.max(3.5, altura * 0.07);
-    } else { // Grande (ex: 100x80+)
-      fontSize = Math.max(11, Math.min(15, area / 550));
-      labelSize = Math.max(9, fontSize - 1);
-      contentSize = fontSize;
-      padding = Math.max(9, largura * 0.09);
-      spacing = Math.max(4.5, altura * 0.09);
-    }
-
-    return {
-      width: `${largura * 3.78}px`, // Conversão mm para px (96 DPI)
-      height: `${altura * 3.78}px`,
-      fontSize: `${fontSize.toFixed(1)}px`,
-      labelSize: `${labelSize.toFixed(1)}px`,
-      contentSize: `${contentSize.toFixed(1)}px`,
-      padding: `${Math.round(padding)}px`,
-      spacing: `${Math.round(spacing)}px`,
-      showGrid: aspectRatio > 1.2, // Mostrar grid se for mais largo
-      compactMode: area < 2500 // Modo compacto para etiquetas muito pequenas
-    };
-  };
-
-  const etiquetasPorPagina = 6;
-  const totalPaginas = Math.ceil(selectedProducts.length / etiquetasPorPagina);
-  const config = getResponsiveConfig();
-
-  const handlePrintRequest = () => {
-    const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
-    
-    if (selectedProductsData.length === 0) {
-      toast({
-        title: "Nenhum produto selecionado",
-        description: "Selecione pelo menos um produto para imprimir.",
-        variant: "destructive",
-      });
+  const openBatchPrint = () => {
+    if (!selectedData.length) {
+      toast({ title: "Nenhum produto selecionado", description: "Selecione pelo menos um produto para imprimir.", variant: "destructive" });
       return;
     }
-
-    setPrintAction('batch');
+    setPrintAction("batch");
     setShowResponsavelDialog(true);
   };
 
-  const handlePrintSingleRequest = (product: any, quantity: number = 1) => {
-    setSingleProductToPrint({ ...product, quickPrintQuantity: quantity });
-    setPrintAction('single');
+  const openSinglePrint = (product: Product) => {
+    setSingleProductToPrint(product);
+    setPrintAction("single");
     setShowResponsavelDialog(true);
   };
 
-  const handleQuickPrintQuantityChange = (productId: string, quantity: number) => {
-    setQuickPrintQuantities(prev => ({
-      ...prev,
-      [productId]: Math.max(1, Math.min(99, quantity))
-    }));
-  };
-
-  const handleEditProduct = (product: any) => {
-    setEditingProduct(product as Product);
-    setShowEditor(true);
-  };
-
-  const handleEditorPrint = async (editedProduct: Product, editedResponsavel: string, quantity: number) => {
-    const expandedProducts = Array(quantity).fill(editedProduct);
-    const qrMap = await buildQrMap([editedProduct]);
-
-    const html = buildEtiquetaPrintHTML({
-      products: expandedProducts,
-      largura,
-      altura,
-      responsavel: editedResponsavel,
-      qrMap,
-      title: `Etiquetas - ${editedProduct.nome || ''} (${quantity}x)`,
-    });
-
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      setTimeout(() => printWindow.print(), 500);
+  const printProducts = async (items: Product[], quantities: Record<string, number>, title: string) => {
+    const expandedProducts = items.flatMap((product) => Array(quantities[String(product.id)] || 1).fill(product));
+    const qrMap = await buildQrMap(items);
+    const html = buildEtiquetaPrintHTML({ products: expandedProducts, largura, altura, responsavel, qrMap, title });
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast({ title: "Não foi possível abrir a impressão", description: "Permita pop-ups para imprimir as etiquetas.", variant: "destructive" });
+      return;
     }
-
-    toast({
-      title: "Etiquetas enviadas para impressão",
-      description: `${quantity} etiqueta(s) de ${editedProduct.nome} enviadas!`,
-    });
-
-    setShowEditor(false);
-    setEditingProduct(null);
+    printWindow.document.write(html);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 500);
+    toast({ title: "Etiquetas prontas para impressão", description: `${expandedProducts.length} etiqueta(s) enviadas.` });
   };
 
-  const executePrint = () => {
+  const executePrint = async () => {
     if (!responsavel.trim()) {
-      toast({
-        title: "Responsável obrigatório",
-        description: "Por favor, selecione um responsável antes de imprimir.",
-        variant: "destructive",
-      });
+      toast({ title: "Responsável obrigatório", description: "Selecione um responsável antes de imprimir.", variant: "destructive" });
       return;
     }
 
-    if (printAction === 'batch') {
-      handlePrint();
-    } else if (printAction === 'single' && singleProductToPrint) {
-      handlePrintSingle(singleProductToPrint);
+    if (printAction === "batch") {
+      await printProducts(selectedData, productQuantities, `Etiquetas Térmicas - ${totalLabels} etiquetas`);
+    } else if (printAction === "single" && singleProductToPrint) {
+      const quantity = quickPrintQuantities[String(singleProductToPrint.id)] || 1;
+      await printProducts([singleProductToPrint], { [String(singleProductToPrint.id)]: quantity }, `Etiquetas - ${singleProductToPrint.nome || "Produto"} (${quantity}x)`);
     }
 
     setShowResponsavelDialog(false);
-    setResponsavel('');
+    setResponsavel("");
     setPrintAction(null);
     setSingleProductToPrint(null);
   };
 
-  const handlePrint = async () => {
-    const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
-
-    const expandedProducts = selectedProductsData.flatMap(product => {
-      const quantity = productQuantities[product.id] || 1;
-      return Array(quantity).fill(product);
-    });
-
-    const qrMap = await buildQrMap(selectedProductsData);
-    const html = buildEtiquetaPrintHTML({
-      products: expandedProducts,
-      largura,
-      altura,
-      responsavel,
-      qrMap,
-      title: `Etiquetas Térmicas - ${expandedProducts.length} etiquetas`,
-    });
-
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      setTimeout(() => printWindow.print(), 500);
-    }
-
-    toast({
-      title: "Etiquetas enviadas para impressão",
-      description: `${expandedProducts.length} etiqueta(s) enviadas!`,
-    });
-  };
-
-  const handlePrintSingle = async (product: any) => {
-    const quantity = product.quickPrintQuantity || 1;
-    const expandedProducts = Array(quantity).fill(product);
+  const handleEditorPrint = async (product: Product, editorResponsavel: string, quantity: number) => {
     const qrMap = await buildQrMap([product]);
-
+    const expandedProducts = Array(clampQuantity(quantity)).fill(product);
     const html = buildEtiquetaPrintHTML({
       products: expandedProducts,
       largura,
       altura,
-      responsavel,
+      responsavel: editorResponsavel,
       qrMap,
-      title: `Etiquetas - ${product.nome || ''} (${quantity}x)`,
+      title: `Etiquetas - ${product.nome || "Produto"} (${quantity}x)`,
     });
-
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      setTimeout(() => printWindow.print(), 500);
-    }
-
-    toast({
-      title: "Etiquetas enviadas para impressão",
-      description: `${quantity} etiqueta(s) de ${product.nome} enviadas!`,
-    });
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    printWindow.document.write(html);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 500);
+    setShowEditor(false);
+    setEditingProduct(null);
   };
+
+  const filteredProducts = products.filter((product) => {
+    const term = quickSearchTerm.toLowerCase().trim();
+    if (!term) return true;
+    return [product.nome, product.lote, product.marca].some((value) => String(value || "").toLowerCase().includes(term));
+  });
 
   return (
-    <PageLayout 
-      title="Impressão de Etiquetas" 
-      description="Impressão otimizada para impressoras térmicas"
-      icon={Printer}
-    >
-
-            {/* Controles de Impressão */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
-                  <Printer className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span>Controles de Impressão</span>
+    <PageLayout title="Impressão de Etiquetas" description="Selecione, revise e imprima suas etiquetas térmicas" icon={Printer}>
+      <div className="space-y-6">
+        <Card className="overflow-hidden border-primary/20 shadow-sm">
+          <CardHeader className="border-b bg-muted/20 p-4 sm:p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Printer className="h-5 w-5 text-primary" />
+                  Preparar impressão
                 </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 sm:pt-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div className="flex items-center space-x-3 sm:space-x-4">
-                    <Checkbox
-                      checked={selectedProducts.length === products.length}
-                      onCheckedChange={handleSelectAll}
-                    />
-                    <span className="text-xs sm:text-sm text-muted-foreground font-medium">
-                      <span className="hidden sm:inline">Selecionar todos</span>
-                      <span className="sm:hidden">Todos</span> ({products.length})
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
-                    <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline"
-                          className="flex-1 sm:flex-none text-sm"
-                          size="sm"
-                        >
-                          <Settings className="w-4 h-4 mr-2" />
-                          <span className="hidden sm:inline">Configurações</span>
-                          <span className="sm:hidden">Config</span>
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle className="flex items-center space-x-2">
-                            <Ruler className="w-5 h-5" />
-                            <span>Ajuste Manual de Tamanho</span>
-                          </DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 pt-4">
-                          <div>
-                            <Label className="text-sm font-medium text-foreground mb-2 block">
-                              Preset de Bobina Térmica
-                            </Label>
-                            <div className="grid grid-cols-2 gap-2">
-                              <Button
-                                type="button"
-                                variant={largura <= 60 ? 'default' : 'outline'}
-                                onClick={() => { handleLarguraChange('52'); handleAlturaChange('80'); }}
-                                size="sm"
-                              >
-                                Bobina 57mm<br />(52×80mm vertical)
-                              </Button>
-                              <Button
-                                type="button"
-                                variant={largura > 60 ? 'default' : 'outline'}
-                                onClick={() => { handleLarguraChange('72'); handleAlturaChange('100'); }}
-                                size="sm"
-                              >
-                                Bobina 80mm<br />(72×100mm vertical)
-                              </Button>
-                            </div>
-                          </div>
-                          <div>
-                            <Label htmlFor="largura" className="text-sm font-medium text-foreground mb-2 block">
-                              Largura (mm) — travada pelo preset
-                            </Label>
-                            <Input id="largura" type="number" value={largura} disabled className="text-center bg-muted" />
-                          </div>
-                          <div>
-                            <Label htmlFor="altura" className="text-sm font-medium text-foreground mb-2 block">
-                              Altura (mm) — ajustável
-                            </Label>
-                            <Input id="altura" type="number" min="40" max="150" value={altura} onChange={(e) => handleAlturaChange(e.target.value)} className="text-center" />
-                          </div>
-                          <div className="alert-banner-info">
-                            <Settings className="w-4 h-4 flex-shrink-0" />
-                            <span className="text-sm">Detecta automaticamente o preset · Compatível com Elgin, Bematech, Tanca, Control ID</span>
-                          </div>
-                          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 p-3 text-xs text-amber-900 dark:text-amber-100 space-y-1">
-                            <p className="font-semibold">💡 Dica para Chrome/Edge</p>
-                            <p>No diálogo de impressão, expanda <strong>Mais configurações</strong> e defina:</p>
-                            <ul className="list-disc ml-4 space-y-0.5">
-                              <li><strong>Margens:</strong> Nenhuma (None)</li>
-                              <li><strong>Escala:</strong> Padrão / 100%</li>
-                              <li><strong>Cabeçalho e rodapé:</strong> desmarcado</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    <Button 
-                      onClick={() => navigate('/visualizar-etiquetas')}
-                      variant="outline"
-                      className="flex-1 sm:flex-none text-sm"
-                      size="sm"
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Visualizar Etiquetas</span>
-                      <span className="sm:hidden">Visualizar</span>
-                    </Button>
-                    <Button 
-                      onClick={handlePrintRequest} 
-                      disabled={selectedProducts.length === 0}
-                      className="flex-1 sm:flex-none gradient-blue text-white text-sm"
-                      size="sm"
-                    >
-                      <Printer className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Imprimir {largura}×{altura}mm</span>
-                      <span className="sm:hidden">Imprimir</span>
-                      {selectedProducts.length > 0 && ` (${Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)})`}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Informações de Impressão */}
-            {selectedProducts.length > 0 && (
-              <Card className="mb-6 bg-primary/5 border-primary/20">
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex items-start sm:items-center space-x-2 text-primary text-xs sm:text-sm">
-                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0" />
-                    <span className="font-medium">
-                      {selectedProducts.length} produto{selectedProducts.length !== 1 ? 's' : ''} • {Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)} etiqueta(s) • {largura}×{altura}mm
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Editor de Etiqueta com Preview */}
-            {showEditor && editingProduct && (
-              <div ref={editorRef}>
-                <Card className="mb-6 border-2 border-primary shadow-lg">
-                  <CardContent className="pt-6">
-                    <EtiquetaEditor
-                      product={editingProduct}
-                      largura={largura}
-                      altura={altura}
-                      onPrint={handleEditorPrint}
-                      onClose={() => {
-                        setShowEditor(false);
-                        setEditingProduct(null);
-                      }}
-                    />
-                  </CardContent>
-                </Card>
+                <p className="mt-1 text-xs sm:text-sm text-muted-foreground">Escolha os produtos e a quantidade de etiquetas.</p>
               </div>
-            )}
-
-            {/* Botões de Impressão Rápida */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
-                  <Printer className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="hidden sm:inline">Impressão Rápida - Produtos Cadastrados</span>
-                  <span className="sm:hidden">Impressão Rápida</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 sm:pt-6">
-                <div className="text-xs sm:text-sm text-muted-foreground mb-4">
-                  Clique em Editar para personalizar a etiqueta antes de imprimir
-                </div>
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar produto..."
-                    value={quickSearchTerm}
-                    onChange={(e) => setQuickSearchTerm(e.target.value)}
-                    className="pl-9 h-9"
-                  />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {products.filter(p => p.nome?.toLowerCase().includes(quickSearchTerm.toLowerCase()) || p.lote?.toLowerCase().includes(quickSearchTerm.toLowerCase()) || p.marca?.toLowerCase().includes(quickSearchTerm.toLowerCase())).map(product => {
-                    const currentQuantity = quickPrintQuantities[product.id] || 1;
-                    return (
-                      <div key={product.id} className="relative border-2 rounded-lg p-4 sm:p-5 hover:border-primary hover:shadow-lg hover:scale-[1.02] transition-all duration-200 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20">
-                        <div className="flex items-start space-x-3 sm:space-x-4 mb-3">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                            <Printer className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-bold text-foreground truncate text-base sm:text-lg">
-                              {product.nome}
-                            </div>
-                            <div className="text-xs sm:text-sm text-muted-foreground truncate mt-1">
-                              Lote: {product.lote || 'N/A'} | {product.marca || 'N/A'}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-2 flex-1">
-                              <Label htmlFor={`qty-${product.id}`} className="text-xs sm:text-sm whitespace-nowrap">
-                                Qtd:
-                              </Label>
-                              <Input
-                                id={`qty-${product.id}`}
-                                type="number"
-                                min="1"
-                                max="99"
-                                value={currentQuantity}
-                                onChange={(e) => handleQuickPrintQuantityChange(product.id, parseInt(e.target.value) || 1)}
-                                className="w-16 sm:w-20 h-9 text-center"
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                            </div>
-                            <Button
-                              variant="default"
-                              size="sm"
-                              className="flex-1"
-                              onClick={() => handlePrintSingleRequest(product, currentQuantity)}
-                            >
-                              <Printer className="w-4 h-4 mr-1" />
-                              <span className="hidden sm:inline">Imprimir</span>
-                              <span className="sm:hidden">Print</span>
-                            </Button>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full"
-                            onClick={() => handleEditProduct(product)}
-                          >
-                            <Edit className="w-4 h-4 mr-1" />
-                            <span>Editar e Preview</span>
-                          </Button>
-                        </div>
+              <div className="flex flex-wrap gap-2">
+                <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm"><Settings className="mr-2 h-4 w-4" />Configurações</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader><DialogTitle className="flex items-center gap-2"><Ruler className="h-5 w-5" />Tamanho da etiqueta</DialogTitle></DialogHeader>
+                    <div className="space-y-4 pt-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button type="button" variant={largura <= 60 ? "default" : "outline"} onClick={() => { handleLarguraChange("52"); handleAlturaChange("80"); }} className="h-auto py-3">Bobina 57 mm<span className="text-xs font-normal">52 × 80 mm</span></Button>
+                        <Button type="button" variant={largura > 60 ? "default" : "outline"} onClick={() => { handleLarguraChange("72"); handleAlturaChange("100"); }} className="h-auto py-3">Bobina 80 mm<span className="text-xs font-normal">72 × 100 mm</span></Button>
                       </div>
-                    );
-                  })}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><Label htmlFor="largura">Largura (mm)</Label><Input id="largura" value={largura} disabled className="mt-1 bg-muted text-center" /></div>
+                        <div><Label htmlFor="altura">Altura (mm)</Label><Input id="altura" type="number" min="40" max="150" value={altura} onChange={(e) => handleAlturaChange(e.target.value)} className="mt-1 text-center" /></div>
+                      </div>
+                      <div className="rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">Para impressoras térmicas, use margem <strong>Nenhuma</strong>, escala <strong>100%</strong> e desative cabeçalho/rodapé.</div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Button variant="outline" size="sm" onClick={() => navigate("/visualizar-etiquetas")}><Eye className="mr-2 h-4 w-4" />Visualizar</Button>
+                <Button onClick={openBatchPrint} disabled={!selectedData.length} size="sm" className="min-w-[150px] gradient-blue text-white">
+                  <Printer className="mr-2 h-4 w-4" />Imprimir selecionadas{selectedData.length ? ` (${totalLabels})` : ""}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <button type="button" onClick={toggleAll} className="flex min-h-10 items-center gap-3 rounded-lg border px-3 text-left hover:bg-muted/50">
+                <Checkbox checked={allSelected} onCheckedChange={toggleAll} />
+                <span className="text-sm font-medium">Selecionar todos</span>
+                <span className="text-xs text-muted-foreground">{products.length} produto(s)</span>
+              </button>
+              <div className="flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2 text-sm">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                <strong>{selectedData.length}</strong> selecionado(s)
+                <span className="text-muted-foreground">•</span>
+                <strong>{totalLabels}</strong> etiqueta(s)
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {selectedData.length > 0 && (
+          <Card className="border-primary/20 bg-primary/[0.03]">
+            <CardContent className="p-4 sm:p-5">
+              <div className="grid gap-5 lg:grid-cols-[1fr_280px] lg:items-center">
+                <div>
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold"><FileText className="h-4 w-4 text-primary" />Resumo da impressão</div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedData.map((product) => (
+                      <div key={product.id} className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-xs">
+                        <span className="max-w-[180px] truncate font-medium">{product.nome || "Produto"}</span>
+                        <span className="rounded-full bg-primary/10 px-1.5 py-0.5 font-semibold text-primary">{productQuantities[String(product.id)] || 1}x</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                {products.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Package className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                    <p>Nenhum produto cadastrado ainda.</p>
-                    <p className="text-sm">Cadastre produtos para usar a impressão rápida.</p>
+                {previewProduct && (
+                  <div className="mx-auto w-full max-w-[280px] rounded-xl border-2 border-foreground/15 bg-white p-4 text-black shadow-sm">
+                    <div className="mb-2 border-b border-dashed pb-2 text-center text-[10px] font-bold uppercase tracking-wider">Pré-visualização</div>
+                    <div className="text-center text-lg font-bold leading-tight">{previewProduct.nome || "Produto"}</div>
+                    {previewProduct.marca && <div className="mt-1 text-center text-xs">{previewProduct.marca}</div>}
+                    {previewProduct.validade && <div className="mt-3 text-center text-sm font-semibold">Validade: {formatDate(previewProduct.validade)}</div>}
+                    {previewProduct.lote && <div className="mt-1 text-center text-[11px]">Lote: {previewProduct.lote}</div>}
+                    <div className="mt-3 border-t border-dashed pt-2 text-center text-[9px] text-gray-500">{largura} × {altura} mm</div>
                   </div>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {showEditor && editingProduct && (
+          <div ref={editorRef}>
+            <Card className="border-2 border-primary shadow-lg">
+              <CardContent className="p-4 sm:p-6">
+                <EtiquetaEditor product={editingProduct} largura={largura} altura={altura} onPrint={handleEditorPrint} onClose={() => { setShowEditor(false); setEditingProduct(null); }} />
               </CardContent>
             </Card>
+          </div>
+        )}
 
-            {/* Seleção Multiple Tradicional */}
-            <Card className="mb-6">
-              <CardHeader>
-                <div className="flex items-center justify-between gap-3">
-                  <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
-                    <Checkbox className="mr-2" />
-                    <span className="hidden sm:inline">Seleção Múltipla - Para Impressão em Lote</span>
-                    <span className="sm:hidden">Seleção Múltipla</span>
-                  </CardTitle>
-                  <Button
-                    onClick={handlePrintRequest}
-                    disabled={selectedProducts.length === 0}
-                    className="flex-shrink-0 gradient-blue text-white text-sm"
-                    size="sm"
-                  >
-                    <Printer className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Imprimir selecionados</span>
-                    <span className="sm:hidden">Imprimir</span>
-                    {selectedProducts.length > 0 && ` (${Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)})`}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {products.map((product) => (
-                    <Card key={product.id} className="cursor-pointer hover:shadow-xl transition-all duration-200 border-2 hover:border-primary hover:scale-[1.02] bg-gradient-to-br from-card to-primary/5">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3 flex-1">
-                            <Checkbox
-                              checked={selectedProducts.includes(product.id)}
-                              onCheckedChange={() => handleSelectProduct(product.id)}
-                            />
-                            <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <Package className="w-5 h-5 text-primary" />
-                            </div>
-                            <CardTitle className="text-sm font-bold">{product.nome}</CardTitle>
-                          </div>
-                          {selectedProducts.includes(product.id) && (
-                            <div className="flex items-center space-x-2">
-                              <Label className="text-xs text-muted-foreground">Qtd:</Label>
-                              <Input
-                                type="number"
-                                min="1"
-                                max="99"
-                                value={productQuantities[product.id] || 1}
-                                onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value) || 1)}
-                                className="w-16 h-8 text-center text-sm"
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="text-sm">
-                        <div className="space-y-1">
-                          <p><span className="font-medium">Lote:</span> {product.lote}</p>
-                          <p><span className="font-medium">Marca:</span> {product.marca}</p>
-                          {product.validade && (
-                            <p><span className="font-medium">Validade:</span> {formatDateSafe(product.validade)}</p>
-                          )}
-                          <p><span className="font-medium">Local:</span> {product.localArmazenamento}</p>
-                          <p><span className="font-medium">Responsável:</span> {product.responsavel}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+        <Card>
+          <CardHeader className="p-4 sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="text-base sm:text-lg">Produtos para impressão</CardTitle>
+                <p className="mt-1 text-xs sm:text-sm text-muted-foreground">Ajuste a quantidade individual antes de imprimir.</p>
+              </div>
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input value={quickSearchTerm} onChange={(e) => setQuickSearchTerm(e.target.value)} placeholder="Buscar produto..." className="pl-9" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-5">
+            {products.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground"><Package className="mx-auto mb-3 h-12 w-12 opacity-40" /><p>Nenhum produto cadastrado ainda.</p></div>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {filteredProducts.map((product) => {
+                  const id = String(product.id);
+                  const selected = selectedProducts.includes(id);
+                  const quantity = productQuantities[id] || 1;
+                  return (
+                    <div key={id} className={`rounded-xl border p-4 transition-all ${selected ? "border-primary bg-primary/[0.04] shadow-sm" : "hover:border-primary/40"}`}>
+                      <div className="flex items-start gap-3">
+                        <Checkbox checked={selected} onCheckedChange={() => toggleProduct(id)} className="mt-1" />
+                        <button type="button" onClick={() => toggleProduct(id)} className="min-w-0 flex-1 text-left">
+                          <div className="flex items-center gap-2"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><Package className="h-4 w-4" /></div><div className="min-w-0"><div className="truncate font-semibold">{product.nome || "Produto sem nome"}</div><div className="truncate text-xs text-muted-foreground">{product.marca || "Sem marca"} • Lote {product.lote || "N/A"}</div></div></div>
+                        </button>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between gap-3 border-t pt-3">
+                        <div className="flex items-center gap-2"><Label className="text-xs text-muted-foreground">Quantidade</Label><div className="flex items-center rounded-lg border bg-background"><Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => setQuantity(id, quantity - 1)} disabled={quantity <= 1}><Minus className="h-3.5 w-3.5" /></Button><Input value={quantity} onChange={(e) => setQuantity(id, parseInt(e.target.value) || 1)} className="h-8 w-12 border-0 p-0 text-center text-sm focus-visible:ring-0" inputMode="numeric" /><Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => setQuantity(id, quantity + 1)} disabled={quantity >= 99}><Plus className="h-3.5 w-3.5" /></Button></div></div>
+                        <div className="flex gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setEditingProduct(product); setShowEditor(true); }}><Edit className="mr-1.5 h-3.5 w-3.5" />Editar</Button><Button type="button" size="sm" onClick={() => openSinglePrint(product)}><Printer className="mr-1.5 h-3.5 w-3.5" />Imprimir</Button></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {products.length > 0 && filteredProducts.length === 0 && <div className="py-10 text-center text-sm text-muted-foreground">Nenhum produto encontrado para “{quickSearchTerm}”.</div>}
+          </CardContent>
+        </Card>
 
-            {/* Dialog para selecionar responsável */}
-            <Dialog open={showResponsavelDialog} onOpenChange={setShowResponsavelDialog}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Selecione o Responsável</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <ResponsavelSelectField
-                    label="Responsável"
-                    value={responsavel}
-                    onChange={setResponsavel}
-                    required={true}
-                  />
-                  <div className="flex justify-end space-x-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setShowResponsavelDialog(false);
-                        setResponsavel('');
-                        setPrintAction(null);
-                        setSingleProductToPrint(null);
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={executePrint}
-                      className=""
-                    >
-                      <Printer className="w-4 h-4 mr-2" />
-                      Imprimir
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+        <Dialog open={showResponsavelDialog} onOpenChange={setShowResponsavelDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader><DialogTitle>Confirmar impressão</DialogTitle></DialogHeader>
+            <div className="space-y-5 pt-2">
+              <div className="rounded-xl border bg-muted/30 p-4">
+                <div className="text-sm font-semibold">O que será impresso</div>
+                <div className="mt-1 text-sm text-muted-foreground">{printAction === "single" ? `${quickPrintQuantities[String(singleProductToPrint?.id)] || 1} etiqueta(s)` : `${selectedData.length} produto(s) • ${totalLabels} etiqueta(s)`}</div>
+                <div className="mt-1 text-xs text-muted-foreground">Formato: {largura} × {altura} mm</div>
+              </div>
+              <ResponsavelSelectField label="Responsável" value={responsavel} onChange={setResponsavel} required />
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><Button variant="outline" onClick={() => { setShowResponsavelDialog(false); setResponsavel(""); setPrintAction(null); setSingleProductToPrint(null); }}>Cancelar</Button><Button onClick={executePrint}><Printer className="mr-2 h-4 w-4" />Confirmar impressão</Button></div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </PageLayout>
   );
 };
