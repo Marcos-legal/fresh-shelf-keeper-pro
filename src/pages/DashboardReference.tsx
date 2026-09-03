@@ -81,7 +81,7 @@ export default function DashboardReference() {
     .filter(({ days, product }) => product.status === "vencido" || (days !== null && days < 0))
     .sort((a, b) => (a.days || 0) - (b.days || 0)).slice(0, 5), [products]);
 
-  const attention = [
+  const attention: { value: number; label: string; detail: string; tone: "danger" | "warning"; action: () => void }[] = [
     { value: stats.vencidos, label: "Produtos vencidos", detail: "Precisam de ação agora", tone: "danger", action: () => navigate("/relatorios") },
     { value: upcoming.filter(({ days }) => days !== null && days <= 7).length, label: "Vencem nesta semana", detail: "Confira antes da próxima compra", tone: "warning", action: () => navigate("/relatorios") },
     { value: stats.proximoVencimento, label: "Vencem em 30 dias", detail: "Planeje o consumo e reposição", tone: "warning", action: () => navigate("/relatorios") },
@@ -113,7 +113,7 @@ export default function DashboardReference() {
           </header>
 
           <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
-            {showForm && <div className="mb-5 rounded-lg border border-slate-200 bg-white p-1 shadow-sm"><ProductForm title={editingProduct ? "Editar Produto" : "Novo Produto"} submitLabel={editingProduct ? "Atualizar Produto" : "Salvar Produto"} initialData={editingProduct || undefined} onSubmit={editingProduct ? handleEdit : handleAdd} /></div>}
+            {showForm && <div className="mb-5 rounded-lg border border-slate-200 bg-white p-1 shadow-sm"><ProductForm title={editingProduct ? "Editar Produto" : "Novo Produto"} submitLabel={editingProduct ? "Atualizar Produto" : "Salvar Produto"} initialData={editingProduct ? toFormData(editingProduct) : undefined} onSubmit={editingProduct ? handleEdit : handleAdd} /></div>}
 
             <div className="mb-5 flex flex-col gap-1"><p className="text-sm font-medium text-slate-500">Resumo do estoque</p><h2 className="text-lg font-semibold text-slate-900">Olá! Aqui está o que precisa da sua atenção hoje.</h2></div>
 
