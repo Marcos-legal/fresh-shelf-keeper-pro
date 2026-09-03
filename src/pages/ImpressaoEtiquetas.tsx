@@ -18,6 +18,7 @@ import { Product } from "@/types/product";
 import QRCode from "qrcode";
 import { buildEtiquetaQrPayload } from "@/lib/qrcode";
 import { buildEtiquetaPrintHTML } from "@/lib/etiquetaPrintTemplate";
+import { buildEtiquetaA4PrintHTML } from "@/lib/etiquetaA4Template";
 
 async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
   const map = new Map<string, string>();
@@ -54,7 +55,7 @@ const ImpressaoEtiquetas = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [responsavel, setResponsavel] = useState('');
   const [showResponsavelDialog, setShowResponsavelDialog] = useState(false);
-  const [printAction, setPrintAction] = useState<'batch' | 'single' | null>(null);
+  const [printAction, setPrintAction] = useState<'batch' | 'single' | 'a4' | null>(null);
   const [singleProductToPrint, setSingleProductToPrint] = useState<any>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showEditor, setShowEditor] = useState(false);
@@ -279,6 +280,8 @@ const ImpressaoEtiquetas = () => {
 
     if (printAction === 'batch') {
       handlePrint();
+    } else if (printAction === 'a4') {
+      handlePrintA4();
     } else if (printAction === 'single' && singleProductToPrint) {
       handlePrintSingle(singleProductToPrint);
     }
@@ -317,6 +320,50 @@ const ImpressaoEtiquetas = () => {
     toast({
       title: "Etiquetas enviadas para impressão",
       description: `${expandedProducts.length} etiqueta(s) enviadas!`,
+    });
+  };
+
+  const handlePrintA4Request = () => {
+    if (selectedProducts.length === 0) {
+      toast({
+        title: "Nenhum produto selecionado",
+        description: "Selecione ao menos um produto para gerar o PDF em A4.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setPrintAction('a4');
+    setShowResponsavelDialog(true);
+  };
+
+  const handlePrintA4 = async () => {
+    const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
+
+    const expandedProducts = selectedProductsData.flatMap(product => {
+      const quantity = productQuantities[product.id] || 1;
+      return Array(quantity).fill(product);
+    });
+
+    const qrMap = await buildQrMap(selectedProductsData);
+    const html = buildEtiquetaA4PrintHTML({
+      products: expandedProducts,
+      largura,
+      altura,
+      responsavel,
+      qrMap,
+      title: `Etiquetas A4 - ${expandedProducts.length} etiquetas`,
+    });
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      setTimeout(() => printWindow.print(), 500);
+    }
+
+    toast({
+      title: "PDF A4 gerado",
+      description: `${expandedProducts.length} etiqueta(s) em folha A4. No diálogo, escolha "Salvar como PDF".`,
     });
   };
 
@@ -455,6 +502,17 @@ const ImpressaoEtiquetas = () => {
                       <Eye className="w-4 h-4 mr-2" />
                       <span className="hidden sm:inline">Visualizar Etiquetas</span>
                       <span className="sm:hidden">Visualizar</span>
+                    </Button>
+                    <Button
+                      onClick={handlePrintA4Request}
+                      disabled={selectedProducts.length === 0}
+                      variant="outline"
+                      className="flex-1 sm:flex-none text-sm"
+                      size="sm"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Gerar PDF (Folha A4)</span>
+                      <span className="sm:hidden">PDF A4</span>
                     </Button>
                     <Button 
                       onClick={handlePrintRequest} 
