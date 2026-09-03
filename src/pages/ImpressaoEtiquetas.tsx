@@ -280,6 +280,8 @@ const ImpressaoEtiquetas = () => {
 
     if (printAction === 'batch') {
       handlePrint();
+    } else if (printAction === 'a4') {
+      handlePrintA4();
     } else if (printAction === 'single' && singleProductToPrint) {
       handlePrintSingle(singleProductToPrint);
     }
