@@ -18,6 +18,7 @@ import { Product } from "@/types/product";
 import QRCode from "qrcode";
 import { buildEtiquetaQrPayload } from "@/lib/qrcode";
 import { buildEtiquetaPrintHTML } from "@/lib/etiquetaPrintTemplate";
+import { buildEtiquetaA4PrintHTML } from "@/lib/etiquetaA4Template";
 
 async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
   const map = new Map<string, string>();
