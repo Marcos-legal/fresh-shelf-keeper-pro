@@ -16,17 +16,17 @@ import { EmpresaSwitcher } from "./EmpresaSwitcher";
 
 const navSections = [
   { label: "Visão Geral", items: [{ title: "Dashboard", url: "/", icon: LayoutDashboard }] },
-  { label: "Armazenamento", items: [
-    { title: "Refrigerado", url: "/refrigerado", icon: Thermometer },
-    { title: "Congelado", url: "/congelado", icon: Snowflake },
-    { title: "Ambiente", url: "/ambiente", icon: Home },
-    { title: "Câmara Fria", url: "/camara-fria", icon: Refrigerator },
-  ] },
-  { label: "Operações", items: [
-    { title: "Cadastro", url: "/cadastro", icon: Package },
+  { label: "Controle", items: [
+    { title: "Produtos · Refrigerado", url: "/refrigerado", icon: Thermometer },
+    { title: "Produtos · Congelado", url: "/congelado", icon: Snowflake },
+    { title: "Produtos · Ambiente", url: "/ambiente", icon: Home },
+    { title: "Produtos · Câmara Fria", url: "/camara-fria", icon: Refrigerator },
+    { title: "Cadastro de Produtos", url: "/cadastro", icon: Package },
     { title: "Estoque", url: "/contagem-estoque", icon: Calculator },
     { title: "Etiquetas", url: "/impressao-etiquetas", icon: Printer },
-    { title: "Visualizar", url: "/visualizar-etiquetas", icon: Eye },
+    { title: "Visualizar Etiquetas", url: "/visualizar-etiquetas", icon: Eye },
+  ] },
+  { label: "Operação", items: [
     { title: "Leitor QR", url: "/leitor-qrcode", icon: QrCode },
     { title: "Relatórios", url: "/relatorios", icon: FileText },
   ] },
@@ -55,13 +55,7 @@ export function AppSidebar() {
   };
 
   return (
-    <aside
-      className={cn(
-        "fixed inset-y-0 left-0 z-40 hidden lg:block transition-[width] duration-200 ease-out",
-        state === "expanded" ? "w-[13.25rem]" : "w-[3.5rem]"
-      )}
-      aria-label="Navegação principal"
-    >
+    <aside className={cn("fixed inset-y-0 left-0 z-40 hidden lg:block transition-[width] duration-200 ease-out", state === "expanded" ? "w-[13.25rem]" : "w-[3.5rem]")} aria-label="Navegação principal">
       <Sidebar collapsible="none" className="h-full w-full border-r border-slate-200 bg-white text-slate-700 shadow-[1px_0_8px_rgba(15,23,42,0.035)]">
         <SidebarHeader className={cn("border-b border-slate-100 bg-white py-3", state === "expanded" ? "px-3" : "px-1")}>
           <div className={cn("flex items-center", state === "expanded" ? "gap-2.5" : "justify-center")}>
