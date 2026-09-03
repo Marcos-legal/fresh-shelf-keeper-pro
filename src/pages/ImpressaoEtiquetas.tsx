@@ -503,6 +503,17 @@ const ImpressaoEtiquetas = () => {
                       <span className="hidden sm:inline">Visualizar Etiquetas</span>
                       <span className="sm:hidden">Visualizar</span>
                     </Button>
+                    <Button
+                      onClick={handlePrintA4Request}
+                      disabled={selectedProducts.length === 0}
+                      variant="outline"
+                      className="flex-1 sm:flex-none text-sm"
+                      size="sm"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Gerar PDF (Folha A4)</span>
+                      <span className="sm:hidden">PDF A4</span>
+                    </Button>
                     <Button 
                       onClick={handlePrintRequest} 
                       disabled={selectedProducts.length === 0}
