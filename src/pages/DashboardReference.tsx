@@ -44,6 +44,25 @@ function daysFromNow(value: unknown) {
   return Math.ceil((date.getTime() - Date.now()) / 86400000);
 }
 function productTargetDate(product: Product) { return product.utilizarAte || product.validade; }
+function toInputDate(value: unknown) {
+  const date = dateValue(value);
+  return date ? date.toISOString().slice(0, 10) : "";
+}
+function toFormData(product: Product): Partial<ProductFormData> {
+  return {
+    nome: product.nome,
+    lote: product.lote,
+    marca: product.marca,
+    dataFabricacao: toInputDate(product.dataFabricacao),
+    validade: toInputDate(product.validade),
+    dataAbertura: toInputDate(product.dataAbertura),
+    diasParaVencer: product.diasParaVencer,
+    localArmazenamento: product.localArmazenamento,
+    responsavel: product.responsavel,
+    precoCusto: product.precoCusto,
+    showOptionalDates: product.showOptionalDates,
+  };
+}
 
 export default function DashboardReference() {
   const navigate = useNavigate();
