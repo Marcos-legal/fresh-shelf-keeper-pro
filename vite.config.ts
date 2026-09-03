@@ -5,6 +5,7 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: process.env.GITHUB_PAGES === "true" ? "/fresh-shelf-keeper-pro/" : "/",
   server: {
     host: "::",
     port: 8080,
