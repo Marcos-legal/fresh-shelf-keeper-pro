@@ -105,10 +105,11 @@ export function buildEtiquetaPrintHTML({
     <meta charset="utf-8" />
     <title>${escapeHtml(title)}</title>
     <style>
-      @page { size: ${w}mm ${h}mm; margin: 0; }
+      @page { size: ${w}mm ${h}mm portrait; margin: 0; }
       * { box-sizing: border-box; }
       html, body {
         margin: 0; padding: 0;
+        width: ${w}mm;
         font-family: Arial, Helvetica, sans-serif;
         color: #000; background: #fff;
         -webkit-print-color-adjust: exact;
