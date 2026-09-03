@@ -55,7 +55,7 @@ const ImpressaoEtiquetas = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [responsavel, setResponsavel] = useState('');
   const [showResponsavelDialog, setShowResponsavelDialog] = useState(false);
-  const [printAction, setPrintAction] = useState<'batch' | 'single' | null>(null);
+  const [printAction, setPrintAction] = useState<'batch' | 'single' | 'a4' | null>(null);
   const [singleProductToPrint, setSingleProductToPrint] = useState<any>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showEditor, setShowEditor] = useState(false);
