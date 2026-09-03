@@ -117,18 +117,19 @@ export function buildEtiquetaPrintHTML({
       }
       .etiqueta {
         width: ${w}mm;
-        height: ${h}mm;
+        height: calc(${h}mm - 0.4mm);
         border: 1px solid #000;
         padding: 3px;
+        margin: 0;
         display: flex;
         flex-direction: column;
         gap: 2px;
         background: #fff;
-        page-break-after: always;
         page-break-inside: avoid;
+        break-inside: avoid;
         overflow: hidden;
       }
-      .etiqueta:last-child { page-break-after: auto; }
+      .etiqueta + .etiqueta { page-break-before: always; break-before: page; }
       .header {
         background: #000;
         color: #fff;
