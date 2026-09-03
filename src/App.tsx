@@ -36,6 +36,8 @@ const queryClient = new QueryClient({
   },
 });
 
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, "") || undefined;
+
 const App: React.FC = () => (
   <AppErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -47,7 +49,7 @@ const App: React.FC = () => (
                 <SidebarProvider>
                   <Toaster />
                   <Sonner />
-                  <BrowserRouter>
+                  <BrowserRouter basename={routerBasename}>
                     <Routes>
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/reset-password" element={<ResetPassword />} />
@@ -59,7 +61,7 @@ const App: React.FC = () => (
                       <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
                       <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
                       <Route path="/impressao-etiquetas" element={<ProtectedRoute><ImpressaoEtiquetas /></ProtectedRoute>} />
-                      <Route path="/visualizar-etiquetas" element={<ProtectedRoute><VisualizarEtiquetas /></ProtectedRoute>} />
+                      <Route path="/visualizar-etiquetas" element={<VisualizarEtiquetas />} />
                       <Route path="/contagem-estoque" element={<ProtectedRoute><ContagemEstoque /></ProtectedRoute>} />
                       <Route path="/leitor-qrcode" element={<ProtectedRoute><LeitorQrCode /></ProtectedRoute>} />
                       <Route path="/configuracoes/empresa" element={<ProtectedRoute><ConfiguracoesEmpresa /></ProtectedRoute>} />
