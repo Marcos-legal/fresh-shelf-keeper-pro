@@ -323,6 +323,50 @@ const ImpressaoEtiquetas = () => {
     });
   };
 
+  const handlePrintA4Request = () => {
+    if (selectedProducts.length === 0) {
+      toast({
+        title: "Nenhum produto selecionado",
+        description: "Selecione ao menos um produto para gerar o PDF em A4.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setPrintAction('a4');
+    setShowResponsavelDialog(true);
+  };
+
+  const handlePrintA4 = async () => {
+    const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
+
+    const expandedProducts = selectedProductsData.flatMap(product => {
+      const quantity = productQuantities[product.id] || 1;
+      return Array(quantity).fill(product);
+    });
+
+    const qrMap = await buildQrMap(selectedProductsData);
+    const html = buildEtiquetaA4PrintHTML({
+      products: expandedProducts,
+      largura,
+      altura,
+      responsavel,
+      qrMap,
+      title: `Etiquetas A4 - ${expandedProducts.length} etiquetas`,
+    });
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      setTimeout(() => printWindow.print(), 500);
+    }
+
+    toast({
+      title: "PDF A4 gerado",
+      description: `${expandedProducts.length} etiqueta(s) em folha A4. No diálogo, escolha "Salvar como PDF".`,
+    });
+  };
+
   const handlePrintSingle = async (product: any) => {
     const quantity = product.quickPrintQuantity || 1;
     const expandedProducts = Array(quantity).fill(product);
