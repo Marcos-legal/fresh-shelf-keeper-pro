@@ -27,7 +27,8 @@ export function buildEtiquetaPrintHTML({
   title,
 }: BuildOptions): string {
   const preset = getPresetForWidth(largura);
-  const w = preset.largura;
+  // Usa exatamente a largura/altura escolhidas pelo usuário (mm)
+  const w = largura && largura > 20 ? largura : preset.largura;
   const h = altura && altura > 20 ? altura : preset.altura;
 
   const scale = Math.max(0.7, Math.min(1.25, h / preset.altura));
