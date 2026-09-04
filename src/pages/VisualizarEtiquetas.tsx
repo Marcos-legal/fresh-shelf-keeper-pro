@@ -27,6 +27,7 @@ const VisualizarEtiquetas = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<'all' | 'valido' | 'proximo-vencimento' | 'vencido'>('all');
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const itemsPerPage = 12;
 
   // Recuperar tamanhos salvos das etiquetas
