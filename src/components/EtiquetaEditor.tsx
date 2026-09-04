@@ -180,7 +180,7 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
     validade: parseStringToDate(editedProduct.validade),
     dataAbertura: parseStringToDate(editedProduct.dataAbertura),
     diasParaVencer: editedProduct.diasParaVencer,
-    utilizarAte: editedProduct.utilizarAte,
+    utilizarAte: computedUtilizarAte,
     localArmazenamento: editedProduct.localArmazenamento as StorageLocation || 'ambiente',
     responsavel: editedProduct.responsavel
   };
