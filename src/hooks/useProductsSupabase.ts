@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEmpresa } from '@/contexts/EmpresaContext';
-import { Product, ProductFormData, StorageLocation } from '@/types/product';
+import { Product, ProductFormData, ProductStatus, StorageLocation } from '@/types/product';
 import { toast } from '@/hooks/use-toast';
 import { parseValidadeDate } from '@/utils/productValidation';
 import type { Database } from '@/integrations/supabase/types';
@@ -36,7 +36,7 @@ export function useProductsSupabase() {
       dataAbertura: parseDate(row.opening_date), diasParaVencer: row.days_valid || 0, utilizarAte: parseDate(row.use_by_date),
       localArmazenamento: row.storage as StorageLocation || 'ambiente', responsavel: row.responsible || '',
       precoCusto: (row as { preco_custo?: number | string | null }).preco_custo != null ? Number((row as { preco_custo: number | string }).preco_custo) : undefined,
-      status: 'valido', criadoEm: new Date(row.created_at), atualizadoEm: new Date(row.created_at), showOptionalDates: false,
+      status: 'sem-status', criadoEm: new Date(row.created_at), atualizadoEm: new Date(row.created_at), showOptionalDates: false,
     };
   };
 
@@ -118,10 +118,11 @@ export function useProductsSupabase() {
     catch (error) { console.error('Error deleting product:', error); toast({ title: 'Erro inesperado', description: 'Ocorreu um erro ao excluir o produto.', variant: 'destructive' }); }
   };
 
-  const calculateStatus = (product: Product): 'valido' | 'proximo-vencimento' | 'vencido' => {
+  const calculateStatus = (product: Product): ProductStatus => {
     const now = new Date(); let targetDate: Date | undefined;
     if (product.utilizarAte instanceof Date) targetDate = product.utilizarAte; else if (product.validade instanceof Date) targetDate = product.validade;
-    if (!targetDate || !(targetDate instanceof Date) || isNaN(targetDate.getTime())) return 'valido';
+    // Sem nenhuma data de validade/abertura o produto fica sem status
+    if (!targetDate || !(targetDate instanceof Date) || isNaN(targetDate.getTime())) return 'sem-status';
     const today = new Date(now); today.setHours(0, 0, 0, 0); const validityDay = new Date(targetDate); validityDay.setHours(0, 0, 0, 0);
     if (validityDay < today) return 'vencido'; const daysToExpire = Math.ceil((validityDay.getTime() - today.getTime()) / 86400000); if (daysToExpire <= 1) return 'proximo-vencimento'; return 'valido';
   };
