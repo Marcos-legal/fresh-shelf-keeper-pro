@@ -295,6 +295,21 @@ const VisualizarEtiquetas = () => {
                 <Button onClick={() => window.location.href = '/cadastro'} size="sm">Cadastrar Produto</Button>
               </div>
             )}
+
+            <Dialog open={!!editingProduct} onOpenChange={(open) => !open && setEditingProduct(null)}>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                {editingProduct && (
+                  <EtiquetaEditor
+                    product={editingProduct}
+                    largura={largura}
+                    altura={altura}
+                    onSave={handleEditorSave}
+                    onPrint={() => setEditingProduct(null)}
+                    onClose={() => setEditingProduct(null)}
+                  />
+                )}
+              </DialogContent>
+            </Dialog>
     </PageLayout>
   );
 };
