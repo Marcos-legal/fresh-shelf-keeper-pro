@@ -1,7 +1,7 @@
 
 export type StorageLocation = 'refrigerado' | 'congelado' | 'ambiente' | 'camara-fria';
 
-export type ProductStatus = 'valido' | 'proximo-vencimento' | 'vencido';
+export type ProductStatus = 'sem-status' | 'valido' | 'proximo-vencimento' | 'vencido';
 
 export interface Product {
   id: string;

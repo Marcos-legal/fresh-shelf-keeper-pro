@@ -22,6 +22,7 @@ interface ProductTableProps {
 }
 
 const statusConfig = {
+  'sem-status': { label: 'Sem datas', className: 'bg-muted text-muted-foreground border-border', dot: 'bg-muted-foreground' },
   'valido': { label: 'Válido', className: 'bg-success/10 text-success border-success/20', dot: 'bg-success' },
   'proximo-vencimento': { label: 'Próx. Venc.', className: 'bg-warning/10 text-warning border-warning/20', dot: 'bg-warning' },
   'vencido': { label: 'Vencido', className: 'bg-destructive/10 text-destructive border-destructive/20', dot: 'bg-destructive' },

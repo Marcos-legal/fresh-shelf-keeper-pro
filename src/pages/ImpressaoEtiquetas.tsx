@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { escapeHtml } from "@/lib/security";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
 import { EtiquetaEditor } from "@/components/EtiquetaEditor";
-import { Product } from "@/types/product";
+import { Product, ProductFormData } from "@/types/product";
 import QRCode from "qrcode";
 import { buildEtiquetaQrPayload } from "@/lib/qrcode";
 import { buildEtiquetaPrintHTML } from "@/lib/etiquetaPrintTemplate";
@@ -40,7 +40,7 @@ async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
 }
 
 const ImpressaoEtiquetas = () => {
-  const { products } = useProductsSupabase();
+  const { products, updateProduct } = useProductsSupabase();
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [productQuantities, setProductQuantities] = useState<Record<string, number>>({});
   const [quickPrintQuantities, setQuickPrintQuantities] = useState<Record<string, number>>({});
@@ -237,6 +237,10 @@ const ImpressaoEtiquetas = () => {
   const handleEditProduct = (product: any) => {
     setEditingProduct(product as Product);
     setShowEditor(true);
+  };
+
+  const handleEditorSave = async (productId: string, data: Partial<ProductFormData>) => {
+    await updateProduct(productId, data);
   };
 
   const handleEditorPrint = async (editedProduct: Product, editedResponsavel: string, quantity: number) => {
@@ -554,6 +558,7 @@ const ImpressaoEtiquetas = () => {
                       largura={largura}
                       altura={altura}
                       onPrint={handleEditorPrint}
+                      onSave={handleEditorSave}
                       onClose={() => {
                         setShowEditor(false);
                         setEditingProduct(null);
