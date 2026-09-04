@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { escapeHtml } from "@/lib/security";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
 import { EtiquetaEditor } from "@/components/EtiquetaEditor";
-import { Product } from "@/types/product";
+import { Product, ProductFormData } from "@/types/product";
 import QRCode from "qrcode";
 import { buildEtiquetaQrPayload } from "@/lib/qrcode";
 import { buildEtiquetaPrintHTML } from "@/lib/etiquetaPrintTemplate";
