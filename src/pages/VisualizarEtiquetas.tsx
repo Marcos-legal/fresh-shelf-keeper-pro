@@ -132,6 +132,11 @@ const VisualizarEtiquetas = () => {
     setSelectedProducts([]);
   };
 
+  const handleEditorSave = async (productId: string, data: Partial<ProductFormData>) => {
+    await updateProduct(productId, data);
+    setEditingProduct(null);
+  };
+
   return (
     <PageLayout 
       title="Visualizar Etiquetas" 
