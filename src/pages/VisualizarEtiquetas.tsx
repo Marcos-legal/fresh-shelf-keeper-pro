@@ -8,7 +8,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { EtiquetaView } from "@/components/EtiquetaView";
-import { Eye, CalendarIcon, RefreshCw, AlertTriangle, Ruler, Grid, List } from "lucide-react";
+import { EtiquetaEditor } from "@/components/EtiquetaEditor";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import type { Product, ProductFormData } from "@/types/product";
+import { Eye, CalendarIcon, RefreshCw, AlertTriangle, Ruler, Grid, List, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -24,6 +27,7 @@ const VisualizarEtiquetas = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<'all' | 'valido' | 'proximo-vencimento' | 'vencido'>('all');
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const itemsPerPage = 12;
 
   // Recuperar tamanhos salvos das etiquetas
@@ -126,6 +130,11 @@ const VisualizarEtiquetas = () => {
 
     // Limpar seleção após atualização
     setSelectedProducts([]);
+  };
+
+  const handleEditorSave = async (productId: string, data: Partial<ProductFormData>) => {
+    await updateProduct(productId, data);
+    setEditingProduct(null);
   };
 
   return (
@@ -234,6 +243,9 @@ const VisualizarEtiquetas = () => {
                           )}>
                             <Checkbox checked={selectedProducts.includes(product.id)} onCheckedChange={() => handleSelectProduct(product.id)} />
                             <span className="text-[11px] text-destructive font-semibold">VENCIDO</span>
+                            <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px] ml-auto" onClick={() => setEditingProduct(product)}>
+                              <Pencil className="w-3 h-3 mr-1" />Editar
+                            </Button>
                           </div>
                           <div className={cn(
                             "border border-destructive/20 rounded-xl p-3 bg-destructive/5 hover:shadow-sm transition-all duration-200",
@@ -291,6 +303,21 @@ const VisualizarEtiquetas = () => {
                 <Button onClick={() => window.location.href = '/cadastro'} size="sm">Cadastrar Produto</Button>
               </div>
             )}
+
+            <Dialog open={!!editingProduct} onOpenChange={(open) => !open && setEditingProduct(null)}>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                {editingProduct && (
+                  <EtiquetaEditor
+                    product={editingProduct}
+                    largura={largura}
+                    altura={altura}
+                    onSave={handleEditorSave}
+                    onPrint={() => setEditingProduct(null)}
+                    onClose={() => setEditingProduct(null)}
+                  />
+                )}
+              </DialogContent>
+            </Dialog>
     </PageLayout>
   );
 };
