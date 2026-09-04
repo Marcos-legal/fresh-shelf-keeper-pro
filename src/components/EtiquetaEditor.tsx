@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -162,7 +162,7 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
       validade: parseStringToDate(editedProduct.validade),
       dataAbertura: parseStringToDate(editedProduct.dataAbertura),
       diasParaVencer: editedProduct.diasParaVencer,
-      utilizarAte: editedProduct.utilizarAte,
+      utilizarAte: computedUtilizarAte,
       localArmazenamento: editedProduct.localArmazenamento as StorageLocation || 'ambiente',
       responsavel: editedProduct.responsavel
     };
