@@ -121,47 +121,20 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
   
   const [quantity, setQuantity] = useState(1);
 
+  // utilizarAte é sempre derivado de dataAbertura + diasParaVencer
+  const computedUtilizarAte = useMemo(() => {
+    const abertura = parseStringToDate(editedProduct.dataAbertura);
+    const dias = Number(editedProduct.diasParaVencer) || 0;
+    if (!abertura || isNaN(abertura.getTime()) || dias <= 0) return undefined;
+    return new Date(abertura.getFullYear(), abertura.getMonth(), abertura.getDate() + dias);
+  }, [editedProduct.dataAbertura, editedProduct.diasParaVencer]);
+
   const handleInputChange = (field: keyof EditableProduct, value: string) => {
-    setEditedProduct(prev => {
-      const updated = { ...prev, [field]: value };
-      
-      // Recalculate utilizarAte when dataAbertura or diasParaVencer changes
-      if (field === 'dataAbertura' || field === 'diasParaVencer') {
-        const abertura = field === 'dataAbertura' ? value : prev.dataAbertura;
-        const dias = field === 'diasParaVencer' ? parseInt(value) || 0 : prev.diasParaVencer;
-        
-        if (abertura && dias > 0) {
-          const [year, month, day] = abertura.split('-').map(Number);
-          if (year && month && day) {
-            const useBy = new Date(year, month - 1, day + dias);
-            updated.utilizarAte = useBy;
-          }
-        } else {
-          updated.utilizarAte = undefined;
-        }
-      }
-      
-      return updated;
-    });
+    setEditedProduct(prev => ({ ...prev, [field]: value }));
   };
 
   const handleNumberInputChange = (field: keyof EditableProduct, value: number) => {
-    setEditedProduct(prev => {
-      const updated = { ...prev, [field]: value };
-      
-      // Recalculate utilizarAte when diasParaVencer changes
-      if (field === 'diasParaVencer' && prev.dataAbertura && value > 0) {
-        const [year, month, day] = prev.dataAbertura.split('-').map(Number);
-        if (year && month && day) {
-          const useBy = new Date(year, month - 1, day + value);
-          updated.utilizarAte = useBy;
-        }
-      } else if (field === 'diasParaVencer') {
-        updated.utilizarAte = undefined;
-      }
-      
-      return updated;
-    });
+    setEditedProduct(prev => ({ ...prev, [field]: value }));
   };
 
   const handleToggleOptionalDates = (show: boolean) => {
@@ -169,24 +142,11 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
   };
 
   const handleUpdateDates = () => {
-    const today = new Date().toISOString().split('T')[0];
-    setEditedProduct(prev => {
-      const updated = {
-        ...prev,
-        dataFabricacao: today,
-        dataAbertura: today
-      };
-      
-      // Recalculate utilizarAte
-      if (prev.diasParaVencer > 0) {
-        const [year, month, day] = today.split('-').map(Number);
-        const useBy = new Date(year, month - 1, day + prev.diasParaVencer);
-        updated.utilizarAte = useBy;
-      }
-      
-      return updated;
-    });
+    const now = new Date();
+    const today = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+    setEditedProduct(prev => ({ ...prev, dataFabricacao: today, dataAbertura: today }));
   };
+
 
   const handlePrint = () => {
     if (!editedProduct.responsavel.trim()) {
