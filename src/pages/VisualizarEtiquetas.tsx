@@ -282,6 +282,9 @@ const VisualizarEtiquetas = () => {
                           )}>
                             <Checkbox checked={selectedProducts.includes(product.id)} onCheckedChange={() => handleSelectProduct(product.id)} />
                             <span className="text-[11px] text-success font-medium">Válido</span>
+                            <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px] ml-auto" onClick={() => setEditingProduct(product)}>
+                              <Pencil className="w-3 h-3 mr-1" />Editar
+                            </Button>
                           </div>
                           <div className={cn(
                             "hover:shadow-sm transition-shadow duration-200 border border-border/60 rounded-xl p-3 bg-card",
