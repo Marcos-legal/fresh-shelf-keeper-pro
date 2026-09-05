@@ -14,10 +14,11 @@ import { useNavigate } from "react-router-dom";
 import { escapeHtml } from "@/lib/security";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
 import { EtiquetaEditor } from "@/components/EtiquetaEditor";
-import { Product } from "@/types/product";
+import { Product, ProductFormData } from "@/types/product";
 import QRCode from "qrcode";
 import { buildEtiquetaQrPayload } from "@/lib/qrcode";
 import { buildEtiquetaPrintHTML } from "@/lib/etiquetaPrintTemplate";
+import { buildEtiquetaA4PrintHTML } from "@/lib/etiquetaA4Template";
 
 async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
   const map = new Map<string, string>();
@@ -39,7 +40,7 @@ async function buildQrMap(products: Product[]): Promise<Map<string, string>> {
 }
 
 const ImpressaoEtiquetas = () => {
-  const { products } = useProductsSupabase();
+  const { products, updateProduct } = useProductsSupabase();
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [productQuantities, setProductQuantities] = useState<Record<string, number>>({});
   const [quickPrintQuantities, setQuickPrintQuantities] = useState<Record<string, number>>({});
@@ -54,7 +55,7 @@ const ImpressaoEtiquetas = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [responsavel, setResponsavel] = useState('');
   const [showResponsavelDialog, setShowResponsavelDialog] = useState(false);
-  const [printAction, setPrintAction] = useState<'batch' | 'single' | null>(null);
+  const [printAction, setPrintAction] = useState<'batch' | 'single' | 'a4' | null>(null);
   const [singleProductToPrint, setSingleProductToPrint] = useState<any>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showEditor, setShowEditor] = useState(false);
@@ -238,6 +239,10 @@ const ImpressaoEtiquetas = () => {
     setShowEditor(true);
   };
 
+  const handleEditorSave = async (productId: string, data: Partial<ProductFormData>) => {
+    await updateProduct(productId, data);
+  };
+
   const handleEditorPrint = async (editedProduct: Product, editedResponsavel: string, quantity: number) => {
     const expandedProducts = Array(quantity).fill(editedProduct);
     const qrMap = await buildQrMap([editedProduct]);
@@ -279,6 +284,8 @@ const ImpressaoEtiquetas = () => {
 
     if (printAction === 'batch') {
       handlePrint();
+    } else if (printAction === 'a4') {
+      handlePrintA4();
     } else if (printAction === 'single' && singleProductToPrint) {
       handlePrintSingle(singleProductToPrint);
     }
@@ -317,6 +324,50 @@ const ImpressaoEtiquetas = () => {
     toast({
       title: "Etiquetas enviadas para impressão",
       description: `${expandedProducts.length} etiqueta(s) enviadas!`,
+    });
+  };
+
+  const handlePrintA4Request = () => {
+    if (selectedProducts.length === 0) {
+      toast({
+        title: "Nenhum produto selecionado",
+        description: "Selecione ao menos um produto para gerar o PDF em A4.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setPrintAction('a4');
+    setShowResponsavelDialog(true);
+  };
+
+  const handlePrintA4 = async () => {
+    const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
+
+    const expandedProducts = selectedProductsData.flatMap(product => {
+      const quantity = productQuantities[product.id] || 1;
+      return Array(quantity).fill(product);
+    });
+
+    const qrMap = await buildQrMap(selectedProductsData);
+    const html = buildEtiquetaA4PrintHTML({
+      products: expandedProducts,
+      largura,
+      altura,
+      responsavel,
+      qrMap,
+      title: `Etiquetas A4 - ${expandedProducts.length} etiquetas`,
+    });
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      setTimeout(() => printWindow.print(), 500);
+    }
+
+    toast({
+      title: "PDF A4 gerado",
+      description: `${expandedProducts.length} etiqueta(s) em folha A4. No diálogo, escolha "Salvar como PDF".`,
     });
   };
 
@@ -456,6 +507,17 @@ const ImpressaoEtiquetas = () => {
                       <span className="hidden sm:inline">Visualizar Etiquetas</span>
                       <span className="sm:hidden">Visualizar</span>
                     </Button>
+                    <Button
+                      onClick={handlePrintA4Request}
+                      disabled={selectedProducts.length === 0}
+                      variant="outline"
+                      className="flex-1 sm:flex-none text-sm"
+                      size="sm"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Gerar PDF (Folha A4)</span>
+                      <span className="sm:hidden">PDF A4</span>
+                    </Button>
                     <Button 
                       onClick={handlePrintRequest} 
                       disabled={selectedProducts.length === 0}
@@ -496,6 +558,7 @@ const ImpressaoEtiquetas = () => {
                       largura={largura}
                       altura={altura}
                       onPrint={handleEditorPrint}
+                      onSave={handleEditorSave}
                       onClose={() => {
                         setShowEditor(false);
                         setEditingProduct(null);
@@ -601,11 +664,24 @@ const ImpressaoEtiquetas = () => {
             {/* Seleção Multiple Tradicional */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
-                  <Checkbox className="mr-2" />
-                  <span className="hidden sm:inline">Seleção Múltipla - Para Impressão em Lote</span>
-                  <span className="sm:hidden">Seleção Múltipla</span>
-                </CardTitle>
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+                    <Checkbox className="mr-2" />
+                    <span className="hidden sm:inline">Seleção Múltipla - Para Impressão em Lote</span>
+                    <span className="sm:hidden">Seleção Múltipla</span>
+                  </CardTitle>
+                  <Button
+                    onClick={handlePrintRequest}
+                    disabled={selectedProducts.length === 0}
+                    className="flex-shrink-0 gradient-blue text-white text-sm"
+                    size="sm"
+                  >
+                    <Printer className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Imprimir selecionados</span>
+                    <span className="sm:hidden">Imprimir</span>
+                    {selectedProducts.length > 0 && ` (${Object.values(productQuantities).reduce((sum, qty) => sum + (qty || 0), 0)})`}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

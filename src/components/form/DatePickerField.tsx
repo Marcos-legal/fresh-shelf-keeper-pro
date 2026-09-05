@@ -1,13 +1,6 @@
-
-import { useState } from "react";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, X } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { CalendarIcon } from "lucide-react";
 
 interface DatePickerFieldProps {
   label: string;
@@ -18,97 +11,55 @@ interface DatePickerFieldProps {
   id: string;
 }
 
-export function DatePickerField({
-  label,
-  value,
-  onChange,
-  error,
-  required = false,
-  id
-}: DatePickerFieldProps) {
-  const [calendarOpen, setCalendarOpen] = useState(false);
+export function DatePickerField({ label, value, onChange, error, required = false, id }: DatePickerFieldProps) {
+  const displayValue = value || '';
 
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      // Garantir que a data seja exatamente a selecionada, sem ajustes de timezone
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const dateString = `${year}-${month}-${day}`;
-      
-      
-      onChange(dateString);
-      setCalendarOpen(false);
+  const handleTextChange = (inputValue: string) => {
+    const digits = inputValue.replace(/\D/g, '').slice(0, 8);
+    let formatted = digits;
+    if (digits.length > 2) formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    if (digits.length > 4) formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    onChange(formatted);
+  };
+
+  const handleDateChange = (inputValue: string) => {
+    if (!inputValue) {
+      onChange('');
+      return;
     }
+    const [year, month, day] = inputValue.split('-');
+    onChange(`${day}/${month}/${year}`);
   };
 
-  const formatDateForDisplay = (dateString: string) => {
-    if (!dateString) return 'Selecionar data';
-    try {
-      // Criar data usando os componentes para evitar problemas de timezone
-      const [year, month, day] = dateString.split('-').map(Number);
-      const date = new Date(year, month - 1, day);
-      return format(date, "dd/MM/yyyy", { locale: ptBR });
-    } catch {
-      return 'Data inválida';
-    }
-  };
-
-  const getSelectedDate = () => {
-    if (!value) return undefined;
-    try {
-      const [year, month, day] = value.split('-').map(Number);
-      return new Date(year, month - 1, day);
-    } catch {
-      return undefined;
-    }
-  };
-
-  const handleClear = () => {
-    onChange('');
-    setCalendarOpen(false);
-  };
+  const isoValue = /^\d{4}-\d{2}-\d{2}$/.test(value || '')
+    ? value
+    : '';
 
   return (
     <div className="space-y-2">
-      <Label>{label} {required && '*'}</Label>
-      <div className="relative w-full">
-        <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !value && "text-muted-foreground",
-                value && "pr-8",
-                error && "border-red-500"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {formatDateForDisplay(value)}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={getSelectedDate()}
-              onSelect={handleDateSelect}
-              initialFocus
-              className="pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
-        {value && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 hover:opacity-100 flex items-center justify-center z-10"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
+      <Label htmlFor={id}>{label} {required && '*'}</Label>
+      <div className="flex gap-2">
+        <Input
+          id={id}
+          value={displayValue}
+          onChange={(e) => handleTextChange(e.target.value)}
+          placeholder="30/10/2025"
+          maxLength={10}
+          aria-label={label}
+          className={error ? 'border-destructive' : ''}
+        />
+        <label className="relative inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-input bg-background hover:bg-accent" title="Selecionar data">
+          <CalendarIcon className="h-4 w-4" />
+          <input
+            type="date"
+            value={isoValue}
+            onChange={(e) => handleDateChange(e.target.value)}
+            className="absolute inset-0 cursor-pointer opacity-0"
+            aria-label={`Selecionar ${label}`}
+          />
+        </label>
       </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }
