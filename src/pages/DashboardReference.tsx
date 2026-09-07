@@ -209,10 +209,19 @@ export default function DashboardReference() {
 
         <button type="button" onClick={openNew} className="fixed bottom-20 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-md transition hover:bg-blue-700 lg:hidden" aria-label="Novo produto"><Plus className="h-6 w-6" /></button>
         <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 lg:hidden"><div className="mx-auto grid max-w-lg grid-cols-4"><MobileNav icon={Home} label="Dashboard" active onClick={() => navigate("/")} /><MobileNav icon={Box} label="Estoque" onClick={() => navigate("/contagem-estoque")} /><MobileNav icon={Tag} label="Etiquetas" onClick={() => navigate("/impressao-etiquetas")} /><MobileNav icon={Menu} label="Mais" onClick={() => setMobileMenuOpen(true)} /></div></nav>
+
+        <RegistrarAberturaDialog
+          open={aberturaOpen}
+          onOpenChange={setAberturaOpen}
+          products={products}
+          onSave={updateProduct}
+          onPrintLabel={() => navigate("/impressao-etiquetas")}
+        />
       </div>
     </SidebarProvider>
   );
 }
+
 
 function KpiCard({ title, value, description, icon: Icon, tone }: { title: string; value: number; description: string; icon: typeof Box; tone: "blue" | "amber" | "red" | "green" }) {
   const styles = { blue: "bg-blue-50 text-blue-600", amber: "bg-amber-50 text-amber-500", red: "bg-red-50 text-red-500", green: "bg-green-50 text-green-600" }[tone];
