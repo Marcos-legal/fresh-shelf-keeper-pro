@@ -64,12 +64,31 @@ function toFormData(product: Product): Partial<ProductFormData> {
   };
 }
 
+type DashboardFilter = "todos" | "hoje" | "semana" | "vencidos" | "sem-datas";
+
+const filterTitles: Record<DashboardFilter, string> = {
+  todos: "Todos os Produtos",
+  hoje: "Vencem hoje",
+  semana: "Vencem nos próximos 7 dias",
+  vencidos: "Produtos vencidos",
+  "sem-datas": "Produtos que precisam de ação",
+};
+
 export default function DashboardReference() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { products, addProduct, updateProduct, deleteProduct, stats } = useProductsSupabase();
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [aberturaOpen, setAberturaOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<DashboardFilter>("todos");
+
+  const userName = useMemo(() => {
+    const meta = (user?.user_metadata || {}) as { full_name?: string; name?: string };
+    const raw = meta.full_name || meta.name || user?.email?.split("@")[0] || "";
+    return raw ? raw.split(" ")[0].charAt(0).toUpperCase() + raw.split(" ")[0].slice(1) : "";
+  }, [user]);
 
   const upcoming = useMemo(() => products
     .map((product) => ({ product, days: daysFromNow(productTargetDate(product)) }))
@@ -81,10 +100,28 @@ export default function DashboardReference() {
     .filter(({ days, product }) => product.status === "vencido" || (days !== null && days < 0))
     .sort((a, b) => (a.days || 0) - (b.days || 0)).slice(0, 5), [products]);
 
-  const attention: { value: number; label: string; detail: string; tone: "danger" | "warning"; action: () => void }[] = [
-    { value: stats.vencidos, label: "Produtos vencidos", detail: "Precisam de ação agora", tone: "danger", action: () => navigate("/relatorios") },
-    { value: upcoming.filter(({ days }) => days !== null && days <= 7).length, label: "Vencem nesta semana", detail: "Confira antes da próxima compra", tone: "warning", action: () => navigate("/relatorios") },
-    { value: stats.proximoVencimento, label: "Vencem em 30 dias", detail: "Planeje o consumo e reposição", tone: "warning", action: () => navigate("/relatorios") },
+  const groups = useMemo(() => {
+    const withDays = products.map((product) => ({ product, days: daysFromNow(productTargetDate(product)) }));
+    return {
+      hoje: withDays.filter(({ days }) => days === 0).map(({ product }) => product),
+      semana: withDays.filter(({ days }) => days !== null && days >= 0 && days <= 7).map(({ product }) => product),
+      vencidos: products.filter((product) => product.status === "vencido"),
+      "sem-datas": products.filter((product) => product.status === "sem-status"),
+    };
+  }, [products]);
+
+  const filteredProducts = activeFilter === "todos" ? products : groups[activeFilter];
+
+  const applyFilter = (filter: DashboardFilter) => {
+    setActiveFilter((current) => (current === filter ? "todos" : filter));
+    document.getElementById("lista-produtos")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const attention: { value: number; label: string; detail: string; tone: "danger" | "warning"; active: boolean; action: () => void }[] = [
+    { value: groups.hoje.length, label: "Vencem hoje", detail: "Use ou descarte ainda hoje", tone: "danger", active: activeFilter === "hoje", action: () => applyFilter("hoje") },
+    { value: groups.semana.length, label: "Vencem em 7 dias", detail: "Priorize o consumo desta semana", tone: "warning", active: activeFilter === "semana", action: () => applyFilter("semana") },
+    { value: stats.vencidos, label: "Produtos vencidos", detail: "Precisam de ação agora", tone: "danger", active: activeFilter === "vencidos", action: () => applyFilter("vencidos") },
+    { value: groups["sem-datas"].length, label: "Precisam de ação", detail: "Sem datas informadas", tone: "warning", active: activeFilter === "sem-datas", action: () => applyFilter("sem-datas") },
   ];
 
   const handleAdd = (data: ProductFormData) => { addProduct(data); setShowForm(false); toast({ title: "Produto cadastrado", description: "Produto cadastrado com sucesso." }); };
