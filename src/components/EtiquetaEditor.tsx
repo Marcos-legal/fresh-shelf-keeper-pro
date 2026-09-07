@@ -125,10 +125,7 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onSave, onCl
 
   // utilizarAte é sempre derivado de dataAbertura + diasParaVencer
   const computedUtilizarAte = useMemo(() => {
-    const abertura = parseStringToDate(editedProduct.dataAbertura);
-    const dias = Number(editedProduct.diasParaVencer) || 0;
-    if (!abertura || isNaN(abertura.getTime()) || dias <= 0) return undefined;
-    return new Date(abertura.getFullYear(), abertura.getMonth(), abertura.getDate() + dias);
+    return calcularUtilizarAte(parseStringToDate(editedProduct.dataAbertura), Number(editedProduct.diasParaVencer) || 0);
   }, [editedProduct.dataAbertura, editedProduct.diasParaVencer]);
 
   const handleInputChange = (field: keyof EditableProduct, value: string) => {
