@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle, Bell, Box, CalendarDays, CheckCircle2, ChevronRight, Clock3,
-  Home, Menu, Package, Plus, QrCode, RefreshCw, Refrigerator, Snowflake, Tag,
+  Home, Menu, Package, Plus, QrCode, RefreshCw, Refrigerator, Snowflake, Tag, CalendarCheck,
   ThermometerSnowflake, Truck, CircleAlert, ArrowUpRight,
 } from "lucide-react";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
@@ -12,6 +12,8 @@ import { ProductTable } from "@/components/ProductTable";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardChart } from "@/components/DashboardChart";
 import { MobileDrawer } from "@/components/MobileDrawer";
+import { RegistrarAberturaDialog } from "@/components/RegistrarAberturaDialog";
+import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -228,9 +230,9 @@ function KpiCard({ title, value, description, icon: Icon, tone }: { title: strin
   return <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><div className="flex items-start gap-3"><div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-md", styles)}><Icon className="h-5 w-5" /></div><div className="min-w-0"><p className="truncate text-xs font-medium text-slate-500 sm:text-sm">{title}</p><p className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 sm:text-[27px]">{value}</p><p className="mt-0.5 hidden text-xs text-slate-400 sm:block">{description}</p></div></div></div>;
 }
 
-function AttentionItem({ value, label, detail, tone, action }: { value: number; label: string; detail: string; tone: "danger" | "warning"; action: () => void }) {
+function AttentionItem({ value, label, detail, tone, active, action }: { value: number; label: string; detail: string; tone: "danger" | "warning"; active?: boolean; action: () => void }) {
   const danger = tone === "danger";
-  return <button onClick={action} className="flex min-w-0 items-center gap-3 rounded-md border border-slate-200 p-3 text-left transition hover:bg-slate-50"><span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", danger ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-500")}><AlertTriangle className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-slate-800">{value} {label}</span><span className="block truncate text-xs text-slate-500">{detail}</span></span><ChevronRight className="h-4 w-4 shrink-0 text-slate-300" /></button>;
+  return <button onClick={action} className={cn("flex min-h-[64px] min-w-0 items-center gap-3 rounded-md border p-3 text-left transition hover:bg-slate-50", active ? "border-blue-400 bg-blue-50/50" : "border-slate-200")}><span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", danger ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-500")}><AlertTriangle className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-slate-800">{value} {label}</span><span className="block truncate text-xs text-slate-500">{detail}</span></span><ChevronRight className="h-4 w-4 shrink-0 text-slate-300" /></button>;
 }
 
 function ProductListCard({ title, items, empty, variant, onViewAll }: { title: string; items: { product: Product; days: number | null }[]; empty: string; variant: "warning" | "danger"; onViewAll: () => void }) {
