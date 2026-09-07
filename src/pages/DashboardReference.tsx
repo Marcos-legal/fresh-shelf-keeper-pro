@@ -152,7 +152,7 @@ export default function DashboardReference() {
           <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
             {showForm && <div className="mb-5 rounded-lg border border-slate-200 bg-white p-1 shadow-sm"><ProductForm title={editingProduct ? "Editar Produto" : "Novo Produto"} submitLabel={editingProduct ? "Atualizar Produto" : "Salvar Produto"} initialData={editingProduct ? toFormData(editingProduct) : undefined} onSubmit={editingProduct ? handleEdit : handleAdd} /></div>}
 
-            <div className="mb-5 flex flex-col gap-1"><p className="text-sm font-medium text-slate-500">Resumo do estoque</p><h2 className="text-lg font-semibold text-slate-900">Olá! Aqui está o que precisa da sua atenção hoje.</h2></div>
+            <div className="mb-5 flex flex-col gap-1"><p className="text-sm font-medium text-slate-500">Resumo do estoque</p><h2 className="text-lg font-semibold text-slate-900">{userName ? `Olá, ${userName}!` : "Olá!"} Aqui está o que precisa da sua atenção hoje.</h2></div>
 
             <section className="grid grid-cols-2 gap-3 xl:grid-cols-4 xl:gap-4">
               <KpiCard title="Produtos" value={stats.total} description="Total cadastrado" icon={Box} tone="blue" />
@@ -161,10 +161,22 @@ export default function DashboardReference() {
               <KpiCard title="Vencidos" value={stats.vencidos} description="Ação necessária" icon={AlertTriangle} tone="red" />
             </section>
 
-            <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
-              <div className="mb-4 flex items-center justify-between"><div><h2 className="text-base font-semibold text-slate-900">O que precisa da sua atenção</h2><p className="mt-0.5 text-xs text-slate-500">Prioridades para reduzir perdas e manter o estoque em dia.</p></div><CircleAlert className="hidden h-5 w-5 text-slate-400 sm:block" /></div>
-              <div className="grid gap-2 md:grid-cols-3">{attention.map((item) => <AttentionItem key={item.label} {...item} />)}</div>
+            <section className="mt-5 rounded-lg border-2 border-amber-200 bg-white p-4 shadow-sm sm:p-5">
+              <div className="mb-4 flex items-center justify-between"><div><h2 className="text-base font-semibold text-slate-900 sm:text-lg">O que precisa da sua atenção</h2><p className="mt-0.5 text-xs text-slate-500">Toque em um item para ver a lista já filtrada.</p></div><CircleAlert className="hidden h-5 w-5 text-amber-500 sm:block" /></div>
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">{attention.map((item) => <AttentionItem key={item.label} {...item} />)}</div>
             </section>
+
+            <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
+              <div className="mb-4"><h2 className="text-base font-semibold text-slate-900">Ações rápidas</h2><p className="text-xs text-slate-500">Atalhos para as tarefas do dia a dia.</p></div>
+              <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">
+                <QuickAction icon={Plus} label="Novo produto" onClick={openNew} tone="blue" />
+                <QuickAction icon={CalendarCheck} label="Registrar abertura" onClick={() => setAberturaOpen(true)} tone="green" />
+                <QuickAction icon={Tag} label="Gerar etiqueta" onClick={() => navigate("/impressao-etiquetas")} tone="blue" />
+                <QuickAction icon={QrCode} label="Ler QR Code" onClick={() => navigate("/leitor-qrcode")} tone="purple" />
+                <QuickAction icon={Truck} label="Relatórios" onClick={() => navigate("/relatorios")} tone="amber" />
+              </div>
+            </section>
+
 
             <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between"><div><h2 className="text-base font-semibold text-slate-900">Produtos por armazenamento</h2><p className="text-xs text-slate-500">Distribuição atual do estoque.</p></div><button onClick={() => navigate("/relatorios")} className="hidden items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 sm:flex">Ver relatório <ArrowUpRight className="h-3.5 w-3.5" /></button></div>
