@@ -12,6 +12,7 @@ import { NumberInputField } from "@/components/form/NumberInputField";
 import { SelectField } from "@/components/form/SelectField";
 import { ValidadeField } from "@/components/form/ValidadeField";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
+import { calcularUtilizarAte } from "@/lib/utilizarAte";
 
 interface EtiquetaEditorProps {
   product: Product;
@@ -125,10 +126,7 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onSave, onCl
 
   // utilizarAte é sempre derivado de dataAbertura + diasParaVencer
   const computedUtilizarAte = useMemo(() => {
-    const abertura = parseStringToDate(editedProduct.dataAbertura);
-    const dias = Number(editedProduct.diasParaVencer) || 0;
-    if (!abertura || isNaN(abertura.getTime()) || dias <= 0) return undefined;
-    return new Date(abertura.getFullYear(), abertura.getMonth(), abertura.getDate() + dias);
+    return calcularUtilizarAte(parseStringToDate(editedProduct.dataAbertura), Number(editedProduct.diasParaVencer) || 0);
   }, [editedProduct.dataAbertura, editedProduct.diasParaVencer]);
 
   const handleInputChange = (field: keyof EditableProduct, value: string) => {
