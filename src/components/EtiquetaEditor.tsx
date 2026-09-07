@@ -12,6 +12,7 @@ import { NumberInputField } from "@/components/form/NumberInputField";
 import { SelectField } from "@/components/form/SelectField";
 import { ValidadeField } from "@/components/form/ValidadeField";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
+import { calcularUtilizarAte } from "@/lib/utilizarAte";
 
 interface EtiquetaEditorProps {
   product: Product;
