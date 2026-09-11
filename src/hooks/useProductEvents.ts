@@ -85,8 +85,8 @@ export function useProductEvents() {
         return false;
       }
 
-      // Não apagamos o produto: limpamos apenas as datas/validades,
-      // mantendo o nome cadastrado e deixando-o sem status até novas datas.
+      // Não apagamos o produto: limpamos apenas validade, lote e fabricação,
+      // mantendo o nome e os "dias para vencer" cadastrados até novas datas.
       if (Number.isFinite(numericId)) {
         await supabase
           .from("products")
@@ -95,7 +95,7 @@ export function useProductEvents() {
             expiry_date: null,
             opening_date: null,
             use_by_date: null,
-            days_valid: 0,
+            lot: "",
             manufacture_date_entered: false,
             expiry_date_entered: false,
             responsible: "",
@@ -106,7 +106,7 @@ export function useProductEvents() {
       await loadEvents();
       toast({
         title: tipo === "consumido" ? "Produto consumido" : "Produto descartado",
-        description: "Baixa registrada. As datas foram limpas e o produto segue cadastrado.",
+        description: "Baixa registrada. Validade, lote e fabricação foram limpos; os dias para vencer foram mantidos.",
       });
       return true;
     },
