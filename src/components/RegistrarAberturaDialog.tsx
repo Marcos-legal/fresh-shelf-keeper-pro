@@ -38,7 +38,6 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dataAbertura, setDataAbertura] = useState(todayInput());
   const [dias, setDias] = useState<number>(0);
-  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const selected = useMemo(() => products.find((p) => p.id === productId), [products, productId]);
@@ -48,7 +47,6 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
       setProductId("");
       setDataAbertura(todayInput());
       setDias(0);
-      setSaved(false);
       setSaving(false);
     }
   }, [open]);
@@ -64,7 +62,8 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
     setSaving(true);
     await onSave(selected.id, { dataAbertura, diasParaVencer: dias });
     setSaving(false);
-    setSaved(true);
+    onPrintLabel(selected);
+    onOpenChange(false);
   };
 
   return (
