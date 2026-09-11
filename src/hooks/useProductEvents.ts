@@ -106,7 +106,7 @@ export function useProductEvents() {
       await loadEvents();
       toast({
         title: tipo === "consumido" ? "Produto consumido" : "Produto descartado",
-        description: "Baixa registrada. As datas foram limpas e o produto segue cadastrado.",
+        description: "Baixa registrada. Validade, lote e fabricação foram limpos; os dias para vencer foram mantidos.",
       });
       return true;
     },
