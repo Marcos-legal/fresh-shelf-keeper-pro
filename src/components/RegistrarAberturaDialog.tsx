@@ -16,8 +16,8 @@ interface RegistrarAberturaDialogProps {
   products: Product[];
   /** Mesma função de atualização já usada no sistema (useProductsSupabase.updateProduct) */
   onSave: (id: string, data: ProductFormData) => void | Promise<void>;
-  /** Ação existente de impressão de etiquetas */
-  onPrintLabel: () => void;
+  /** Ação existente de impressão de etiquetas — recebe o produto recém-aberto */
+  onPrintLabel: (product: Product) => void;
 }
 
 function todayInput() {
