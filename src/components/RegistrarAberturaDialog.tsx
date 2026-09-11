@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronsUpDown, Printer, CalendarCheck } from "lucide-react";
+import { Check, ChevronsUpDown, CalendarCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +16,8 @@ interface RegistrarAberturaDialogProps {
   products: Product[];
   /** Mesma função de atualização já usada no sistema (useProductsSupabase.updateProduct) */
   onSave: (id: string, data: ProductFormData) => void | Promise<void>;
-  /** Ação existente de impressão de etiquetas */
-  onPrintLabel: () => void;
+  /** Ação existente de impressão de etiquetas — recebe o produto recém-aberto */
+  onPrintLabel: (product: Product) => void;
 }
 
 function todayInput() {
@@ -38,7 +38,6 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dataAbertura, setDataAbertura] = useState(todayInput());
   const [dias, setDias] = useState<number>(0);
-  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const selected = useMemo(() => products.find((p) => p.id === productId), [products, productId]);
@@ -48,7 +47,6 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
       setProductId("");
       setDataAbertura(todayInput());
       setDias(0);
-      setSaved(false);
       setSaving(false);
     }
   }, [open]);
@@ -64,7 +62,8 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
     setSaving(true);
     await onSave(selected.id, { dataAbertura, diasParaVencer: dias });
     setSaving(false);
-    setSaved(true);
+    onPrintLabel(selected);
+    onOpenChange(false);
   };
 
   return (
@@ -97,7 +96,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
                         <CommandItem
                           key={product.id}
                           value={`${product.nome || "sem nome"} ${product.lote || ""} ${product.marca || ""}`}
-                          onSelect={() => { setProductId(product.id); setPickerOpen(false); setSaved(false); }}
+                          onSelect={() => { setProductId(product.id); setPickerOpen(false); }}
                         >
                           <Check className={cn("mr-2 h-4 w-4", productId === product.id ? "opacity-100" : "opacity-0")} />
                           <span className="truncate">{product.nome || "Produto sem nome"}{product.lote ? ` · ${product.lote}` : ""}</span>
@@ -113,11 +112,11 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="abertura-data">Data de abertura</Label>
-              <Input id="abertura-data" type="date" className="h-12" value={dataAbertura} onChange={(e) => { setDataAbertura(e.target.value); setSaved(false); }} />
+              <Input id="abertura-data" type="date" className="h-12" value={dataAbertura} onChange={(e) => setDataAbertura(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="abertura-dias">Dias para vencer após abertura</Label>
-              <Input id="abertura-dias" type="number" min={0} className="h-12" value={dias} onChange={(e) => { setDias(Number(e.target.value) || 0); setSaved(false); }} />
+              <Input id="abertura-dias" type="number" min={0} className="h-12" value={dias} onChange={(e) => setDias(Number(e.target.value) || 0)} />
             </div>
           </div>
 
@@ -131,21 +130,10 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
         </div>
 
         <DialogFooter className="flex-col gap-2 sm:flex-row">
-          {saved ? (
-            <>
-              <Button variant="outline" className="h-12 w-full sm:h-10 sm:w-auto" onClick={() => onOpenChange(false)}>Fechar</Button>
-              <Button className="h-12 w-full sm:h-10 sm:w-auto" onClick={() => { onOpenChange(false); onPrintLabel(); }}>
-                <Printer className="mr-2 h-4 w-4" /> Imprimir etiqueta
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" className="h-12 w-full sm:h-10 sm:w-auto" onClick={() => onOpenChange(false)}>Cancelar</Button>
-              <Button className="h-12 w-full sm:h-10 sm:w-auto" disabled={!selected || !dataAbertura || saving} onClick={handleSave}>
-                {saving ? "Salvando..." : "Salvar abertura"}
-              </Button>
-            </>
-          )}
+          <Button variant="outline" className="h-12 w-full sm:h-10 sm:w-auto" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button className="h-12 w-full sm:h-10 sm:w-auto" disabled={!selected || !dataAbertura || saving} onClick={handleSave}>
+            {saving ? "Salvando..." : "Salvar e imprimir etiqueta"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
