@@ -85,8 +85,8 @@ export function useProductEvents() {
         return false;
       }
 
-      // Não apagamos o produto: limpamos apenas as datas/validades,
-      // mantendo o nome cadastrado e deixando-o sem status até novas datas.
+      // Não apagamos o produto: limpamos apenas validade, lote e fabricação,
+      // mantendo o nome e os "dias para vencer" cadastrados até novas datas.
       if (Number.isFinite(numericId)) {
         await supabase
           .from("products")
