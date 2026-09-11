@@ -96,7 +96,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
                         <CommandItem
                           key={product.id}
                           value={`${product.nome || "sem nome"} ${product.lote || ""} ${product.marca || ""}`}
-                          onSelect={() => { setProductId(product.id); setPickerOpen(false); setSaved(false); }}
+                          onSelect={() => { setProductId(product.id); setPickerOpen(false); }}
                         >
                           <Check className={cn("mr-2 h-4 w-4", productId === product.id ? "opacity-100" : "opacity-0")} />
                           <span className="truncate">{product.nome || "Produto sem nome"}{product.lote ? ` · ${product.lote}` : ""}</span>
@@ -112,11 +112,11 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="abertura-data">Data de abertura</Label>
-              <Input id="abertura-data" type="date" className="h-12" value={dataAbertura} onChange={(e) => { setDataAbertura(e.target.value); setSaved(false); }} />
+              <Input id="abertura-data" type="date" className="h-12" value={dataAbertura} onChange={(e) => setDataAbertura(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="abertura-dias">Dias para vencer após abertura</Label>
-              <Input id="abertura-dias" type="number" min={0} className="h-12" value={dias} onChange={(e) => { setDias(Number(e.target.value) || 0); setSaved(false); }} />
+              <Input id="abertura-dias" type="number" min={0} className="h-12" value={dias} onChange={(e) => setDias(Number(e.target.value) || 0)} />
             </div>
           </div>
 
