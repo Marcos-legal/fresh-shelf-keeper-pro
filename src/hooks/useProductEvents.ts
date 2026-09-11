@@ -95,7 +95,7 @@ export function useProductEvents() {
             expiry_date: null,
             opening_date: null,
             use_by_date: null,
-            days_valid: 0,
+            lot: "",
             manufacture_date_entered: false,
             expiry_date_entered: false,
             responsible: "",
