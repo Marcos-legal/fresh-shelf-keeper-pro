@@ -130,21 +130,10 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
         </div>
 
         <DialogFooter className="flex-col gap-2 sm:flex-row">
-          {saved ? (
-            <>
-              <Button variant="outline" className="h-12 w-full sm:h-10 sm:w-auto" onClick={() => onOpenChange(false)}>Fechar</Button>
-              <Button className="h-12 w-full sm:h-10 sm:w-auto" onClick={() => { onOpenChange(false); onPrintLabel(); }}>
-                <Printer className="mr-2 h-4 w-4" /> Imprimir etiqueta
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" className="h-12 w-full sm:h-10 sm:w-auto" onClick={() => onOpenChange(false)}>Cancelar</Button>
-              <Button className="h-12 w-full sm:h-10 sm:w-auto" disabled={!selected || !dataAbertura || saving} onClick={handleSave}>
-                {saving ? "Salvando..." : "Salvar abertura"}
-              </Button>
-            </>
-          )}
+          <Button variant="outline" className="h-12 w-full sm:h-10 sm:w-auto" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button className="h-12 w-full sm:h-10 sm:w-auto" disabled={!selected || !dataAbertura || saving} onClick={handleSave}>
+            {saving ? "Salvando..." : "Salvar e imprimir etiqueta"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
