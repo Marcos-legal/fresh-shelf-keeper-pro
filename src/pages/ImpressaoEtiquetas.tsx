@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Printer, Package, Eye, FileText, Settings, Ruler, Edit, Search } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { escapeHtml } from "@/lib/security";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
 import { EtiquetaEditor } from "@/components/EtiquetaEditor";
@@ -63,6 +63,23 @@ const ImpressaoEtiquetas = () => {
   const editorRef = useRef<HTMLDivElement>(null);
   
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Abre a impressão individual automaticamente quando redirecionado pelo "Registrar abertura"
+  useEffect(() => {
+    const produtoId = searchParams.get('produtoId');
+    const autoPrint = searchParams.get('autoPrint');
+    if (produtoId && autoPrint === '1' && products.length > 0) {
+      const product = products.find((p) => p.id === produtoId);
+      if (product) {
+        handlePrintSingleRequest(product);
+      }
+      const next = new URLSearchParams(searchParams);
+      next.delete('produtoId');
+      next.delete('autoPrint');
+      setSearchParams(next, { replace: true });
+    }
+  }, [products, searchParams, setSearchParams]);
   
   // Scroll to editor when it opens
   useEffect(() => {
