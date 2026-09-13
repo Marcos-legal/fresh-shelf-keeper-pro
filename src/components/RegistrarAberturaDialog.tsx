@@ -48,6 +48,8 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
   const [dataAbertura, setDataAbertura] = useState(todayInput());
   const [dias, setDias] = useState<number>(0);
   const [lote, setLote] = useState<string>("");
+  const [dataFabricacao, setDataFabricacao] = useState<string>("");
+  const [validade, setValidade] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   const selected = useMemo(() => products.find((p) => p.id === productId), [products, productId]);
