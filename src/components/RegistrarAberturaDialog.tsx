@@ -38,6 +38,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dataAbertura, setDataAbertura] = useState(todayInput());
   const [dias, setDias] = useState<number>(0);
+  const [lote, setLote] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   const selected = useMemo(() => products.find((p) => p.id === productId), [products, productId]);
@@ -47,12 +48,16 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
       setProductId("");
       setDataAbertura(todayInput());
       setDias(0);
+      setLote("");
       setSaving(false);
     }
   }, [open]);
 
   useEffect(() => {
-    if (selected) setDias(selected.diasParaVencer || 0);
+    if (selected) {
+      setDias(selected.diasParaVencer || 0);
+      setLote(selected.lote || "");
+    }
   }, [selected]);
 
   const utilizarAte = calcularUtilizarAte(parseInputDate(dataAbertura), dias);
@@ -60,7 +65,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
   const handleSave = async () => {
     if (!selected) return;
     setSaving(true);
-    await onSave(selected.id, { dataAbertura, diasParaVencer: dias });
+    await onSave(selected.id, { dataAbertura, diasParaVencer: dias, lote });
     setSaving(false);
     onPrintLabel(selected);
     onOpenChange(false);
@@ -89,7 +94,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
               <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
                 <Command>
                   <CommandInput placeholder="Buscar produto..." />
-                  <CommandList>
+                  <CommandList className="max-h-64 overflow-y-auto">
                     <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                     <CommandGroup>
                       {products.map((product) => (
@@ -107,6 +112,11 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
                 </Command>
               </PopoverContent>
             </Popover>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="abertura-lote">Lote</Label>
+            <Input id="abertura-lote" className="h-12" placeholder="Ex.: L2024-001" value={lote} onChange={(e) => setLote(e.target.value)} />
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

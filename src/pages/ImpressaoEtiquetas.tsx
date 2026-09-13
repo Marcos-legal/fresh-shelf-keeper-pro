@@ -608,7 +608,7 @@ const ImpressaoEtiquetas = () => {
                     className="pl-9 h-9"
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[480px] overflow-y-auto pr-1">
                   {products.filter(p => p.nome?.toLowerCase().includes(quickSearchTerm.toLowerCase()) || p.lote?.toLowerCase().includes(quickSearchTerm.toLowerCase()) || p.marca?.toLowerCase().includes(quickSearchTerm.toLowerCase())).map(product => {
                     const currentQuantity = quickPrintQuantities[product.id] || 1;
                     return (
