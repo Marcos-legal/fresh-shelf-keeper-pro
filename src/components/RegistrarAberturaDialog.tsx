@@ -139,10 +139,31 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
             </Popover>
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="abertura-lote">Lote</Label>
-            <Input id="abertura-lote" className="h-12" placeholder="Ex.: L2024-001" value={lote} onChange={(e) => setLote(e.target.value)} />
-          </div>
+          {selected && (semFabricacao || semValidade || semLote) && (
+            <div className="space-y-3 rounded-lg border border-dashed border-border/70 bg-muted/20 p-3">
+              <p className="text-xs font-medium text-muted-foreground">Este produto está sem algumas informações — preencha para completar o cadastro.</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {semLote && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="abertura-lote">Lote</Label>
+                    <Input id="abertura-lote" className="h-12" placeholder="Ex.: L2024-001" value={lote} onChange={(e) => setLote(e.target.value)} />
+                  </div>
+                )}
+                {semFabricacao && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="abertura-fabricacao">Data de fabricação</Label>
+                    <Input id="abertura-fabricacao" type="date" className="h-12" value={dataFabricacao} onChange={(e) => setDataFabricacao(e.target.value)} />
+                  </div>
+                )}
+                {semValidade && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="abertura-validade">Data de validade</Label>
+                    <Input id="abertura-validade" type="date" className="h-12" value={validade} onChange={(e) => setValidade(e.target.value)} />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
