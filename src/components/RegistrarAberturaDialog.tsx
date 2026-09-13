@@ -33,12 +33,23 @@ function parseInputDate(value: string): Date | undefined {
   return isNaN(date.getTime()) ? undefined : date;
 }
 
+function toInput(value?: Date | string): string {
+  if (!value) return "";
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
+  }
+  if (typeof value === "string") return value.slice(0, 10);
+  return "";
+}
+
 export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, onPrintLabel }: RegistrarAberturaDialogProps) {
   const [productId, setProductId] = useState<string>("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dataAbertura, setDataAbertura] = useState(todayInput());
   const [dias, setDias] = useState<number>(0);
   const [lote, setLote] = useState<string>("");
+  const [dataFabricacao, setDataFabricacao] = useState<string>("");
+  const [validade, setValidade] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   const selected = useMemo(() => products.find((p) => p.id === productId), [products, productId]);
@@ -49,6 +60,8 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
       setDataAbertura(todayInput());
       setDias(0);
       setLote("");
+      setDataFabricacao("");
+      setValidade("");
       setSaving(false);
     }
   }, [open]);
@@ -57,15 +70,27 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
     if (selected) {
       setDias(selected.diasParaVencer || 0);
       setLote(selected.lote || "");
+      setDataFabricacao(toInput(selected.dataFabricacao));
+      setValidade(toInput(selected.validade));
     }
   }, [selected]);
+
+  const semFabricacao = !!selected && !selected.dataFabricacao;
+  const semValidade = !!selected && !selected.validade;
+  const semLote = !!selected && !(selected.lote && selected.lote.trim());
 
   const utilizarAte = calcularUtilizarAte(parseInputDate(dataAbertura), dias);
 
   const handleSave = async () => {
     if (!selected) return;
     setSaving(true);
-    await onSave(selected.id, { dataAbertura, diasParaVencer: dias, lote });
+    await onSave(selected.id, {
+      dataAbertura,
+      diasParaVencer: dias,
+      lote,
+      ...(semFabricacao ? { dataFabricacao: dataFabricacao || undefined } : {}),
+      ...(semValidade ? { validade: validade || undefined } : {}),
+    });
     setSaving(false);
     onPrintLabel(selected);
     onOpenChange(false);
@@ -114,10 +139,31 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
             </Popover>
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="abertura-lote">Lote</Label>
-            <Input id="abertura-lote" className="h-12" placeholder="Ex.: L2024-001" value={lote} onChange={(e) => setLote(e.target.value)} />
-          </div>
+          {selected && (semFabricacao || semValidade || semLote) && (
+            <div className="space-y-3 rounded-lg border border-dashed border-border/70 bg-muted/20 p-3">
+              <p className="text-xs font-medium text-muted-foreground">Este produto está sem algumas informações — preencha para completar o cadastro.</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {semLote && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="abertura-lote">Lote</Label>
+                    <Input id="abertura-lote" className="h-12" placeholder="Ex.: L2024-001" value={lote} onChange={(e) => setLote(e.target.value)} />
+                  </div>
+                )}
+                {semFabricacao && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="abertura-fabricacao">Data de fabricação</Label>
+                    <Input id="abertura-fabricacao" type="date" className="h-12" value={dataFabricacao} onChange={(e) => setDataFabricacao(e.target.value)} />
+                  </div>
+                )}
+                {semValidade && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="abertura-validade">Data de validade</Label>
+                    <Input id="abertura-validade" type="date" className="h-12" value={validade} onChange={(e) => setValidade(e.target.value)} />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
