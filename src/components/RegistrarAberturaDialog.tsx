@@ -33,6 +33,15 @@ function parseInputDate(value: string): Date | undefined {
   return isNaN(date.getTime()) ? undefined : date;
 }
 
+function toInput(value?: Date | string): string {
+  if (!value) return "";
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
+  }
+  if (typeof value === "string") return value.slice(0, 10);
+  return "";
+}
+
 export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, onPrintLabel }: RegistrarAberturaDialogProps) {
   const [productId, setProductId] = useState<string>("");
   const [pickerOpen, setPickerOpen] = useState(false);
