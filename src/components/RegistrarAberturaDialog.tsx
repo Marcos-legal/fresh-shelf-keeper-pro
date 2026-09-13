@@ -60,6 +60,8 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
       setDataAbertura(todayInput());
       setDias(0);
       setLote("");
+      setDataFabricacao("");
+      setValidade("");
       setSaving(false);
     }
   }, [open]);
@@ -68,15 +70,27 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
     if (selected) {
       setDias(selected.diasParaVencer || 0);
       setLote(selected.lote || "");
+      setDataFabricacao(toInput(selected.dataFabricacao));
+      setValidade(toInput(selected.validade));
     }
   }, [selected]);
+
+  const semFabricacao = !!selected && !selected.dataFabricacao;
+  const semValidade = !!selected && !selected.validade;
+  const semLote = !!selected && !(selected.lote && selected.lote.trim());
 
   const utilizarAte = calcularUtilizarAte(parseInputDate(dataAbertura), dias);
 
   const handleSave = async () => {
     if (!selected) return;
     setSaving(true);
-    await onSave(selected.id, { dataAbertura, diasParaVencer: dias, lote });
+    await onSave(selected.id, {
+      dataAbertura,
+      diasParaVencer: dias,
+      lote,
+      ...(semFabricacao ? { dataFabricacao: dataFabricacao || undefined } : {}),
+      ...(semValidade ? { validade: validade || undefined } : {}),
+    });
     setSaving(false);
     onPrintLabel(selected);
     onOpenChange(false);
