@@ -114,6 +114,11 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
             </Popover>
           </div>
 
+          <div className="space-y-1.5">
+            <Label htmlFor="abertura-lote">Lote</Label>
+            <Input id="abertura-lote" className="h-12" placeholder="Ex.: L2024-001" value={lote} onChange={(e) => setLote(e.target.value)} />
+          </div>
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="abertura-data">Data de abertura</Label>
