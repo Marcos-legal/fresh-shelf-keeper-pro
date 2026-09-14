@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle, Bell, Box, CalendarDays, CheckCircle2, ChevronRight, Clock3,
-  Home, Menu, Package, Plus, QrCode, RefreshCw, Refrigerator, Snowflake, Tag, CalendarCheck,
+  Home, Package, Plus, QrCode, RefreshCw, Refrigerator, Snowflake, Tag, CalendarCheck,
   ThermometerSnowflake, Truck, CircleAlert, ArrowUpRight,
 } from "lucide-react";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
@@ -82,7 +82,6 @@ export default function DashboardReference() {
   const { products, addProduct, updateProduct, deleteProduct, stats } = useProductsSupabase();
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aberturaOpen, setAberturaOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<DashboardFilter>("todos");
 
@@ -133,14 +132,13 @@ export default function DashboardReference() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen w-full bg-slate-50 text-slate-900">
+      <div className="min-h-screen min-h-[100dvh] w-full bg-slate-50 text-slate-900">
         <MobileDrawer />
         <AppSidebar />
         <main className="min-w-0 lg:pl-64">
           <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
-            <div className="mx-auto flex min-h-[68px] max-w-[1500px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto flex min-h-[68px] max-w-[1500px] items-center justify-between gap-3 pl-16 pr-3 sm:px-6 lg:px-8">
               <div className="flex min-w-0 items-center gap-3">
-                <button type="button" aria-label="Abrir menu" onClick={() => setMobileMenuOpen(true)} className="rounded-md p-2 text-slate-600 hover:bg-slate-100 lg:hidden"><Menu className="h-5 w-5" /></button>
                 <div className="min-w-0"><h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Dashboard</h1><p className="hidden text-sm text-slate-500 sm:block">Visão geral do controle de validades</p></div>
               </div>
               <div className="flex shrink-0 items-center gap-2 sm:gap-4">
@@ -151,12 +149,12 @@ export default function DashboardReference() {
             </div>
           </header>
 
-          <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+          <div className="mx-auto w-full max-w-[1500px] px-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:px-8 lg:py-7">
             {showForm && <div className="mb-5 rounded-lg border border-slate-200 bg-white p-1 shadow-sm"><ProductForm title={editingProduct ? "Editar Produto" : "Novo Produto"} submitLabel={editingProduct ? "Atualizar Produto" : "Salvar Produto"} initialData={editingProduct ? toFormData(editingProduct) : undefined} onSubmit={editingProduct ? handleEdit : handleAdd} /></div>}
 
             <div className="mb-5 flex flex-col gap-1"><p className="text-sm font-medium text-slate-500">Resumo do estoque</p><h2 className="text-lg font-semibold text-slate-900">{userName ? `Olá, ${userName}!` : "Olá!"} Aqui está o que precisa da sua atenção hoje.</h2></div>
 
-            <section className="grid grid-cols-2 gap-3 xl:grid-cols-4 xl:gap-4">
+            <section className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 xl:grid-cols-4 xl:gap-4">
               <KpiCard title="Produtos" value={stats.total} description="Total cadastrado" icon={Box} tone="blue" />
               <KpiCard title="Válidos" value={stats.validos} description="Dentro da validade" icon={CheckCircle2} tone="green" />
               <KpiCard title="Vencendo em 30 dias" value={stats.proximoVencimento} description="Requer atenção" icon={Clock3} tone="amber" />
@@ -170,7 +168,7 @@ export default function DashboardReference() {
 
             <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
               <div className="mb-4"><h2 className="text-base font-semibold text-slate-900">Ações rápidas</h2><p className="text-xs text-slate-500">Atalhos para as tarefas do dia a dia.</p></div>
-              <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">
+              <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 lg:grid-cols-5">
                 <QuickAction icon={Plus} label="Novo produto" onClick={openNew} tone="blue" />
                 <QuickAction icon={CalendarCheck} label="Registrar abertura" onClick={() => setAberturaOpen(true)} tone="green" />
                 <QuickAction icon={Tag} label="Gerar etiqueta" onClick={() => navigate("/impressao-etiquetas")} tone="blue" />
@@ -182,7 +180,7 @@ export default function DashboardReference() {
 
             <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between"><div><h2 className="text-base font-semibold text-slate-900">Produtos por armazenamento</h2><p className="text-xs text-slate-500">Distribuição atual do estoque.</p></div><button onClick={() => navigate("/relatorios")} className="hidden items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 sm:flex">Ver relatório <ArrowUpRight className="h-3.5 w-3.5" /></button></div>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{storageConfig.map((item) => { const count = stats.porCategoria[item.key] || 0; const tone = toneClasses[item.tone]; const total = Math.max(1, stats.total); const percentage = Math.round((count / total) * 100); return <button key={item.key} onClick={() => navigate(`/${item.key}`)} className="rounded-md border border-slate-200 p-3 text-left transition hover:border-blue-200 hover:bg-slate-50"><div className="flex items-center gap-2"><span className={cn("flex h-8 w-8 items-center justify-center rounded-md", tone.icon)}><item.icon className="h-4 w-4" /></span><span className="truncate text-xs font-medium text-slate-600">{item.label}</span></div><div className="mt-3 flex items-end justify-between"><span className="text-xl font-semibold text-slate-900">{count}</span><span className="text-[11px] text-slate-400">{percentage}%</span></div><div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100"><div className={cn("h-full", tone.bar)} style={{ width: `${Math.max(count ? 5 : 0, percentage)}%` }} /></div></button>; })}</div>
+              <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:grid-cols-4">{storageConfig.map((item) => { const count = stats.porCategoria[item.key] || 0; const tone = toneClasses[item.tone]; const total = Math.max(1, stats.total); const percentage = Math.round((count / total) * 100); return <button key={item.key} onClick={() => navigate(`/${item.key}`)} className="rounded-md border border-slate-200 p-3 text-left transition hover:border-blue-200 hover:bg-slate-50"><div className="flex items-center gap-2"><span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-md", tone.icon)}><item.icon className="h-4 w-4" /></span><span className="break-words text-xs font-medium text-slate-600">{item.label}</span></div><div className="mt-3 flex items-end justify-between"><span className="text-xl font-semibold text-slate-900">{count}</span><span className="text-[11px] text-slate-400">{percentage}%</span></div><div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100"><div className={cn("h-full", tone.bar)} style={{ width: `${Math.max(count ? 5 : 0, percentage)}%` }} /></div></button>; })}</div>
             </section>
 
             <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
@@ -209,9 +207,6 @@ export default function DashboardReference() {
           </div>
         </main>
 
-        <button type="button" onClick={openNew} className="fixed bottom-20 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-md transition hover:bg-blue-700 lg:hidden" aria-label="Novo produto"><Plus className="h-6 w-6" /></button>
-        <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 lg:hidden"><div className="mx-auto grid max-w-lg grid-cols-4"><MobileNav icon={Home} label="Dashboard" active onClick={() => navigate("/")} /><MobileNav icon={Box} label="Estoque" onClick={() => navigate("/contagem-estoque")} /><MobileNav icon={Tag} label="Etiquetas" onClick={() => navigate("/impressao-etiquetas")} /><MobileNav icon={Menu} label="Mais" onClick={() => setMobileMenuOpen(true)} /></div></nav>
-
         <RegistrarAberturaDialog
           open={aberturaOpen}
           onOpenChange={setAberturaOpen}
@@ -227,12 +222,12 @@ export default function DashboardReference() {
 
 function KpiCard({ title, value, description, icon: Icon, tone }: { title: string; value: number; description: string; icon: typeof Box; tone: "blue" | "amber" | "red" | "green" }) {
   const styles = { blue: "bg-blue-50 text-blue-600", amber: "bg-amber-50 text-amber-500", red: "bg-red-50 text-red-500", green: "bg-green-50 text-green-600" }[tone];
-  return <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><div className="flex items-start gap-3"><div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-md", styles)}><Icon className="h-5 w-5" /></div><div className="min-w-0"><p className="truncate text-xs font-medium text-slate-500 sm:text-sm">{title}</p><p className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 sm:text-[27px]">{value}</p><p className="mt-0.5 hidden text-xs text-slate-400 sm:block">{description}</p></div></div></div>;
+  return <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><div className="flex items-start gap-3"><div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-md", styles)}><Icon className="h-5 w-5" /></div><div className="min-w-0"><p className="break-words text-xs font-medium leading-snug text-slate-500 sm:text-sm">{title}</p><p className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 sm:text-[27px]">{value}</p><p className="mt-0.5 hidden text-xs text-slate-400 sm:block">{description}</p></div></div></div>;
 }
 
 function AttentionItem({ value, label, detail, tone, active, action }: { value: number; label: string; detail: string; tone: "danger" | "warning"; active?: boolean; action: () => void }) {
   const danger = tone === "danger";
-  return <button onClick={action} className={cn("flex min-h-[64px] min-w-0 items-center gap-3 rounded-md border p-3 text-left transition hover:bg-slate-50", active ? "border-blue-400 bg-blue-50/50" : "border-slate-200")}><span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", danger ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-500")}><AlertTriangle className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-slate-800">{value} {label}</span><span className="block truncate text-xs text-slate-500">{detail}</span></span><ChevronRight className="h-4 w-4 shrink-0 text-slate-300" /></button>;
+  return <button onClick={action} className={cn("flex min-h-[64px] min-w-0 items-center gap-3 rounded-md border p-3 text-left transition hover:bg-slate-50", active ? "border-blue-400 bg-blue-50/50" : "border-slate-200")}><span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", danger ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-500")}><AlertTriangle className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold leading-snug text-slate-800">{value} {label}</span><span className="block break-words text-xs leading-snug text-slate-500">{detail}</span></span><ChevronRight className="h-4 w-4 shrink-0 text-slate-300" /></button>;
 }
 
 function ProductListCard({ title, items, empty, variant, onViewAll }: { title: string; items: { product: Product; days: number | null }[]; empty: string; variant: "warning" | "danger"; onViewAll: () => void }) {
@@ -244,6 +239,3 @@ function QuickAction({ icon: Icon, label, onClick, tone }: { icon: typeof Plus; 
   return <button onClick={onClick} className="flex min-h-14 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"><Icon className={cn("h-4 w-4", styles)} />{label}</button>;
 }
 
-function MobileNav({ icon: Icon, label, active, onClick }: { icon: typeof Home; label: string; active?: boolean; onClick: () => void }) {
-  return <button onClick={onClick} className={cn("flex flex-col items-center gap-1 py-1 text-[10px] font-medium", active ? "text-blue-600" : "text-slate-500")}><Icon className="h-5 w-5" />{label}</button>;
-}

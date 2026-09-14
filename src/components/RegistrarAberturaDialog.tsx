@@ -98,7 +98,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md pb-[max(1rem,env(safe-area-inset-bottom))]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             <CalendarCheck className="h-4 w-4 text-primary" /> Registrar abertura
@@ -116,10 +116,10 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <PopoverContent className="w-[--radix-popover-trigger-width] max-w-[calc(100vw-2rem)] p-0" align="start" sideOffset={6}>
                 <Command>
                   <CommandInput placeholder="Buscar produto..." />
-                  <CommandList className="max-h-64 overflow-y-auto">
+                   <CommandList className="max-h-[min(16rem,45dvh)] overflow-y-auto overscroll-contain">
                     <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                     <CommandGroup>
                       {products.map((product) => (
@@ -185,7 +185,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
           </div>
         </div>
 
-        <DialogFooter className="flex-col gap-2 sm:flex-row">
+         <DialogFooter className="flex-col-reverse gap-2 sm:flex-row">
           <Button variant="outline" className="h-12 w-full sm:h-10 sm:w-auto" onClick={() => onOpenChange(false)}>Cancelar</Button>
           <Button className="h-12 w-full sm:h-10 sm:w-auto" disabled={!selected || !dataAbertura || saving} onClick={handleSave}>
             {saving ? "Salvando..." : "Salvar e imprimir etiqueta"}

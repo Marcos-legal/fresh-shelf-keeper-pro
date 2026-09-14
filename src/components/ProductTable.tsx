@@ -144,7 +144,7 @@ export function ProductTable({
         </div>
       </div>
 
-      <div className="hidden overflow-x-auto lg:block">
+      <div className="hidden overflow-x-auto overscroll-x-contain lg:block" style={{ WebkitOverflowScrolling: "touch" }}>
         <Table>
           <TableHeader>
             <TableRow className="border-border/50 bg-muted/20 hover:bg-muted/20">
@@ -192,7 +192,7 @@ export function ProductTable({
           const status = statusConfig[product.status];
           return (
             <div key={product.id} className={cn("border-b border-border/30 last:border-0 transition-colors", isExpanded ? "bg-muted/20" : "hover:bg-muted/10")}>
-              <div className="flex cursor-pointer items-center gap-3 p-4 active:bg-muted/30" onClick={() => setExpandedId(isExpanded ? null : product.id)}>
+               <div className="flex min-h-16 cursor-pointer items-center gap-3 p-4 active:bg-muted/30 min-[390px]:p-5" onClick={() => setExpandedId(isExpanded ? null : product.id)}>
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-semibold text-xs">{product.nome.charAt(0).toUpperCase()}</div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center gap-2">
