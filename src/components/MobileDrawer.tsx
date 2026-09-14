@@ -76,7 +76,7 @@ export function MobileDrawer() {
             variant="outline"
             size="icon"
             className={cn(
-              "fixed top-3 left-3 z-40 h-10 w-10 rounded-xl shadow-md bg-background/90 backdrop-blur-xl border-border/50 transition-all duration-300",
+              "fixed left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-40 h-11 w-11 rounded-xl shadow-md bg-background/95 backdrop-blur-xl border-border/50 transition-all duration-300 sm:left-4",
               isVisible ? "translate-x-0 opacity-100" : "-translate-x-14 opacity-0"
             )}
             aria-label="Abrir menu"
@@ -85,7 +85,7 @@ export function MobileDrawer() {
           </Button>
         </SheetTrigger>
 
-        <SheetContent side="left" className="w-[88vw] max-w-[340px] p-0 flex flex-col border-r-border/60">
+        <SheetContent side="left" className="w-[88vw] max-w-[340px] p-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] flex flex-col border-r-border/60">
           <SheetHeader className="p-5 pb-4 border-b border-border/50 bg-background/95">
             <div className="flex items-center gap-3 text-left">
               <div className="relative w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm shrink-0">
