@@ -1,6 +1,7 @@
 import {
   LayoutDashboard, Snowflake, Thermometer, Home, Refrigerator,
-  Package, FileText, Printer, Eye, Calculator, Menu, ChevronRight, QrCode
+  Package, FileText, Printer, Eye, Calculator, Menu, ChevronRight, QrCode,
+  MoreHorizontal,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
@@ -36,6 +37,13 @@ const navSections = [
   },
 ];
 
+const bottomNav = [
+  { title: "Início", url: "/", icon: LayoutDashboard },
+  { title: "Produtos", url: "/cadastro", icon: Package },
+  { title: "QR Code", url: "/leitor-qrcode", icon: QrCode },
+  { title: "Etiquetas", url: "/impressao-etiquetas", icon: Printer },
+];
+
 export function MobileDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -68,6 +76,12 @@ export function MobileDrawer() {
     return 0;
   };
 
+  const isBottomActive = (url: string) => {
+    if (url === '/') return location.pathname === '/';
+    if (url === '/cadastro') return ['/cadastro', '/refrigerado', '/congelado', '/ambiente', '/camara-fria'].includes(location.pathname);
+    return location.pathname === url;
+  };
+
   return (
     <div className="lg:hidden">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -79,7 +93,7 @@ export function MobileDrawer() {
               "fixed left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-40 h-11 w-11 rounded-xl shadow-md bg-background/95 backdrop-blur-xl border-border/50 transition-all duration-300 sm:left-4",
               isVisible ? "translate-x-0 opacity-100" : "-translate-x-14 opacity-0"
             )}
-            aria-label="Abrir menu"
+            aria-label="Abrir menu completo"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -114,7 +128,7 @@ export function MobileDrawer() {
                       to={item.url}
                       onClick={() => setIsOpen(false)}
                       className={cn(
-                        "flex items-center justify-between mx-3 px-3.5 py-3 rounded-xl transition-all duration-150 group",
+                        "flex items-center justify-between mx-3 px-3.5 py-3 rounded-xl transition-all duration-150 group min-h-11",
                         active ? "bg-primary/10 text-primary font-semibold shadow-sm" : "text-foreground/70 hover:bg-accent hover:text-foreground active:bg-accent/80"
                       )}
                     >
@@ -156,6 +170,40 @@ export function MobileDrawer() {
           </div>
         </SheetContent>
       </Sheet>
+
+      <nav
+        aria-label="Navegação rápida"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-background/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_18px_rgba(15,23,42,0.08)] backdrop-blur-xl"
+      >
+        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
+          {bottomNav.map((item) => {
+            const active = isBottomActive(item.url);
+            return (
+              <Link
+                key={item.title}
+                to={item.url}
+                className={cn(
+                  "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[10px] font-medium transition-colors",
+                  active ? "bg-primary/10 text-primary" : "text-muted-foreground active:bg-muted"
+                )}
+                aria-current={active ? "page" : undefined}
+              >
+                <item.icon className={cn("h-5 w-5", active && "stroke-[2.5]")} />
+                <span>{item.title}</span>
+              </Link>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setIsOpen(true)}
+            className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[10px] font-medium text-muted-foreground active:bg-muted"
+            aria-label="Abrir mais opções"
+          >
+            <MoreHorizontal className="h-5 w-5" />
+            <span>Mais</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
