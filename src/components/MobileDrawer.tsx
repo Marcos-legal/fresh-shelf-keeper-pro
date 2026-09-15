@@ -83,14 +83,14 @@ export function MobileDrawer() {
   };
 
   return (
-    <div className="lg:hidden">
+    <div className="lg:hidden fixed inset-0 z-[100] pointer-events-none" aria-label="Navegação mobile">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button
             variant="outline"
             size="icon"
             className={cn(
-              "fixed left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-40 h-11 w-11 rounded-xl shadow-md bg-background/95 backdrop-blur-xl border-border/50 transition-all duration-300 sm:left-4",
+              "pointer-events-auto fixed left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-[101] h-11 w-11 rounded-xl shadow-md bg-background/95 backdrop-blur-xl border-border/50 transition-all duration-300 sm:left-4",
               isVisible ? "translate-x-0 opacity-100" : "-translate-x-14 opacity-0"
             )}
             aria-label="Abrir menu completo"
@@ -173,7 +173,7 @@ export function MobileDrawer() {
 
       <nav
         aria-label="Navegação rápida"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-background/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_18px_rgba(15,23,42,0.08)] backdrop-blur-xl"
+        className="pointer-events-auto fixed inset-x-0 bottom-0 z-[101] border-t border-border/70 bg-background/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_18px_rgba(15,23,42,0.08)] backdrop-blur-xl"
       >
         <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
           {bottomNav.map((item) => {
@@ -183,7 +183,7 @@ export function MobileDrawer() {
                 key={item.title}
                 to={item.url}
                 className={cn(
-                  "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[10px] font-medium transition-colors",
+                  "flex min-h-12 touch-manipulation select-none flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[10px] font-medium transition-colors",
                   active ? "bg-primary/10 text-primary" : "text-muted-foreground active:bg-muted"
                 )}
                 aria-current={active ? "page" : undefined}
@@ -196,7 +196,7 @@ export function MobileDrawer() {
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[10px] font-medium text-muted-foreground active:bg-muted"
+            className="flex min-h-12 touch-manipulation select-none flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[10px] font-medium text-muted-foreground active:bg-muted"
             aria-label="Abrir mais opções"
           >
             <MoreHorizontal className="h-5 w-5" />
