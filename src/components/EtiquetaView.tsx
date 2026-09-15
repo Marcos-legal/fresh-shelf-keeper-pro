@@ -20,7 +20,7 @@ interface EtiquetaViewProps {
  */
 export function EtiquetaView({ product, largura = 52, altura }: EtiquetaViewProps) {
   const preset = getPresetForWidth(largura);
-  const w = preset.largura;
+  const w = largura && largura > 20 ? largura : preset.largura;
   const h = altura && altura > 20 ? altura : preset.altura;
 
   // Fator de escala proporcional à altura (referência: altura padrão do preset)

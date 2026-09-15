@@ -1,52 +1,51 @@
-
 import { ProductFormData } from "@/types/product";
+
+const normalizeMonth = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toUpperCase();
+
+const MONTHS = [
+  'JANEIRO', 'FEVEREIRO', 'MARCO', 'ABRIL', 'MAIO', 'JUNHO',
+  'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
+];
+
+const isValidCalendarDate = (year: number, month: number, day: number) => {
+  if (month < 1 || month > 12 || day < 1) return false;
+  const lastDay = new Date(year, month, 0).getDate();
+  return day <= lastDay;
+};
 
 const parseValidadeDate = (validade: string): Date | undefined => {
   if (!validade || validade.trim() === '') return undefined;
 
+  const value = validade.trim();
+
   try {
-    // Formato DD/MM/AAAA ou DD/MM/AA
-    if (/^\d{2}\/\d{2}\/\d{2,4}$/.test(validade)) {
-      const parts = validade.split('/');
-      const day = Number(parts[0]);
-      const month = Number(parts[1]);
-      let year = Number(parts[2]);
-      
-      if (year < 100) {
-        year = year < 50 ? 2000 + year : 1900 + year;
-      }
+    // Formato DD/MM/AAAA — somente ano com 4 dígitos.
+    const fullDateMatch = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (fullDateMatch) {
+      const day = Number(fullDateMatch[1]);
+      const month = Number(fullDateMatch[2]);
+      const year = Number(fullDateMatch[3]);
+
+      if (!isValidCalendarDate(year, month, day)) return undefined;
       return new Date(year, month - 1, day);
     }
 
-    // Formato MM/AAAA ou MM/AA
-    if (/^\d{2}\/\d{2,4}$/.test(validade)) {
-      const parts = validade.split('/');
-      const month = Number(parts[0]);
-      let year = Number(parts[1]);
-      
-      if (year < 100) {
-        year = year < 50 ? 2000 + year : 1900 + year;
-      }
-      // Último dia do mês
-      return new Date(year, month, 0);
-    }
+    // Formato Mês/Ano — aceita meses em português com ou sem acento.
+    const monthYearMatch = value.match(/^([^/]+)\/(\d{4})$/);
+    if (monthYearMatch) {
+      const monthText = normalizeMonth(monthYearMatch[1]);
+      const year = Number(monthYearMatch[2]);
+      const monthIndex = MONTHS.indexOf(monthText);
 
-    // Formato MES/ANO (ex: NOVEMBRO/2025)
-    if (/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]+\/\d{4}$/.test(validade)) {
-      const [mesTexto, anoTexto] = validade.split('/');
-      const meses = [
-        'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
-        'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
-      ];
-      
-      const mesIndex = meses.indexOf(mesTexto.toUpperCase());
-      if (mesIndex === -1) return undefined;
-      
-      const ano = parseInt(anoTexto);
-      if (isNaN(ano)) return undefined;
-      
-      // Último dia do mês
-      return new Date(ano, mesIndex + 1, 0);
+      if (monthIndex === -1) return undefined;
+
+      // Para Mês/Ano, a validade é considerada até o último dia daquele mês.
+      return new Date(year, monthIndex + 1, 0);
     }
 
     return undefined;
@@ -59,15 +58,13 @@ const parseValidadeDate = (validade: string): Date | undefined => {
 export const validateProductForm = (formData: ProductFormData): Partial<Record<keyof ProductFormData, string>> => {
   const errors: Partial<Record<keyof ProductFormData, string>> = {};
 
-  // Validar formato da data de validade se fornecida
   if (formData.validade && formData.validade.trim() !== '') {
     const validadeDate = parseValidadeDate(formData.validade);
-    if (!validadeDate) {
-      errors.validade = 'Formato de data inválido. Use DD/MM/AA, MM/AA ou MÊS/ANO';
+    if (!validadeDate || Number.isNaN(validadeDate.getTime())) {
+      errors.validade = 'Formato inválido. Use DD/MM/AAAA ou Mês/Ano (ex.: 31/12/2026 ou Dezembro/2026).';
     }
   }
 
-  // Validar dias para vencer apenas se fornecido
   if (formData.diasParaVencer !== undefined && formData.diasParaVencer < 0) {
     errors.diasParaVencer = 'Dias para vencer deve ser maior ou igual a 0';
   }
@@ -75,5 +72,4 @@ export const validateProductForm = (formData: ProductFormData): Partial<Record<k
   return errors;
 };
 
-// Exportar função auxiliar para uso em outros lugares
 export { parseValidadeDate };

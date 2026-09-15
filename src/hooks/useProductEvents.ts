@@ -85,14 +85,28 @@ export function useProductEvents() {
         return false;
       }
 
+      // Não apagamos o produto: limpamos apenas validade, lote e fabricação,
+      // mantendo o nome e os "dias para vencer" cadastrados até novas datas.
       if (Number.isFinite(numericId)) {
-        await supabase.from("products").delete().eq("id", numericId);
+        await supabase
+          .from("products")
+          .update({
+            manufacture_date: null,
+            expiry_date: null,
+            opening_date: null,
+            use_by_date: null,
+            lot: "",
+            manufacture_date_entered: false,
+            expiry_date_entered: false,
+            responsible: "",
+          })
+          .eq("id", numericId);
       }
 
       await loadEvents();
       toast({
         title: tipo === "consumido" ? "Produto consumido" : "Produto descartado",
-        description: "Baixa registrada com sucesso.",
+        description: "Baixa registrada. Validade, lote e fabricação foram limpos; os dias para vencer foram mantidos.",
       });
       return true;
     },
