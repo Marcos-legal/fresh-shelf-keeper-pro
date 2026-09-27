@@ -3,7 +3,7 @@ import {
   Package, FileText, Printer, Eye, Calculator, Menu, ChevronRight, QrCode,
   MoreHorizontal, LogOut,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -50,6 +50,7 @@ export function MobileDrawer() {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
   const location = useLocation();
+  const navigate = useNavigate();
   const { stats } = useProductsSupabase();
   const { signOut } = useAuth();
   const isMobile = useIsMobile();
@@ -82,6 +83,12 @@ export function MobileDrawer() {
     if (url === '/') return location.pathname === '/';
     if (url === '/cadastro') return ['/cadastro', '/refrigerado', '/congelado', '/ambiente', '/camara-fria'].includes(location.pathname);
     return location.pathname === url;
+  };
+
+  const handleSignOut = async () => {
+    setIsOpen(false);
+    await signOut();
+    navigate('/auth', { replace: true });
   };
 
   return (
@@ -171,7 +178,7 @@ export function MobileDrawer() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={signOut}
+                onClick={handleSignOut}
                 className="h-10 flex-1 gap-2 rounded-xl border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 aria-label="Sair do sistema"
               >
