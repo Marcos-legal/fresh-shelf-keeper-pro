@@ -227,12 +227,12 @@ function KpiCard({ title, value, description, icon: Icon, tone }: { title: strin
 
 function AttentionItem({ value, label, detail, tone, active, action }: { value: number; label: string; detail: string; tone: "orange" | "warning" | "danger" | "purple"; active?: boolean; action: () => void }) {
   const toneStyles = {
-    orange: { icon: "bg-orange-50 text-orange-500", active: "border-orange-400 bg-orange-50/50" },
-    warning: { icon: "bg-amber-50 text-amber-500", active: "border-amber-400 bg-amber-50/50" },
-    danger: { icon: "bg-red-50 text-red-500", active: "border-red-400 bg-red-50/50" },
-    purple: { icon: "bg-violet-50 text-violet-600", active: "border-violet-400 bg-violet-50/50" },
+    orange: { card: "border-orange-200 bg-orange-50 hover:bg-orange-100", icon: "bg-orange-100 text-orange-600", active: "border-orange-400 bg-orange-100" },
+    warning: { card: "border-amber-200 bg-amber-50 hover:bg-amber-100", icon: "bg-amber-100 text-amber-600", active: "border-amber-400 bg-amber-100" },
+    danger: { card: "border-red-200 bg-red-50 hover:bg-red-100", icon: "bg-red-100 text-red-600", active: "border-red-400 bg-red-100" },
+    purple: { card: "border-violet-200 bg-violet-50 hover:bg-violet-100", icon: "bg-violet-100 text-violet-700", active: "border-violet-400 bg-violet-100" },
   }[tone];
-  return <button onClick={action} className={cn("flex min-h-[64px] min-w-0 items-center gap-3 rounded-md border p-3 text-left transition hover:bg-slate-50", active ? toneStyles.active : "border-slate-200")}><span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", toneStyles.icon)}><AlertTriangle className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold leading-snug text-slate-800">{value} {label}</span><span className="block break-words text-xs leading-snug text-slate-500">{detail}</span></span><ChevronRight className="h-4 w-4 shrink-0 text-slate-300" /></button>;
+  return <button onClick={action} className={cn("flex min-h-[64px] min-w-0 items-center gap-3 rounded-md border p-3 text-left transition", toneStyles.card, active && toneStyles.active)}><span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", toneStyles.icon)}><AlertTriangle className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold leading-snug text-slate-800">{value} {label}</span><span className="block break-words text-xs leading-snug text-slate-500">{detail}</span></span><ChevronRight className="h-4 w-4 shrink-0 text-slate-300" /></button>;
 }
 
 function ProductListCard({ title, items, empty, variant, onViewAll }: { title: string; items: { product: Product; days: number | null }[]; empty: string; variant: "warning" | "danger"; onViewAll: () => void }) {
