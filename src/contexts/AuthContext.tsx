@@ -39,7 +39,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!mounted) return;
@@ -47,8 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Handle auth events
+
         if (event === 'SIGNED_IN') {
           toast({
             title: "Login realizado com sucesso!",
@@ -63,7 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession()
       .then(({ data: { session }, error }) => {
         if (error) {
@@ -87,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, captchaToken?: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const signUpOptions: any = {
       email,
       password,
@@ -96,13 +93,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Adicionar captcha token se fornecido
     if (captchaToken) {
       signUpOptions.options.captchaToken = captchaToken;
     }
 
     const { error } = await supabase.auth.signUp(signUpOptions);
-    
+
     if (error) {
       toast({
         title: "Erro no cadastro",
@@ -115,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "Verifique seu email para confirmar a conta.",
       });
     }
-    
+
     return { error };
   };
 
@@ -124,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password,
     });
-    
+
     if (error) {
       toast({
         title: "Erro no login",
@@ -132,13 +128,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         variant: "destructive",
       });
     }
-    
+
     return { error };
   };
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      // Local logout is intentional: it immediately removes this device's session
+      // even when the network is unavailable, allowing another user to sign in.
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
       if (error) {
         console.error("Sign out error:", error.message);
       }
@@ -147,6 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setUser(null);
       setSession(null);
+      setLoading(false);
     }
   };
 

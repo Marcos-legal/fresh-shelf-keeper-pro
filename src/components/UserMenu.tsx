@@ -11,13 +11,20 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   if (!user) return null;
 
   const userInitials = user.email?.slice(0, 2).toUpperCase() || 'U';
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth', { replace: true });
+  };
 
   return (
     <DropdownMenu>
@@ -49,12 +56,12 @@ export function UserMenu() {
           <span>Configurações</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
+        <DropdownMenuItem
           className="cursor-pointer text-destructive focus:text-destructive"
-          onClick={signOut}
+          onClick={handleSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
+          <span>Sair do sistema</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -138,7 +138,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                   <Command>
                     <CommandInput placeholder="Buscar produto..." />
-                    <CommandList>
+                    <CommandList className="max-h-64 overflow-y-auto">
                       <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                       <CommandGroup>
                         {produtoOptions.map((option) => (
