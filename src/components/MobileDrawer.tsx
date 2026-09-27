@@ -52,7 +52,7 @@ export function MobileDrawer() {
   const location = useLocation();
   const navigate = useNavigate();
   const { stats } = useProductsSupabase();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -172,18 +172,28 @@ export function MobileDrawer() {
                 <div className="text-[10px] text-muted-foreground mt-1">Vencidos</div>
               </div>
             </div>
-            <div className="flex items-center justify-between gap-2 px-1">
-              <UserMenu />
-              <ThemeToggle />
+            <div className="rounded-xl border border-border/60 bg-background p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 flex items-center gap-2.5">
+                  <UserMenu />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground">Conta conectada</p>
+                    <p className="truncate text-[10px] text-muted-foreground">
+                      {user?.email || "Usuário"}
+                    </p>
+                  </div>
+                </div>
+                <ThemeToggle />
+              </div>
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleSignOut}
-                className="h-10 flex-1 gap-2 rounded-xl border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                className="mt-3 h-10 w-full gap-2 rounded-xl border-destructive/25 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 aria-label="Sair do sistema"
               >
                 <LogOut className="h-4 w-4" />
-                <span>Sair</span>
+                <span>Sair do sistema</span>
               </Button>
             </div>
           </div>
