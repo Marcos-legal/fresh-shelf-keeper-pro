@@ -118,11 +118,11 @@ export default function DashboardReference() {
     document.getElementById("lista-produtos")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const attention: { value: number; label: string; detail: string; tone: "danger" | "warning"; active: boolean; action: () => void }[] = [
-    { value: groups.hoje.length, label: "Vencem hoje", detail: "Use ou descarte ainda hoje", tone: "danger", active: activeFilter === "hoje", action: () => applyFilter("hoje") },
+  const attention: { value: number; label: string; detail: string; tone: "orange" | "warning" | "danger" | "purple"; active: boolean; action: () => void }[] = [
+    { value: groups.hoje.length, label: "Vencem hoje", detail: "Use ou descarte ainda hoje", tone: "orange", active: activeFilter === "hoje", action: () => applyFilter("hoje") },
     { value: groups.semana.length, label: "Vencem em 7 dias", detail: "Priorize o consumo desta semana", tone: "warning", active: activeFilter === "semana", action: () => applyFilter("semana") },
     { value: stats.vencidos, label: "Produtos vencidos", detail: "Precisam de ação agora", tone: "danger", active: activeFilter === "vencidos", action: () => applyFilter("vencidos") },
-    { value: groups["sem-datas"].length, label: "Precisam de ação", detail: "Sem datas informadas", tone: "warning", active: activeFilter === "sem-datas", action: () => applyFilter("sem-datas") },
+    { value: groups["sem-datas"].length, label: "Precisam de ação", detail: "Sem datas informadas", tone: "purple", active: activeFilter === "sem-datas", action: () => applyFilter("sem-datas") },
   ];
 
   const handleAdd = (data: ProductFormData) => { addProduct(data); setShowForm(false); toast({ title: "Produto cadastrado", description: "Produto cadastrado com sucesso." }); };
@@ -225,9 +225,14 @@ function KpiCard({ title, value, description, icon: Icon, tone }: { title: strin
   return <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><div className="flex items-start gap-3"><div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-md", styles)}><Icon className="h-5 w-5" /></div><div className="min-w-0"><p className="break-words text-xs font-medium leading-snug text-slate-500 sm:text-sm">{title}</p><p className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 sm:text-[27px]">{value}</p><p className="mt-0.5 hidden text-xs text-slate-400 sm:block">{description}</p></div></div></div>;
 }
 
-function AttentionItem({ value, label, detail, tone, active, action }: { value: number; label: string; detail: string; tone: "danger" | "warning"; active?: boolean; action: () => void }) {
-  const danger = tone === "danger";
-  return <button onClick={action} className={cn("flex min-h-[64px] min-w-0 items-center gap-3 rounded-md border p-3 text-left transition hover:bg-slate-50", active ? "border-blue-400 bg-blue-50/50" : "border-slate-200")}><span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", danger ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-500")}><AlertTriangle className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold leading-snug text-slate-800">{value} {label}</span><span className="block break-words text-xs leading-snug text-slate-500">{detail}</span></span><ChevronRight className="h-4 w-4 shrink-0 text-slate-300" /></button>;
+function AttentionItem({ value, label, detail, tone, active, action }: { value: number; label: string; detail: string; tone: "orange" | "warning" | "danger" | "purple"; active?: boolean; action: () => void }) {
+  const toneStyles = {
+    orange: { icon: "bg-orange-50 text-orange-500", active: "border-orange-400 bg-orange-50/50" },
+    warning: { icon: "bg-amber-50 text-amber-500", active: "border-amber-400 bg-amber-50/50" },
+    danger: { icon: "bg-red-50 text-red-500", active: "border-red-400 bg-red-50/50" },
+    purple: { icon: "bg-violet-50 text-violet-600", active: "border-violet-400 bg-violet-50/50" },
+  }[tone];
+  return <button onClick={action} className={cn("flex min-h-[64px] min-w-0 items-center gap-3 rounded-md border p-3 text-left transition hover:bg-slate-50", active ? toneStyles.active : "border-slate-200")}><span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", toneStyles.icon)}><AlertTriangle className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold leading-snug text-slate-800">{value} {label}</span><span className="block break-words text-xs leading-snug text-slate-500">{detail}</span></span><ChevronRight className="h-4 w-4 shrink-0 text-slate-300" /></button>;
 }
 
 function ProductListCard({ title, items, empty, variant, onViewAll }: { title: string; items: { product: Product; days: number | null }[]; empty: string; variant: "warning" | "danger"; onViewAll: () => void }) {
