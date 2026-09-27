@@ -227,10 +227,10 @@ function KpiCard({ title, value, description, icon: Icon, tone }: { title: strin
 
 function AttentionItem({ value, label, detail, tone, active, action }: { value: number; label: string; detail: string; tone: "orange" | "warning" | "danger" | "purple"; active?: boolean; action: () => void }) {
   const toneStyles = {
-    orange: { card: "border-orange-200 bg-orange-50 hover:bg-orange-100", icon: "bg-orange-100 text-orange-600", active: "border-orange-400 bg-orange-100" },
-    warning: { card: "border-amber-200 bg-amber-50 hover:bg-amber-100", icon: "bg-amber-100 text-amber-600", active: "border-amber-400 bg-amber-100" },
-    danger: { card: "border-red-200 bg-red-50 hover:bg-red-100", icon: "bg-red-100 text-red-600", active: "border-red-400 bg-red-100" },
-    purple: { card: "border-violet-200 bg-violet-50 hover:bg-violet-100", icon: "bg-violet-100 text-violet-700", active: "border-violet-400 bg-violet-100" },
+    orange: { card: "border-orange-300 bg-orange-200 hover:bg-orange-300", icon: "bg-orange-300 text-orange-700", active: "border-orange-500 bg-orange-300" },
+    warning: { card: "border-amber-300 bg-amber-200 hover:bg-amber-300", icon: "bg-amber-300 text-amber-700", active: "border-amber-500 bg-amber-300" },
+    danger: { card: "border-red-300 bg-red-200 hover:bg-red-300", icon: "bg-red-300 text-red-700", active: "border-red-500 bg-red-300" },
+    purple: { card: "border-violet-300 bg-violet-200 hover:bg-violet-300", icon: "bg-violet-300 text-violet-800", active: "border-violet-500 bg-violet-300" },
   }[tone];
   return <button onClick={action} className={cn("flex min-h-[64px] min-w-0 items-center gap-3 rounded-md border p-3 text-left transition", toneStyles.card, active && toneStyles.active)}><span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", toneStyles.icon)}><AlertTriangle className="h-4 w-4" /></span><span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold leading-snug text-slate-800">{value} {label}</span><span className="block break-words text-xs leading-snug text-slate-500">{detail}</span></span><ChevronRight className="h-4 w-4 shrink-0 text-slate-300" /></button>;
 }
