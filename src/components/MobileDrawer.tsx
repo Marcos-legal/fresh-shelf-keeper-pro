@@ -1,13 +1,14 @@
 import {
   LayoutDashboard, Snowflake, Thermometer, Home, Refrigerator,
   Package, FileText, Printer, Eye, Calculator, Menu, ChevronRight, QrCode,
-  MoreHorizontal,
+  MoreHorizontal, LogOut,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useProductsSupabase } from "@/hooks/useProductsSupabase";
+import { useAuth } from "@/contexts/AuthContext";
 import { UserMenu } from "./UserMenu";
 import { ThemeToggle } from "./ThemeToggle";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -50,6 +51,7 @@ export function MobileDrawer() {
   const lastScrollY = useRef(0);
   const location = useLocation();
   const { stats } = useProductsSupabase();
+  const { signOut } = useAuth();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -163,9 +165,19 @@ export function MobileDrawer() {
                 <div className="text-[10px] text-muted-foreground mt-1">Vencidos</div>
               </div>
             </div>
-            <div className="flex items-center justify-between px-1">
+            <div className="flex items-center justify-between gap-2 px-1">
               <UserMenu />
               <ThemeToggle />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={signOut}
+                className="h-10 flex-1 gap-2 rounded-xl border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                aria-label="Sair do sistema"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sair</span>
+              </Button>
             </div>
           </div>
         </SheetContent>
