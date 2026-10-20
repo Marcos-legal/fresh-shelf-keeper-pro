@@ -26,20 +26,20 @@ export function EstoqueSearchFilter({
   const activeFiltersCount = [searchTerm, filterResponsavel !== 'all' ? filterResponsavel : ''].filter(Boolean).length;
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 p-4 bg-card rounded-lg border">
-      <div className="flex-1 relative">
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-lg border">
+      <div className="flex-1 min-w-0 relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
           placeholder="Buscar produtos ou observações..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10"
+          className="pl-10 h-11 sm:h-10"
         />
       </div>
-      
-      <div className="flex gap-2 items-center">
+
+      <div className="flex flex-wrap gap-2 items-center">
         <Select value={filterResponsavel} onValueChange={onFilterResponsavelChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10">
             <Filter className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Filtrar por responsável" />
           </SelectTrigger>
@@ -53,11 +53,13 @@ export function EstoqueSearchFilter({
           </SelectContent>
         </Select>
         
-        <Button 
-          variant="outline" 
-          size="icon" 
+        <Button
+          variant="outline"
+          size="icon"
           onClick={onRefresh}
           disabled={isLoading}
+          className="h-11 w-11 sm:h-10 sm:w-10"
+          aria-label="Atualizar dados"
         >
           <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
         </Button>

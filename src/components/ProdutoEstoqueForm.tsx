@@ -1,8 +1,7 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { EstoqueFormData } from "@/hooks/useEstoqueSupabase";
 import { TextInputField } from "@/components/form/TextInputField";
 import { NumberInputField } from "@/components/form/NumberInputField";
@@ -14,10 +13,9 @@ interface ProdutoEstoqueFormProps {
   submitLabel?: string;
 }
 
-export function ProdutoEstoqueForm({ 
-  onSubmit, 
-  initialData, 
-  title = "Cadastro de Produto para Estoque",
+export function ProdutoEstoqueForm({
+  onSubmit,
+  initialData,
   submitLabel = "Salvar Produto"
 }: ProdutoEstoqueFormProps) {
   const [formData, setFormData] = useState<EstoqueFormData>({
@@ -71,15 +69,7 @@ export function ProdutoEstoqueForm({
   };
 
   return (
-    <Card className="animate-fade-in">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Package className="w-6 h-6" />
-          <span>{title}</span>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent>
+    <div className="animate-fade-in">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <TextInputField
@@ -123,14 +113,13 @@ export function ProdutoEstoqueForm({
             />
           </div>
 
-          <div className="flex justify-end space-x-4 pt-6 border-t">
-            <Button type="submit" className="gradient-blue text-white">
+          <div className="flex justify-end pt-6 border-t">
+            <Button type="submit" className="gradient-blue text-white h-12 w-full sm:h-10 sm:w-auto">
               <Save className="w-4 h-4 mr-2" />
               {submitLabel}
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+    </div>
   );
 }
