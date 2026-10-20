@@ -19,7 +19,7 @@ export function PageLayout({ children, title, description, icon: Icon, iconClass
       <MobileDrawer />
       <AppSidebar />
       <main className="flex-1 min-w-0 w-full overflow-x-hidden lg:pl-[var(--valicontrol-sidebar-width)] transition-[padding-left] duration-200 ease-out">
-        <div className="mx-auto w-full max-w-[1520px] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 sm:py-5 lg:px-8 lg:py-7">
+        <div className="mx-auto w-full max-w-[1520px] px-3 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 lg:px-8 lg:py-7 lg:pb-7">
           <header className="sticky top-0 z-20 -mx-3 mb-5 border-b border-border/70 bg-background/95 px-3 py-3 backdrop-blur-sm sm:-mx-6 sm:mb-7 sm:px-6 sm:py-4 lg:-mx-8 lg:px-8">
             <div className="mx-auto flex max-w-[1520px] items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2.5 pl-12 sm:gap-3 lg:pl-0">
