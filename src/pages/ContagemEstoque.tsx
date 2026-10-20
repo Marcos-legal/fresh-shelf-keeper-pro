@@ -159,7 +159,7 @@ export default function ContagemEstoque() {
                   <span className="sm:hidden">Produto</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="sm:max-w-2xl">
                 <DialogHeader><DialogTitle>Cadastrar Produto para Estoque</DialogTitle></DialogHeader>
                 <ProdutoEstoqueForm onSubmit={(data) => { addProdutoEstoque(data); setShowProdutoForm(false); }} />
               </DialogContent>
@@ -173,7 +173,7 @@ export default function ContagemEstoque() {
                     <span className="sm:hidden">Contagem</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-2xl">
                   <DialogHeader><DialogTitle>Nova Contagem de Estoque</DialogTitle></DialogHeader>
                   <ContagemEstoqueForm produtos={produtos} onSubmit={addContagem} onClose={() => setShowContagemForm(false)} />
                 </DialogContent>
@@ -572,7 +572,7 @@ export default function ContagemEstoque() {
       </div>
 
       <Dialog open={!!editingProduto} onOpenChange={(open) => !open && setEditingProduto(null)}>
-        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader><DialogTitle>Editar Produto de Estoque</DialogTitle></DialogHeader>
           {editingProduto && (
             <ProdutoEstoqueForm
