@@ -159,8 +159,8 @@ export default function ContagemEstoque() {
                   <span className="sm:hidden">Produto</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-2xl">
-                <DialogHeader><DialogTitle>Cadastrar Produto para Estoque</DialogTitle></DialogHeader>
+              <DialogContent className="w-[calc(100vw-1rem)] max-w-2xl max-h-[calc(100dvh-1rem)] overflow-x-hidden overflow-y-auto overscroll-contain p-4 sm:max-h-[calc(100dvh-2rem)] sm:p-6">
+                <DialogHeader className="pr-9"><DialogTitle className="text-lg leading-tight sm:text-xl">Cadastrar Produto para Estoque</DialogTitle></DialogHeader>
                 <ProdutoEstoqueForm onSubmit={(data) => { addProdutoEstoque(data); setShowProdutoForm(false); }} />
               </DialogContent>
             </Dialog>
@@ -173,8 +173,8 @@ export default function ContagemEstoque() {
                     <span className="sm:hidden">Contagem</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-2xl">
-                  <DialogHeader><DialogTitle>Nova Contagem de Estoque</DialogTitle></DialogHeader>
+                <DialogContent className="w-[calc(100vw-1rem)] max-w-2xl max-h-[calc(100dvh-1rem)] overflow-x-hidden overflow-y-auto overscroll-contain p-4 sm:max-h-[calc(100dvh-2rem)] sm:p-6">
+                  <DialogHeader className="pr-9"><DialogTitle className="text-lg leading-tight sm:text-xl">Nova Contagem de Estoque</DialogTitle></DialogHeader>
                   <ContagemEstoqueForm produtos={produtos} onSubmit={addContagem} onClose={() => setShowContagemForm(false)} />
                 </DialogContent>
               </Dialog>
