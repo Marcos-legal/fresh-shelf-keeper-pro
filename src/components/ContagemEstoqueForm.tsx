@@ -103,8 +103,8 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
   };
 
   return (
-    <div className="animate-fade-in">
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="min-w-0 w-full animate-fade-in">
+        <form onSubmit={handleSubmit} className="w-full min-w-0 space-y-4 sm:space-y-6">
           <div className="grid grid-cols-1 gap-6">
             <div className="space-y-2">
               <Label>Produto *</Label>
@@ -128,10 +128,10 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] max-w-[calc(100vw-3rem)] p-0" align="start" sideOffset={6}>
-                  <Command>
+                <PopoverContent className="z-[70] w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-2rem)] overflow-hidden p-0" align="start" side="bottom" sideOffset={6} collisionPadding={12} avoidCollisions>
+                  <Command className="max-h-[min(60dvh,28rem)] min-w-0">
                     <CommandInput placeholder="Buscar produto..." />
-                    <CommandList className="max-h-[min(16rem,45dvh)] overflow-y-auto overscroll-contain">
+                    <CommandList className="min-h-0 max-h-[min(45dvh,20rem)] overflow-x-hidden overflow-y-auto overscroll-contain [touch-action:pan-y]">
                       <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                       <CommandGroup>
                         {produtoOptions.map((option) => (
@@ -170,7 +170,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
               required
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
               <NumberInputField
                 id="quantidade_extra"
                 label="Quantidade Extra"
@@ -190,10 +190,10 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
             </div>
 
             {produtoSelecionado && (
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="min-w-0 overflow-hidden rounded-lg border border-blue-200 bg-blue-50 p-3 sm:p-4">
                 <h3 className="font-medium text-blue-900 mb-3">📊 Cálculo do Estoque</h3>
                 <div className="text-sm text-blue-700 space-y-2">
-                  <div className="flex justify-between">
+                  <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:justify-between">
                     <span>Quantidade Principal:</span>
                     <span className="font-medium">
                       {formData.quantidade} {produtoSelecionado.unidade_medida} × {produtoSelecionado.quantidade_por_unidade} = {formData.quantidade * produtoSelecionado.quantidade_por_unidade} {produtoSelecionado.unidade_conteudo}
@@ -212,7 +212,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                     </div>
                   )}
                   
-                  <div className="border-t pt-2 flex justify-between font-bold text-blue-900">
+                  <div className="flex min-w-0 flex-col gap-1 border-t pt-2 font-bold text-blue-900 sm:flex-row sm:justify-between">
                     <span>Total no Estoque:</span>
                     <span className="text-lg">
                       {Number.isInteger(quantidadeTotal) ? quantidadeTotal : quantidadeTotal.toFixed(2)} {produtoSelecionado.unidade_conteudo}
