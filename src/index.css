@@ -70,3 +70,43 @@
 }
 @media (max-width:767px) { .rounded-2xl { border-radius:10px !important; } }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
+
+
+/* Mobile layout hardening: prevent flex/grid children from forcing viewport overflow. */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  #root { width: 100%; min-width: 0; }
+  img, video, canvas, svg { max-width: 100%; }
+  input, textarea, select, button { min-width: 0; }
+}
+
+@media (max-width: 767px) {
+  [data-radix-popper-content-wrapper] {
+    max-width: calc(100vw - 1rem);
+  }
+
+  [cmdk-root] {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  [cmdk-list] {
+    max-width: 100%;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  [cmdk-item] {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+    padding-top: .7rem;
+    padding-bottom: .7rem;
+  }
+
+  [role="dialog"] {
+    max-width: calc(100vw - 1rem);
+  }
+}
