@@ -104,15 +104,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
   };
 
   return (
-    <Card className="animate-fade-in">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Calculator className="w-6 h-6" />
-          <span>Nova Contagem de Estoque</span>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent>
+    <div className="animate-fade-in">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-6">
             <div className="space-y-2">
@@ -260,7 +252,6 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+    </div>
   );
 }
