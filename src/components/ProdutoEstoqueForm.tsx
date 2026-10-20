@@ -13,10 +13,9 @@ interface ProdutoEstoqueFormProps {
   submitLabel?: string;
 }
 
-export function ProdutoEstoqueForm({ 
-  onSubmit, 
-  initialData, 
-  title = "Cadastro de Produto para Estoque",
+export function ProdutoEstoqueForm({
+  onSubmit,
+  initialData,
   submitLabel = "Salvar Produto"
 }: ProdutoEstoqueFormProps) {
   const [formData, setFormData] = useState<EstoqueFormData>({
