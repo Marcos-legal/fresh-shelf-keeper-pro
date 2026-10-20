@@ -1,8 +1,7 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { EstoqueFormData } from "@/hooks/useEstoqueSupabase";
 import { TextInputField } from "@/components/form/TextInputField";
 import { NumberInputField } from "@/components/form/NumberInputField";

@@ -1,8 +1,7 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, Save, Check, ChevronsUpDown } from "lucide-react";
+import { Save, Check, ChevronsUpDown } from "lucide-react";
 import { ContagemFormData, ProdutoEstoque } from "@/types/estoque";
 import { SelectField } from "@/components/form/SelectField";
 import { NumberInputField } from "@/components/form/NumberInputField";
