@@ -124,21 +124,23 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                     role="combobox"
                     aria-expanded={produtoOpen}
                     className={cn(
-                      "w-full justify-between font-normal",
+                      "h-12 w-full justify-between font-normal sm:h-10",
                       !formData.produto_id && "text-muted-foreground",
                       errors.produto_id && "border-destructive"
                     )}
                   >
-                    {formData.produto_id
-                      ? produtoOptions.find(o => o.value === formData.produto_id)?.label
-                      : "Selecione ou digite o nome do produto"}
+                    <span className="truncate text-left">
+                      {formData.produto_id
+                        ? produtoOptions.find(o => o.value === formData.produto_id)?.label
+                        : "Selecione ou digite o nome do produto"}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                <PopoverContent className="w-[--radix-popover-trigger-width] max-w-[calc(100vw-3rem)] p-0" align="start" sideOffset={6}>
                   <Command>
                     <CommandInput placeholder="Buscar produto..." />
-                    <CommandList className="max-h-64 overflow-y-auto">
+                    <CommandList className="max-h-[min(16rem,45dvh)] overflow-y-auto overscroll-contain">
                       <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                       <CommandGroup>
                         {produtoOptions.map((option) => (
@@ -246,13 +248,13 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
             />
           </div>
 
-          <div className="flex justify-end space-x-4 pt-6 border-t">
+          <div className="flex flex-col-reverse gap-2 pt-6 border-t sm:flex-row sm:justify-end sm:gap-4">
             {onClose && (
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} className="h-12 w-full sm:h-10 sm:w-auto">
                 Cancelar
               </Button>
             )}
-            <Button type="submit" className="gradient-blue text-white">
+            <Button type="submit" className="gradient-blue text-white h-12 w-full sm:h-10 sm:w-auto">
               <Save className="w-4 h-4 mr-2" />
               Registrar Contagem
             </Button>
