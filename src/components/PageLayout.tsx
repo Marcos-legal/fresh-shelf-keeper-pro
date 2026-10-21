@@ -15,12 +15,12 @@ interface PageLayoutProps {
 
 export function PageLayout({ children, title, description, icon: Icon, iconClassName, headerActions }: PageLayoutProps) {
   return (
-    <div className="min-h-screen min-h-[100dvh] flex w-full bg-background">
+    <div className="min-h-screen min-h-[100dvh] flex w-full min-w-0 overflow-x-clip bg-background">
       <MobileDrawer />
       <AppSidebar />
       <main className="flex-1 min-w-0 w-full overflow-x-hidden lg:pl-[var(--valicontrol-sidebar-width)] transition-[padding-left] duration-200 ease-out">
-        <div className="mx-auto w-full max-w-[1520px] px-3 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 lg:px-8 lg:py-7 lg:pb-7">
-          <header className="sticky top-0 z-20 -mx-3 mb-5 border-b border-border/70 bg-background/95 px-3 py-3 backdrop-blur-sm sm:-mx-6 sm:mb-7 sm:px-6 sm:py-4 lg:-mx-8 lg:px-8">
+        <div className="mx-auto w-full min-w-0 max-w-[1520px] px-3 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 lg:px-8 lg:py-7 lg:pb-7">
+          <header className="relative z-20 -mx-3 mb-4 border-b border-border/70 bg-background px-3 py-3 sm:-mx-6 sm:mb-7 sm:px-6 sm:py-4 lg:-mx-8 lg:px-8">
             <div className="mx-auto flex max-w-[1520px] items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2.5 pl-12 sm:gap-3 lg:pl-0">
                 {Icon && (
