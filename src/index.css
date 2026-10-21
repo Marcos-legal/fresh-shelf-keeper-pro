@@ -7,7 +7,7 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    max-height: min(60dvh, 28rem);
+    max-height: min(70dvh, 32rem);
     overflow: hidden;
   }
   [cmdk-input-wrapper] { flex: 0 0 auto; }
@@ -16,7 +16,7 @@
     flex: 1 1 auto;
     height: auto;
     min-height: 0;
-    max-height: min(48dvh, 22rem);
+    max-height: min(58dvh, 28rem);
     overflow-y: auto !important;
     overflow-x: hidden;
     overscroll-behavior-y: contain;

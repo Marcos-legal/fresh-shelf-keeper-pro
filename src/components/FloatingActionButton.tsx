@@ -30,7 +30,7 @@ export function FloatingActionButton({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+    <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 sm:bottom-6 sm:right-6 z-40 lg:bottom-6">
       <div className={cn(
         "flex flex-col-reverse space-y-reverse space-y-2 mb-3 transition-all duration-200",
         isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
