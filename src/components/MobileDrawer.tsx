@@ -92,14 +92,14 @@ export function MobileDrawer() {
   };
 
   return (
-    <div className="lg:hidden fixed inset-0 z-[100] pointer-events-none" aria-label="Navegação mobile">
+    <div className="lg:hidden fixed inset-0 z-40 pointer-events-none" aria-label="Navegação mobile">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button
             variant="outline"
             size="icon"
             className={cn(
-              "pointer-events-auto fixed left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-[101] h-11 w-11 rounded-xl shadow-md bg-background/95 backdrop-blur-xl border-border/50 transition-all duration-300 sm:left-4",
+              "pointer-events-auto fixed left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-40 h-11 w-11 rounded-xl shadow-md bg-background/95 backdrop-blur-xl border-border/50 transition-all duration-300 sm:left-4",
               isVisible ? "translate-x-0 opacity-100" : "-translate-x-14 opacity-0"
             )}
             aria-label="Abrir menu completo"
@@ -202,7 +202,7 @@ export function MobileDrawer() {
 
       <nav
         aria-label="Navegação rápida"
-        className="pointer-events-auto fixed inset-x-0 bottom-0 z-[101] border-t border-border/70 bg-background/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_18px_rgba(15,23,42,0.08)] backdrop-blur-xl"
+        className="pointer-events-auto fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-background/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_18px_rgba(15,23,42,0.08)] backdrop-blur-xl"
       >
         <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
           {bottomNav.map((item) => {

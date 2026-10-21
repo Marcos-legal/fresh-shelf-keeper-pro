@@ -119,7 +119,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
               <PopoverContent className="w-[--radix-popover-trigger-width] max-w-[calc(100vw-2rem)] p-0" align="start" sideOffset={6}>
                 <Command>
                   <CommandInput placeholder="Buscar produto..." />
-                   <CommandList className="max-h-[min(16rem,45dvh)] overflow-y-auto overscroll-contain">
+                   <CommandList className="max-h-[min(58dvh,28rem)] overflow-y-auto overscroll-y-contain [touch-action:pan-y] [webkit-overflow-scrolling:touch]">
                     <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                     <CommandGroup>
                       {products.map((product) => (
