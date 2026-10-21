@@ -91,12 +91,12 @@ export function ProductTable({
     });
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm animate-fade-in">
-      <div className="border-b border-border/60 bg-gradient-to-b from-muted/20 to-transparent p-4 sm:p-5">
-        <div className="mb-4 flex items-center justify-between gap-3">
+    <div className="min-w-0 w-full overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm animate-fade-in">
+      <div className="min-w-0 border-b border-border/60 bg-gradient-to-b from-muted/20 to-transparent p-3 sm:p-5">
+        <div className="mb-3 flex min-w-0 items-start justify-between gap-2 sm:mb-4 sm:items-center sm:gap-3">
           <div className="min-w-0">
-            <h3 className="truncate text-base font-semibold tracking-tight text-foreground">{title}</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">Gerencie validade, status e etiquetas dos produtos</p>
+            <h3 className="min-w-0 break-words text-base font-semibold tracking-tight text-foreground">{title}</h3>
+            <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground sm:text-xs">Gerencie validade, status e etiquetas dos produtos</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <span className="hidden rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground sm:inline-flex">
@@ -108,7 +108,7 @@ export function ProductTable({
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
           <div className="relative min-w-0 flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -118,7 +118,7 @@ export function ProductTable({
               className="h-10 border-border/70 bg-background pl-9 text-sm shadow-none transition-shadow focus-visible:ring-2 focus-visible:ring-primary/20 sm:h-9"
             />
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:flex">
+          <div className="grid min-w-0 grid-cols-2 gap-2 sm:flex">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="h-10 border-border/70 bg-background text-sm shadow-none sm:h-9 sm:w-40">
                 <SelectValue placeholder="Status" />
@@ -186,13 +186,13 @@ export function ProductTable({
         </Table>
       </div>
 
-      <div className="lg:hidden">
+      <div className="min-w-0 lg:hidden">
         {filteredProducts.map((product) => {
           const isExpanded = expandedId === product.id;
           const status = statusConfig[product.status];
           return (
-            <div key={product.id} className={cn("border-b border-border/30 last:border-0 transition-colors", isExpanded ? "bg-muted/20" : "hover:bg-muted/10")}>
-               <div className="flex min-h-16 cursor-pointer items-center gap-3 p-4 active:bg-muted/30 min-[390px]:p-5" onClick={() => setExpandedId(isExpanded ? null : product.id)}>
+            <div key={product.id} className={cn("min-w-0 border-b border-border/30 last:border-0 transition-colors", isExpanded ? "bg-muted/20" : "hover:bg-muted/10")}>
+               <div className="flex min-h-16 min-w-0 cursor-pointer items-start gap-2.5 p-3 active:bg-muted/30 min-[390px]:gap-3 min-[390px]:p-4" onClick={() => setExpandedId(isExpanded ? null : product.id)}>
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-semibold text-xs">{product.nome.charAt(0).toUpperCase()}</div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center gap-2">
@@ -205,12 +205,12 @@ export function ProductTable({
               </div>
 
               {isExpanded && (
-                <div className="px-4 pb-4 animate-fade-in">
-                  <div className="mb-3 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/50">
+                <div className="min-w-0 px-3 pb-4 animate-fade-in sm:px-4">
+                  <div className="mb-3 grid min-w-0 grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/50">
                     {[['Fabricação', formatDate(product.dataFabricacao)],['Validade', formatDate(product.validade)],['Abertura', formatDate(product.dataAbertura)],['Usar Até', formatDate(product.utilizarAte)]].map(([label, value]) => (
                       <div key={label} className="bg-card p-3">
                         <span className="mb-1 block text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
-                        <span className="text-xs font-medium tabular-nums text-foreground">{value}</span>
+                        <span className="break-words text-xs font-medium tabular-nums text-foreground">{value || "-"}</span>
                       </div>
                     ))}
                     <div className="col-span-2 bg-card p-3">
@@ -218,7 +218,7 @@ export function ProductTable({
                       <span className="text-xs font-medium text-foreground">{product.responsavel || '-'}</span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex min-w-0 gap-2">
                     {onEdit && <Button variant="outline" size="sm" onClick={() => onEdit(product)} className="h-9 flex-1 text-xs"><Edit className="mr-1.5 h-3.5 w-3.5" />Editar</Button>}
                     {onPrintLabel && <Button size="sm" onClick={() => onPrintLabel(product)} className="h-9 flex-1 text-xs"><Printer className="mr-1.5 h-3.5 w-3.5" />Imprimir</Button>}
                     {onDelete && <Button variant="ghost" size="icon" onClick={() => onDelete(product.id)} className="h-9 w-9 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></Button>}
