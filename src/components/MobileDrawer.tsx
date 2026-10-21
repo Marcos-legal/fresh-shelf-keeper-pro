@@ -204,7 +204,7 @@ export function MobileDrawer() {
         aria-label="Navegação rápida"
         className="pointer-events-auto fixed inset-x-0 bottom-0 z-[101] border-t border-border/70 bg-background/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_18px_rgba(15,23,42,0.08)] backdrop-blur-xl"
       >
-        <div className="mx-auto grid max-w-lg grid-cols-6 gap-1">
+        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
           {bottomNav.map((item) => {
             const active = isBottomActive(item.url);
             return (
