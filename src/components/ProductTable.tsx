@@ -195,11 +195,11 @@ export function ProductTable({
                <div className="flex min-h-16 min-w-0 cursor-pointer items-start gap-2.5 p-3 active:bg-muted/30 min-[390px]:gap-3 min-[390px]:p-4" onClick={() => setExpandedId(isExpanded ? null : product.id)}>
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-semibold text-xs">{product.nome.charAt(0).toUpperCase()}</div>
                 <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex items-center gap-2">
-                    <h4 className="truncate text-sm font-semibold text-foreground">{product.nome}</h4>
-                    <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-semibold", status.className)}><span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />{status.label}</span>
+                  <div className="mb-1 flex min-w-0 flex-wrap items-center gap-1.5">
+                    <h4 className="min-w-0 flex-1 break-words text-sm font-semibold leading-snug text-foreground">{product.nome}</h4>
+                    <span className={cn("inline-flex max-w-full shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-semibold", status.className)}><span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />{status.label}</span>
                   </div>
-                  <p className="truncate text-[11px] text-muted-foreground">{product.marca} · Lote: {product.lote}{!category && ` · ${categoryLabels[product.localArmazenamento]}`}</p>
+                  <p className="break-words text-[11px] leading-snug text-muted-foreground">{product.marca || "Sem marca"} · Lote: {product.lote || "-"}{!category && ` · ${categoryLabels[product.localArmazenamento]}`}</p>
                 </div>
                 <div className="shrink-0 rounded-md p-1 text-muted-foreground">{isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</div>
               </div>
