@@ -129,9 +129,9 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="z-[70] w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-2rem)] overflow-hidden p-0" align="start" side="bottom" sideOffset={6} collisionPadding={12} avoidCollisions>
-                  <Command className="max-h-[min(60dvh,28rem)] min-w-0">
+                  <Command className="flex max-h-[min(60dvh,28rem)] min-w-0 flex-col overflow-hidden">
                     <CommandInput placeholder="Buscar produto..." />
-                    <CommandList className="min-h-0 max-h-[min(45dvh,20rem)] overflow-x-hidden overflow-y-auto overscroll-contain [touch-action:pan-y]">
+                    <CommandList className="h-auto min-h-0 max-h-[min(48dvh,22rem)] flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [touch-action:pan-y] [webkit-overflow-scrolling:touch]">
                       <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                       <CommandGroup>
                         {produtoOptions.map((option) => (
