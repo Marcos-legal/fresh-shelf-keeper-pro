@@ -70,9 +70,10 @@ export function useProductsSupabase() {
         useByDate = `${useBy.getFullYear()}-${String(useBy.getMonth() + 1).padStart(2, '0')}-${String(useBy.getDate()).padStart(2, '0')}`;
       }
       const productData = { name: data.nome || '', lot: data.lote || '', brand: data.marca || '', manufacture_date: manufactureDate, expiry_date: expiryDate, opening_date: openingDate, days_valid: data.diasParaVencer || 0, use_by_date: useByDate, storage: data.localArmazenamento || 'ambiente', responsible: data.responsavel || '', status: 'active', user_id: user.id, empresa_id: activeEmpresaId, preco_custo: data.precoCusto ?? null };
-      const { error } = await supabase.from('products').insert([productData as never]);
+      const { data: inserted, error } = await supabase.from('products').insert([productData as never]).select('id').single();
       if (error) { console.error('Error adding product:', error); toast({ title: 'Erro ao adicionar produto', description: error.message || 'Não foi possível adicionar o produto.', variant: 'destructive' }); return; }
       toast({ title: 'Produto adicionado', description: 'O produto foi adicionado com sucesso.' }); await loadProducts();
+      return inserted && inserted.id != null ? String(inserted.id) : undefined;
     } catch (error) { console.error('Error adding product:', error); toast({ title: 'Erro inesperado', description: 'Ocorreu um erro ao adicionar o produto.', variant: 'destructive' }); }
   };
 
