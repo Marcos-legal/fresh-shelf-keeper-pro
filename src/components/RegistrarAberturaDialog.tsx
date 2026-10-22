@@ -109,17 +109,17 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>Produto</Label>
-            <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+            <Popover modal open={pickerOpen} onOpenChange={setPickerOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" role="combobox" aria-expanded={pickerOpen} className="h-12 w-full justify-between text-left font-normal">
                   <span className="truncate">{selected ? selected.nome || "Produto sem nome" : "Selecionar produto"}</span>
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] max-w-[calc(100vw-2rem)] p-0" align="start" sideOffset={6}>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-2rem)] p-0" align="start" sideOffset={6} collisionPadding={12}>
                 <Command>
                   <CommandInput placeholder="Buscar produto..." />
-                   <CommandList className="max-h-[min(58dvh,28rem)] overflow-y-auto overscroll-y-contain [touch-action:pan-y] [webkit-overflow-scrolling:touch]">
+                   <CommandList>
                     <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                     <CommandGroup>
                       {products.map((product) => (

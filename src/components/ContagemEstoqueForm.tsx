@@ -108,7 +108,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
           <div className="grid grid-cols-1 gap-6">
             <div className="space-y-2">
               <Label>Produto *</Label>
-              <Popover open={produtoOpen} onOpenChange={setProdutoOpen}>
+              <Popover modal open={produtoOpen} onOpenChange={setProdutoOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -129,9 +129,9 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="z-[70] w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-2rem)] overflow-hidden p-0" align="start" side="bottom" sideOffset={6} collisionPadding={12} avoidCollisions>
-                  <Command className="flex max-h-[min(60dvh,28rem)] min-w-0 flex-col overflow-hidden">
+                  <Command>
                     <CommandInput placeholder="Buscar produto..." />
-                    <CommandList className="h-auto min-h-0 max-h-[min(58dvh,28rem)] flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [touch-action:pan-y] [webkit-overflow-scrolling:touch]">
+                    <CommandList>
                       <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                       <CommandGroup>
                         {produtoOptions.map((option) => (
@@ -201,7 +201,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                   </div>
                   
                   {formData.quantidade_extra > 0 && (
-                    <div className="flex justify-between">
+                    <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:justify-between">
                       <span>Quantidade Extra:</span>
                       <span className="font-medium">
                         {formData.quantidade_extra} {formData.unidade_quantidade_extra === 'porcoes' ? produtoSelecionado.unidade_conteudo : 'unidades individuais'}
