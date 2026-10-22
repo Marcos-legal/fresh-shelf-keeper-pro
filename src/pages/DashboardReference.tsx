@@ -212,6 +212,7 @@ export default function DashboardReference() {
           onOpenChange={setAberturaOpen}
           products={products}
           onSave={updateProduct}
+          onCreateProduct={addProduct}
           onPrintLabel={(product) => navigate(`/impressao-etiquetas?produtoId=${product.id}&autoPrint=1`)}
         />
       </div>
