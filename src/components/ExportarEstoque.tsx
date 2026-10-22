@@ -291,13 +291,13 @@ export function ExportarEstoque({ produtos, contagens, getEstoqueAtual }: Export
   };
 
   return (
-    <div className="flex flex-row gap-1.5 sm:gap-2 w-full">
+    <div className="grid w-full min-w-0 grid-cols-2 gap-2">
       <Button
         onClick={exportarRelatorioCompleto}
         disabled={loading || produtos.length === 0}
         variant="outline"
         size="sm"
-        className="border-green-500 text-green-600 hover:bg-green-50 flex-1 text-[10px] sm:text-xs h-8 px-2 sm:px-3 min-w-0"
+        className="border-success/50 text-success hover:bg-success/10 text-xs h-11 lg:h-9 px-2 sm:px-3 min-w-0 gap-2"
       >
         <BarChart3 className="w-3.5 h-3.5 shrink-0" />
         <span className="truncate">Relatório</span>
@@ -308,7 +308,7 @@ export function ExportarEstoque({ produtos, contagens, getEstoqueAtual }: Export
         disabled={loading || contagens.length === 0}
         variant="outline"
         size="sm"
-        className="border-blue-500 text-blue-600 hover:bg-blue-50 flex-1 text-[10px] sm:text-xs h-8 px-2 sm:px-3 min-w-0"
+        className="border-primary/50 text-primary hover:bg-primary/10 text-xs h-11 lg:h-9 px-2 sm:px-3 min-w-0 gap-2"
       >
         <FileText className="w-3.5 h-3.5 shrink-0" />
         <span className="truncate">Histórico</span>

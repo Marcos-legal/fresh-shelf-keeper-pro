@@ -128,12 +128,12 @@ export default function ContagemEstoque() {
       description="Gerencie o estoque de produtos"
       icon={Calculator}
       headerActions={
-        <div className="flex flex-col gap-2">
+        <div className="flex w-full min-w-0 flex-col gap-2 lg:w-auto">
           {/* Mobile toggle button */}
           <Button
             variant="outline"
             size="sm"
-            className="lg:hidden text-xs"
+            className="h-11 self-end text-xs lg:hidden"
             onClick={() => setShowActions(!showActions)}
           >
             <ChevronDown className={cn("w-4 h-4 mr-1.5 transition-transform", showActions && "rotate-180")} />
@@ -142,7 +142,7 @@ export default function ContagemEstoque() {
 
           {/* Action buttons - always visible on desktop, toggleable on mobile */}
           <div className={cn(
-            "flex flex-wrap gap-2",
+            "flex min-w-0 flex-wrap gap-2 [&>button]:h-11 [&>button]:flex-1 [&>button]:basis-[calc(50%-0.25rem)] lg:[&>button]:h-9 lg:[&>button]:flex-none lg:[&>button]:basis-auto",
             showActions ? "flex" : "hidden lg:flex"
           )}>
             <Button variant="secondary" onClick={migrarDadosLocalStorage} className="text-xs sm:text-sm" size="sm">
@@ -264,7 +264,7 @@ export default function ContagemEstoque() {
                     return (
                       <div key={produto.id} className="p-4 hover:bg-muted/20 transition-colors">
                         <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-semibold text-sm text-foreground">{produto.nome}</h4>
+                          <h4 className="min-w-0 flex-1 break-words font-semibold text-sm text-foreground">{produto.nome}</h4>
                           <div className="flex items-center gap-1 flex-shrink-0 ml-2">
                             <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setEditingProduto(produto)} title="Editar">
                               <Pencil className="w-3.5 h-3.5" />
