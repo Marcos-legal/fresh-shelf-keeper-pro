@@ -27,7 +27,8 @@ export function buildEtiquetaPrintHTML({
   title,
 }: BuildOptions): string {
   const preset = getPresetForWidth(largura);
-  const w = preset.largura;
+  // Usa exatamente a largura/altura escolhidas pelo usuário (mm)
+  const w = largura && largura > 20 ? largura : preset.largura;
   const h = altura && altura > 20 ? altura : preset.altura;
 
   const scale = Math.max(0.7, Math.min(1.25, h / preset.altura));
@@ -104,10 +105,11 @@ export function buildEtiquetaPrintHTML({
     <meta charset="utf-8" />
     <title>${escapeHtml(title)}</title>
     <style>
-      @page { size: ${w}mm ${h}mm; margin: 0; }
+      @page { size: ${w}mm ${h}mm portrait; margin: 0; }
       * { box-sizing: border-box; }
       html, body {
         margin: 0; padding: 0;
+        width: ${w}mm;
         font-family: Arial, Helvetica, sans-serif;
         color: #000; background: #fff;
         -webkit-print-color-adjust: exact;
@@ -115,18 +117,19 @@ export function buildEtiquetaPrintHTML({
       }
       .etiqueta {
         width: ${w}mm;
-        height: ${h}mm;
+        height: calc(${h}mm - 0.4mm);
         border: 1px solid #000;
         padding: 3px;
+        margin: 0;
         display: flex;
         flex-direction: column;
         gap: 2px;
         background: #fff;
-        page-break-after: always;
         page-break-inside: avoid;
+        break-inside: avoid;
         overflow: hidden;
       }
-      .etiqueta:last-child { page-break-after: auto; }
+      .etiqueta + .etiqueta { page-break-before: always; break-before: page; }
       .header {
         background: #000;
         color: #fff;

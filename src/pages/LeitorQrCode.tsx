@@ -85,7 +85,15 @@ export default function LeitorQrCode() {
       scannerRef.current = html5;
       await html5.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 240, height: 240 } },
+        {
+          fps: 10,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const available = Math.min(viewfinderWidth, viewfinderHeight);
+            const size = Math.max(160, Math.min(280, Math.floor(available * 0.72)));
+            return { width: size, height: size };
+          },
+          aspectRatio: 1,
+        },
         (decoded) => {
           const parsed = parseEtiquetaQrPayload(decoded);
           const key = parsed?.id ? `id:${parsed.id}` : `raw:${decoded}`;
@@ -172,24 +180,24 @@ export default function LeitorQrCode() {
       <div className="space-y-4 sm:space-y-6">
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
                 <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
                 Câmera
                 {scanning && <Badge variant="secondary" className="text-xs">Lendo...</Badge>}
               </CardTitle>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex">
                 {scanning ? (
-                  <Button variant="outline" size="sm" onClick={stop}>
+                  <Button variant="outline" size="sm" className="h-11 sm:h-9" onClick={stop}>
                     <CameraOff className="w-4 h-4 mr-1.5" /> Parar
                   </Button>
                 ) : (
-                  <Button size="sm" onClick={start}>
+                  <Button size="sm" className="h-11 sm:h-9" onClick={start}>
                     <Camera className="w-4 h-4 mr-1.5" /> Iniciar leitura
                   </Button>
                 )}
                 {scans.length > 0 && (
-                  <Button variant="ghost" size="sm" onClick={clearAll}>
+                  <Button variant="ghost" size="sm" className="h-11 sm:h-9" onClick={clearAll}>
                     <Trash2 className="w-4 h-4 mr-1.5" /> Limpar ({scans.length})
                   </Button>
                 )}
@@ -199,7 +207,7 @@ export default function LeitorQrCode() {
           <CardContent className="p-4 sm:p-6 pt-0">
             <div
               id={READER_ID}
-              className="w-full max-w-md mx-auto rounded-lg overflow-hidden bg-muted/30 aspect-square"
+               className="mx-auto aspect-square w-full max-w-md overflow-hidden rounded-lg bg-muted/30 [&_video]:h-full [&_video]:w-full [&_video]:object-cover"
             />
             {error && <p className="mt-3 text-sm text-destructive text-center">{error}</p>}
             {scanning && (
@@ -264,16 +272,17 @@ export default function LeitorQrCode() {
                           >
                             <EtiquetaView product={product} />
                           </div>
-                          <div className="grid grid-cols-2 gap-2">
+                           <div className="grid grid-cols-1 gap-2 min-[390px]:grid-cols-2">
                             <Button
-                              className="bg-success hover:bg-success/90 text-success-foreground"
+                               className="min-h-11 whitespace-normal bg-success text-success-foreground hover:bg-success/90"
                               onClick={() => handleConsumido(scan)}
                             >
                               <Check className="w-4 h-4 mr-1.5" />
                               Dar Baixa (Consumido)
                             </Button>
                             <Button
-                              variant="destructive"
+                               variant="destructive"
+                               className="min-h-11"
                               onClick={() => setDiscardTarget(scan)}
                             >
                               <Trash2 className="w-4 h-4 mr-1.5" />

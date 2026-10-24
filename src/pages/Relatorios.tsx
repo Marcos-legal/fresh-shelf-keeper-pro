@@ -79,6 +79,7 @@ const Relatorios = () => {
 
       const getStatusDescription = (status: string) => {
         switch (status) {
+          case 'sem-status': return '➖ SEM DATAS';
           case 'valido': return '✅ VÁLIDO';
           case 'proximo-vencimento': return '⚠️ PRÓXIMO VENCIMENTO';
           case 'vencido': return '❌ VENCIDO';
