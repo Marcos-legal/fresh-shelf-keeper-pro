@@ -3,3 +3,10 @@
 - [x] Corrigir contenção e rolagem por toque nas buscas de produtos.
 - [x] Validar cabeçalho e seletores em 320, 360, 390, 430, 820 e 1280px com arrasto nos dois sentidos e seleção do último resultado em teste isolado dos componentes.
 - [ ] Verificar salvamento autenticado — bloqueado por Supabase externo sem sessão disponível.
+
+# Painel administrativo do SaaS
+- [ ] Auditar estruturas, permissões e integração financeira; apresentar plano revisável.
+- [ ] Implementar /admin separado, dados reais, gestão e operações administrativas auditadas após revisão do plano.
+- [ ] Configurar primeiro administrador por procedimento autorizado, sem promoção automática por e-mail.
+- [ ] Validar autorização, isolamento, assinaturas, pagamentos de teste e regressões operacionais.
+- [ ] Entregar preview e documentação, sem publicação automática.
