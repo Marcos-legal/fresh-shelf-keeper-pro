@@ -22,6 +22,7 @@
     --sidebar-primary: 217 91% 60%; --sidebar-primary-foreground: 0 0% 100%; --sidebar-accent: 217 33% 14%; --sidebar-accent-foreground: 210 40% 90%; --sidebar-border: 217 33% 14%; --sidebar-ring: 217 33% 14%;
     --chart-1: 217 91% 60%; --chart-2: 142 71% 45%; --chart-3: 38 92% 50%; --chart-4: 180 55% 42%; --chart-5: 0 65% 52%;
   }
+  .admin-theme { --primary: 158 64% 24%; --ring: 158 64% 24%; --primary-foreground: 0 0% 100%; --background: 150 20% 97%; }
   * { @apply border-border; }
   html { min-height:100%; background:hsl(var(--background)); }
   body { @apply bg-background text-foreground antialiased; min-width:320px; min-height:100%; min-height:100dvh; font-feature-settings: "cv02", "cv03", "cv04", "cv11"; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
