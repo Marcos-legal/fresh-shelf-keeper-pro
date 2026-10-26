@@ -5,8 +5,8 @@
 - [ ] Verificar salvamento autenticado — bloqueado por Supabase externo sem sessão disponível.
 
 # Painel administrativo do SaaS
-- [ ] Auditar estruturas, permissões e integração financeira; apresentar plano revisável.
-- [ ] Implementar /admin separado, dados reais, gestão e operações administrativas auditadas após revisão do plano.
-- [ ] Configurar primeiro administrador por procedimento autorizado, sem promoção automática por e-mail.
-- [ ] Validar autorização, isolamento, assinaturas, pagamentos de teste e regressões operacionais.
+- [x] Auditar estruturas, permissões e integração financeira; apresentar plano revisável.
+- [x] Implementar /admin separado, dados reais, gestão e operações administrativas auditadas após revisão do plano.
+- [x] Configurar primeiro administrador por procedimento autorizado, sem promoção automática por e-mail.
+- [ ] Validar autorização (bloqueado: sem sessão de teste no Supabase externo), isolamento, assinaturas, pagamentos de teste e regressões operacionais.
 - [ ] Entregar preview e documentação, sem publicação automática.
