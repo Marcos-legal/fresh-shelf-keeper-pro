@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string
+          id: string
+          reason: string | null
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       contagens_estoque: {
         Row: {
           created_at: string
@@ -481,6 +517,73 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_assert: { Args: never; Returns: undefined }
+      admin_list_audit: {
+        Args: never
+        Returns: {
+          action: string
+          actor_email: string
+          after_data: Json
+          before_data: Json
+          created_at: string
+          id: string
+          reason: string
+          target_id: string
+          target_type: string
+        }[]
+      }
+      admin_list_empresas: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          members: number
+          nome: string
+          owner_email: string
+          products: number
+        }[]
+      }
+      admin_list_subscriptions: {
+        Args: never
+        Returns: {
+          current_period_end: string
+          effective_status: string
+          email: string
+          empresa_nome: string
+          id: string
+          mp_subscription_id: string
+          plan: string
+          status: string
+          trial_end: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          empresas: number
+          first_name: string
+          last_name: string
+          last_sign_in_at: string
+          sub_status: string
+          trial_end: string
+          user_id: string
+        }[]
+      }
+      admin_overview: { Args: never; Returns: Json }
+      admin_update_subscription: {
+        Args: {
+          _id: string
+          _period_days: number
+          _reason: string
+          _status: string
+          _trial_days: number
+        }
+        Returns: undefined
+      }
       claim_pending_invites: { Args: never; Returns: number }
       get_empresa_ativa: { Args: { _user: string }; Returns: string }
       has_role: {
@@ -494,6 +597,7 @@ export type Database = {
         Args: { _email: string; _empresa: string; _role?: string }
         Returns: Json
       }
+      is_current_user_admin: { Args: never; Returns: boolean }
       is_empresa_admin: {
         Args: { _empresa: string; _user: string }
         Returns: boolean
@@ -533,6 +637,10 @@ export type Database = {
       rename_empresa: {
         Args: { _empresa: string; _nome: string }
         Returns: undefined
+      }
+      sub_effective_status: {
+        Args: { _period_end: string; _status: string; _trial_end: string }
+        Returns: string
       }
       update_empresa_member_role: {
         Args: { _empresa: string; _role: string; _user: string }
