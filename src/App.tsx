@@ -26,6 +26,7 @@ import ContagemEstoque from "./pages/ContagemEstoque";
 import ResetPassword from "./pages/ResetPassword";
 import LeitorQrCode from "./pages/LeitorQrCode";
 import ConfiguracoesEmpresa from "./pages/ConfiguracoesEmpresa";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,6 +66,7 @@ const App: React.FC = () => (
                       <Route path="/contagem-estoque" element={<ProtectedRoute><ContagemEstoque /></ProtectedRoute>} />
                       <Route path="/leitor-qrcode" element={<ProtectedRoute><LeitorQrCode /></ProtectedRoute>} />
                       <Route path="/configuracoes/empresa" element={<ProtectedRoute><ConfiguracoesEmpresa /></ProtectedRoute>} />
+                      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </BrowserRouter>
