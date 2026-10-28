@@ -59,6 +59,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
   const [dataAbertura, setDataAbertura] = useState(todayInput());
   const [dias, setDias] = useState<number>(0);
   const [lote, setLote] = useState<string>("");
+  const [localArmazenamento, setLocalArmazenamento] = useState<StorageLocation>('ambiente');
   const [dataFabricacao, setDataFabricacao] = useState<string>("");
   const [validade, setValidade] = useState<string>("");
   const [saving, setSaving] = useState(false);
@@ -77,6 +78,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
       setDataAbertura(todayInput());
       setDias(0);
       setLote("");
+      setLocalArmazenamento('ambiente');
       setDataFabricacao("");
       setValidade("");
       setSaving(false);
@@ -91,6 +93,7 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
     if (selected) {
       setDias(selected.diasParaVencer || 0);
       setLote(selected.lote || "");
+      setLocalArmazenamento(selected.localArmazenamento || 'ambiente');
       setDataFabricacao(toInput(selected.dataFabricacao));
       setValidade(toInput(selected.validade));
     }
@@ -109,11 +112,12 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
       dataAbertura,
       diasParaVencer: dias,
       lote,
+      localArmazenamento,
       ...(semFabricacao ? { dataFabricacao: dataFabricacao || undefined } : {}),
       ...(semValidade ? { validade: validade || undefined } : {}),
     });
     setSaving(false);
-    onPrintLabel(selected);
+    onPrintLabel({ ...selected, localArmazenamento });
     onOpenChange(false);
   };
 
@@ -184,6 +188,16 @@ export function RegistrarAberturaDialog({ open, onOpenChange, products, onSave, 
                 <Plus className="h-3.5 w-3.5" /> Produto ainda não cadastrado? Cadastrar novo
               </button>
             </div>
+
+            {selected && (
+              <SelectField
+                label="Local de armazenamento"
+                value={localArmazenamento}
+                onChange={(value) => setLocalArmazenamento(value as StorageLocation)}
+                options={storageOptions}
+                placeholder="Selecione o local"
+              />
+            )}
 
             {selected && (semFabricacao || semValidade || semLote) && (
               <div className="space-y-3 rounded-lg border border-dashed border-border/70 bg-muted/20 p-3">
