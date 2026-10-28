@@ -207,7 +207,7 @@ const Index = () => {
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+      <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4 mb-5 sm:mb-6">
         <StatsCard title="Total" value={stats.total} icon={Package} variant="default" description="Produtos cadastrados"
           onClick={() => setActiveFilter(activeFilter === 'todos' ? 'todos' : 'todos')} isActive={activeFilter === 'todos'} />
         <StatsCard title="Válidos" value={stats.validos} icon={CheckCircle} variant="success" description="Em condições ideais"
@@ -225,12 +225,12 @@ const Index = () => {
       />
 
       {/* Storage Locations */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+      <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4 mb-5 sm:mb-6">
         {storageLocations.map((loc) => (
           <div
             key={loc.name}
             onClick={() => navigate(loc.url)}
-            className="group bg-card rounded-xl border border-border/60 p-4 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98]"
+            className="group min-w-0 overflow-hidden bg-card rounded-xl border border-border/60 p-3 sm:p-4 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98]"
           >
             <div className="flex items-center justify-between mb-2">
               <loc.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -242,11 +242,11 @@ const Index = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex flex-wrap gap-2 mb-5 sm:mb-6">
-        <Button size="sm" onClick={() => navigate('/leitor-qrcode')} className="text-xs h-9">
+      <div className="grid grid-cols-2 gap-2 mb-5 sm:mb-6 sm:flex sm:flex-wrap">
+        <Button size="sm" onClick={() => navigate('/leitor-qrcode')} className="h-auto min-h-9 whitespace-normal px-2 text-[11px] leading-tight sm:text-xs">
           <QrCode className="w-3.5 h-3.5 mr-1.5" /> Ler QR Code
         </Button>
-        <Button variant="outline" size="sm" onClick={() => navigate('/impressao-etiquetas')} className="text-xs h-9">
+        <Button variant="outline" size="sm" onClick={() => navigate('/impressao-etiquetas')} className="h-auto min-h-9 whitespace-normal px-2 text-[11px] leading-tight sm:text-xs">
           <Printer className="w-3.5 h-3.5 mr-1.5" /> Imprimir Etiquetas
         </Button>
         <Button variant="outline" size="sm" onClick={() => navigate('/visualizar-etiquetas')} className="text-xs h-9">

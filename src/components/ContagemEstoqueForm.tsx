@@ -1,8 +1,7 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, Save, Check, ChevronsUpDown } from "lucide-react";
+import { Save, Check, ChevronsUpDown } from "lucide-react";
 import { ContagemFormData, ProdutoEstoque } from "@/types/estoque";
 import { SelectField } from "@/components/form/SelectField";
 import { NumberInputField } from "@/components/form/NumberInputField";
@@ -104,38 +103,32 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
   };
 
   return (
-    <Card className="animate-fade-in">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Calculator className="w-6 h-6" />
-          <span>Nova Contagem de Estoque</span>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="min-w-0 w-full animate-fade-in">
+        <form onSubmit={handleSubmit} className="w-full min-w-0 space-y-4 sm:space-y-6">
           <div className="grid grid-cols-1 gap-6">
             <div className="space-y-2">
               <Label>Produto *</Label>
-              <Popover open={produtoOpen} onOpenChange={setProdutoOpen}>
+              <Popover modal open={produtoOpen} onOpenChange={setProdutoOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={produtoOpen}
                     className={cn(
-                      "w-full justify-between font-normal",
+                      "h-12 w-full justify-between font-normal sm:h-10",
                       !formData.produto_id && "text-muted-foreground",
                       errors.produto_id && "border-destructive"
                     )}
                   >
-                    {formData.produto_id
-                      ? produtoOptions.find(o => o.value === formData.produto_id)?.label
-                      : "Selecione ou digite o nome do produto"}
+                    <span className="truncate text-left">
+                      {formData.produto_id
+                        ? produtoOptions.find(o => o.value === formData.produto_id)?.label
+                        : "Selecione ou digite o nome do produto"}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                <PopoverContent className="z-[70] w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-2rem)] overflow-hidden p-0" align="start" side="bottom" sideOffset={6} collisionPadding={12} avoidCollisions>
                   <Command>
                     <CommandInput placeholder="Buscar produto..." />
                     <CommandList>
@@ -177,7 +170,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
               required
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
               <NumberInputField
                 id="quantidade_extra"
                 label="Quantidade Extra"
@@ -197,10 +190,10 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
             </div>
 
             {produtoSelecionado && (
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="min-w-0 overflow-hidden rounded-lg border border-blue-200 bg-blue-50 p-3 sm:p-4">
                 <h3 className="font-medium text-blue-900 mb-3">📊 Cálculo do Estoque</h3>
                 <div className="text-sm text-blue-700 space-y-2">
-                  <div className="flex justify-between">
+                  <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:justify-between">
                     <span>Quantidade Principal:</span>
                     <span className="font-medium">
                       {formData.quantidade} {produtoSelecionado.unidade_medida} × {produtoSelecionado.quantidade_por_unidade} = {formData.quantidade * produtoSelecionado.quantidade_por_unidade} {produtoSelecionado.unidade_conteudo}
@@ -208,7 +201,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                   </div>
                   
                   {formData.quantidade_extra > 0 && (
-                    <div className="flex justify-between">
+                    <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:justify-between">
                       <span>Quantidade Extra:</span>
                       <span className="font-medium">
                         {formData.quantidade_extra} {formData.unidade_quantidade_extra === 'porcoes' ? produtoSelecionado.unidade_conteudo : 'unidades individuais'}
@@ -219,7 +212,7 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
                     </div>
                   )}
                   
-                  <div className="border-t pt-2 flex justify-between font-bold text-blue-900">
+                  <div className="flex min-w-0 flex-col gap-1 border-t pt-2 font-bold text-blue-900 sm:flex-row sm:justify-between">
                     <span>Total no Estoque:</span>
                     <span className="text-lg">
                       {Number.isInteger(quantidadeTotal) ? quantidadeTotal : quantidadeTotal.toFixed(2)} {produtoSelecionado.unidade_conteudo}
@@ -246,19 +239,18 @@ export function ContagemEstoqueForm({ onSubmit, produtos, onClose }: ContagemEst
             />
           </div>
 
-          <div className="flex justify-end space-x-4 pt-6 border-t">
+          <div className="flex flex-col-reverse gap-2 pt-6 border-t sm:flex-row sm:justify-end sm:gap-4">
             {onClose && (
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} className="h-12 w-full sm:h-10 sm:w-auto">
                 Cancelar
               </Button>
             )}
-            <Button type="submit" className="gradient-blue text-white">
+            <Button type="submit" className="gradient-blue text-white h-12 w-full sm:h-10 sm:w-auto">
               <Save className="w-4 h-4 mr-2" />
               Registrar Contagem
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Edit, Eye, Printer, X, Calendar, EyeOff } from "lucide-react";
-import { Product, StorageLocation } from "@/types/product";
+import { Edit, Eye, Printer, X, Calendar, EyeOff, Save } from "lucide-react";
+import { Product, ProductFormData, StorageLocation } from "@/types/product";
 import { EtiquetaPreview } from "./EtiquetaPreview";
 import { TextInputField } from "@/components/form/TextInputField";
 import { DatePickerField } from "@/components/form/DatePickerField";
@@ -12,12 +12,14 @@ import { NumberInputField } from "@/components/form/NumberInputField";
 import { SelectField } from "@/components/form/SelectField";
 import { ValidadeField } from "@/components/form/ValidadeField";
 import { ResponsavelSelectField } from "@/components/form/ResponsavelSelectField";
+import { calcularUtilizarAte } from "@/lib/utilizarAte";
 
 interface EtiquetaEditorProps {
   product: Product;
   largura: number;
   altura: number;
   onPrint: (editedProduct: Product, responsavel: string, quantity: number) => void;
+  onSave?: (productId: string, data: Partial<ProductFormData>) => Promise<void> | void;
   onClose: () => void;
 }
 
@@ -50,7 +52,7 @@ const formatDateToString = (date: Date | string | undefined): string => {
     return date;
   }
   if (date instanceof Date && !isNaN(date.getTime())) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
   }
   return '';
 };
@@ -104,7 +106,7 @@ const parseStringToDate = (dateStr: string): Date | undefined => {
   return undefined;
 };
 
-export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: EtiquetaEditorProps) {
+export function EtiquetaEditor({ product, largura, altura, onPrint, onSave, onClose }: EtiquetaEditorProps) {
   const [editedProduct, setEditedProduct] = useState<EditableProduct>({
     nome: product.nome || '',
     lote: product.lote || '',
@@ -120,48 +122,19 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
   });
   
   const [quantity, setQuantity] = useState(1);
+  const [saving, setSaving] = useState(false);
+
+  // utilizarAte é sempre derivado de dataAbertura + diasParaVencer
+  const computedUtilizarAte = useMemo(() => {
+    return calcularUtilizarAte(parseStringToDate(editedProduct.dataAbertura), Number(editedProduct.diasParaVencer) || 0);
+  }, [editedProduct.dataAbertura, editedProduct.diasParaVencer]);
 
   const handleInputChange = (field: keyof EditableProduct, value: string) => {
-    setEditedProduct(prev => {
-      const updated = { ...prev, [field]: value };
-      
-      // Recalculate utilizarAte when dataAbertura or diasParaVencer changes
-      if (field === 'dataAbertura' || field === 'diasParaVencer') {
-        const abertura = field === 'dataAbertura' ? value : prev.dataAbertura;
-        const dias = field === 'diasParaVencer' ? parseInt(value) || 0 : prev.diasParaVencer;
-        
-        if (abertura && dias > 0) {
-          const [year, month, day] = abertura.split('-').map(Number);
-          if (year && month && day) {
-            const useBy = new Date(year, month - 1, day + dias);
-            updated.utilizarAte = useBy;
-          }
-        } else {
-          updated.utilizarAte = undefined;
-        }
-      }
-      
-      return updated;
-    });
+    setEditedProduct(prev => ({ ...prev, [field]: value }));
   };
 
   const handleNumberInputChange = (field: keyof EditableProduct, value: number) => {
-    setEditedProduct(prev => {
-      const updated = { ...prev, [field]: value };
-      
-      // Recalculate utilizarAte when diasParaVencer changes
-      if (field === 'diasParaVencer' && prev.dataAbertura && value > 0) {
-        const [year, month, day] = prev.dataAbertura.split('-').map(Number);
-        if (year && month && day) {
-          const useBy = new Date(year, month - 1, day + value);
-          updated.utilizarAte = useBy;
-        }
-      } else if (field === 'diasParaVencer') {
-        updated.utilizarAte = undefined;
-      }
-      
-      return updated;
-    });
+    setEditedProduct(prev => ({ ...prev, [field]: value }));
   };
 
   const handleToggleOptionalDates = (show: boolean) => {
@@ -169,26 +142,35 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
   };
 
   const handleUpdateDates = () => {
-    const today = new Date().toISOString().split('T')[0];
-    setEditedProduct(prev => {
-      const updated = {
-        ...prev,
-        dataFabricacao: today,
-        dataAbertura: today
-      };
-      
-      // Recalculate utilizarAte
-      if (prev.diasParaVencer > 0) {
-        const [year, month, day] = today.split('-').map(Number);
-        const useBy = new Date(year, month - 1, day + prev.diasParaVencer);
-        updated.utilizarAte = useBy;
-      }
-      
-      return updated;
-    });
+    const now = new Date();
+    const today = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+    setEditedProduct(prev => ({ ...prev, dataFabricacao: today, dataAbertura: today }));
   };
 
-  const handlePrint = () => {
+
+  const buildFormData = (): Partial<ProductFormData> => ({
+    nome: editedProduct.nome,
+    lote: editedProduct.lote,
+    marca: editedProduct.marca,
+    dataFabricacao: editedProduct.dataFabricacao,
+    validade: editedProduct.validade,
+    dataAbertura: editedProduct.dataAbertura,
+    diasParaVencer: Number(editedProduct.diasParaVencer) || 0,
+    localArmazenamento: (editedProduct.localArmazenamento || 'ambiente') as StorageLocation,
+    ...(editedProduct.responsavel.trim() ? { responsavel: editedProduct.responsavel.trim() } : {}),
+  });
+
+  const handleSave = async () => {
+    if (!onSave) return;
+    setSaving(true);
+    try {
+      await onSave(product.id, buildFormData());
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePrint = async () => {
     if (!editedProduct.responsavel.trim()) {
       return;
     }
@@ -202,10 +184,14 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
       validade: parseStringToDate(editedProduct.validade),
       dataAbertura: parseStringToDate(editedProduct.dataAbertura),
       diasParaVencer: editedProduct.diasParaVencer,
-      utilizarAte: editedProduct.utilizarAte,
+      utilizarAte: computedUtilizarAte,
       localArmazenamento: editedProduct.localArmazenamento as StorageLocation || 'ambiente',
       responsavel: editedProduct.responsavel
     };
+
+    if (onSave) {
+      await handleSave();
+    }
 
     onPrint(productToPrint, editedProduct.responsavel, quantity);
   };
@@ -220,7 +206,7 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
     validade: parseStringToDate(editedProduct.validade),
     dataAbertura: parseStringToDate(editedProduct.dataAbertura),
     diasParaVencer: editedProduct.diasParaVencer,
-    utilizarAte: editedProduct.utilizarAte,
+    utilizarAte: computedUtilizarAte,
     localArmazenamento: editedProduct.localArmazenamento as StorageLocation || 'ambiente',
     responsavel: editedProduct.responsavel
   };
@@ -379,7 +365,20 @@ export function EtiquetaEditor({ product, largura, altura, onPrint, onClose }: E
                 />
               </div>
 
-              {/* Botão de Imprimir */}
+              {/* Botões */}
+              {onSave && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="w-full"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {saving ? "Salvando..." : "Salvar alterações"}
+                </Button>
+              )}
+
               <Button 
                 onClick={handlePrint} 
                 className="w-full gradient-blue text-white"
